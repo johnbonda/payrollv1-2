@@ -2,7 +2,7 @@ module.exports = {
     name: "authorizers",
     fields: [
         {  
-            name: 'id',
+            name: 'aid',
             type: 'String', 
             length: 255,
         },

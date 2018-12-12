@@ -27,7 +27,7 @@ app.route.post('/payslip/issuedOrNot', async function(req, cb){
 app.route.post('/payslip/pendingIssues', async function(req, cb){  // High intensive call, need to find an alternative
     var result = await app.model.Employee.findAll({});
     var array = [];
-    var pid =[ ]
+    var pid = [];
 
     for(obj in result){
         var options = {
@@ -46,6 +46,34 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
         }
     }
     return array;
+})
+
+//On issuer dashboard to display confirmed payslips which are confirmed by all authorizers 
+//GET call
+//inputs:month and year
+//outpu: pays array ehich contain the sonfirmed payslips
+app.route.post('/payslip/confirmedissues',async function(req,cb){
+    var pays=[]
+    var auths = await app.model.Authorizer.findAll({fields:[aid]});
+    var options = {
+        month: req.query.month,
+        year: req.query.year,
+    }
+    var pids = await app.model.Payslip.findAll(options,{fields:[pid]});
+    for(pid in pids){
+        var count = true
+        for(auth in auths){
+            let response = await app.model.Cs.exists({pid:pid,aid:auth})
+            if(!response){
+                count=false;
+                break;
+            }
+        }
+        if(count === true){
+            pays.push(await app.model.Payslip.findOne({pid:pid}));
+        }
+    }
+    return pays;
 })
 
 // For the employee table,
