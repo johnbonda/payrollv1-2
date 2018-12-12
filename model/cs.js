@@ -1,6 +1,11 @@
 module.exports = {
     name: "css",
     fields: [
+        {
+            name :'iid',
+            type : 'String',
+            length: 255,
+        },
         {  
             name: 'upid',
             type: 'String', 

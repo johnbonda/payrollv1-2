@@ -20,6 +20,11 @@ module.exports = {
             name: 'timestamp',
             type: 'String',
             length: 255
+        },
+        {
+            name :'status',
+            type:'String',
+            length: 255
         }
     ]
 }

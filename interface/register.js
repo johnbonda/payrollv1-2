@@ -25,14 +25,9 @@ app.route.post('/payslip/issuedOrNot', async function(req, cb){
 })
 
 app.route.post('/payslip/pendingIssues', async function(req, cb){  // High intensive call, need to find an alternative
-
-    // if(!req.query.dappToken) return "Need Dapp Token, please Login";
-    // if(! (await auth.checkSession(req.query.dappToken))) return "Unauthorized Token";
-   
-    var result = await app.model.Employee.findAll(options);
-
-
+    var result = await app.model.Employee.findAll({});
     var array = [];
+    var pid =[ ]
 
     for(obj in result){
         var options = {
@@ -40,11 +35,14 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
             month: req.query.month,
             year: req.query.year,
         }
-        let response = await app.model.Ucps.exists(options);
-        //if(!response) array.push(result[obj]);
+        let response = await app.model.Payslip.findOne(options,{fields:[pid]});
         if(!response){
-            let response2 = await app.model.Mps.exists(options);
-            if(!response2) array.push(result[obj]);
+             array.push(result[obj]);
+        }else{
+            let check = await app.model.Issue.findOne({condition:{pid: response}},{fields:[status]})
+            if(check === 'rejected'){
+                array.push(result[obj]);
+            }
         }
     }
     return array;
