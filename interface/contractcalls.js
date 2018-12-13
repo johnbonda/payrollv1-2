@@ -11,6 +11,8 @@ var addressquery = require("../utils/mailTemplate/TemplateMail/addressquery");
 var register = require("../interface/register");
 var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
+var DappCall = require("../utils/DappCall");
+
 
 
 app.route.post("/issueTransactionCall", async function(req, res){
@@ -32,7 +34,30 @@ app.route.post("/issueTransactionCall", async function(req, res){
             pid: pid
         }
     });
-
-    if(issue.iid)
+    if(issue.iid !== req.query.iid) return "Invalid issuer";
     
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            empID: payslip.empid
+        }
+    });
+    if(!employee) return "Invalid employee";
+    
+    if(issue.status !== "Authorized") return "Payslip not authorized yet";
+
+    var args = "[\"" + employee.walletAddress + "\"," + "\"payslip\"";
+    for(i in payslip){
+        args += ",\"" + payslip[i] + "\"";
+    }
+    args += "]";
+
+    transactionParams.args;
+    transactionParams.type = 1003;
+    transactionParams.fee = req.query.fee;
+    transactionParams.secret = req.query.secret;
+    transactionParams.senderPublicKey = req.query.senderPublicKey;
+
+    var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid);
+    return response;
+
 })
