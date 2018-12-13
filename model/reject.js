@@ -9,6 +9,11 @@ module.exports = {
             length : 255
         },
         {
+            name : 'iid',
+            type : 'String',
+            length : 255
+        },
+        {
             name : 'message',
             type : 'String',
             length : 255

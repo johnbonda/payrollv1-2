@@ -213,19 +213,21 @@ module.exports.getToken = async function(req, cb){
 }
 
 app.route.post('/getToken', module.exports.getToken)
+
+
 //start
 app.route.post('/payslip/pendingIssues', async function(req, cb){  // High intensive call, need to find an alternative
     var result = await app.model.Employee.findAll({});
     var array = [];
-    var pid = [];
-    var rejlist = await app.model.Reject.findAll({fields:['pid']});
+    // var pid = [];
+    // var rejlist = await app.model.Reject.findAll({fields:['pid']});
     for(obj in result){
         var options = {
             empid: result[obj].empID,
             month: req.query.month,
             year: req.query.year,
         }
-        let response = await app.model.Payslip.findOne({options,fields:['pid']});
+        let response = await app.model.Payslip.findOne({condition: options,fields:['pid']});
         if(!response){
              array.push(result[obj]);
         }
@@ -251,7 +253,7 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
         status : 'pending',
         count : {$gte : count_of_auths }
     }
-    var pids = await app.model.Issue.findAll({options,fields:['pid']});
+    var pids = await app.model.Issue.findAll({condition: options,fields:['pid']});
     for(pid in pids){
             var count = 0;
             for(auth in auths){
