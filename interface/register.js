@@ -218,19 +218,20 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
     var result = await app.model.Employee.findAll({});
     var array = [];
     var pid = [];
-
+    var rejlist = await app.model.Reject.findAll({fields:['pid']});
     for(obj in result){
         var options = {
             empid: result[obj].empID,
             month: req.query.month,
             year: req.query.year,
         }
-        let response = await app.model.Payslip.findOne(options,{fields:[pid]});
+        let response = await app.model.Payslip.findOne({options,fields:['pid']});
         if(!response){
              array.push(result[obj]);
-        }else{
-            let check = await app.model.Issue.findOne({condition:{pid: response}},{fields:[status]})
-            if(check === 'rejected'){
+        }
+        else{
+            let rejresponse = await app.model.Reject.findOne({condition:{pid:response.pid}})
+            if(rejresponse){
                 array.push(result[obj]);
             }
         }
@@ -244,13 +245,13 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
 //outpu: pays array which contains the confirmed payslips.
 app.route.post('/payslip/confirmedIssues',async function(req,cb){
     var pays=[]
-    var auths = await app.model.Authorizer.findAll({fields:[aid]});
+    var auths = await app.model.Authorizer.findAll({fields:['aid']});
     var count_of_auths = auths.length;
     var options = {
         status : 'pending',
         count : {$gte : count_of_auths }
     }
-    var pids = await app.model.Issue.findAll(options,{fields:[pid]});
+    var pids = await app.model.Issue.findAll({options,fields:['pid']});
     for(pid in pids){
             var count = 0;
             for(auth in auths){
@@ -323,7 +324,16 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         }
     }
     var result = await app.model.Payslip.findOne(options);
-    if(result) return "Payslip already issued";
+    if(result){
+        var rej = await app.model.Reject.findOne({pid:result.pid})
+        if(!rej){
+            return 'Payslip already issued.'
+        }
+        else{
+            app.sdb.del('Payslip',{pid: result.pid});
+            app.sdb.del('Reject',{pid: result.pid});
+        }
+    }
     app.sdb.create("payslip", payslip);
     var hash = util.getHash(JSON.stringify(payslip));
     var sign = util.getSignatureByHash(hash, secret);
@@ -340,7 +350,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     });
 });
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
-        var pids = await app.model.Issue.findall({condition:{status:"pending"}},{fields:[pid]})
+        var pids = await app.model.Issue.findall({condition:{status:"pending"},fields:['pid']})
         var remaining = [];
         var aid = req.query.aid;
         for(pid in pids){
@@ -404,3 +414,9 @@ app.route.post('/authorizer/authorize',async function(req,cb){
         return "success";
 })
 
+app.route.post('/authorizer/reject',async function(req,cb){
+    var pid = req.query.pid;
+    var message = req.query.message;
+    app.sdb.del('Issue',{pid:pid})
+    app.adb.create('Reject',{pid:pid, message:message})
+})
