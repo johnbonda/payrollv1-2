@@ -27,5 +27,12 @@ app.route.post("/issueTransactionCall", async function(req, res){
         fields: ['aid']
     });
 
+    var issue = await app.model.Issue.findOne({
+        condition: {
+            pid: pid
+        }
+    });
+
+    if(issue.iid)
     
 })
