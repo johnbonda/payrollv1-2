@@ -35,6 +35,11 @@ module.exports = {
             name :'status',
             type:'String',
             length: 255
+        },
+        {
+            name:'count',
+            type: 'number',
+            length: 255
         }
     ]
 }
