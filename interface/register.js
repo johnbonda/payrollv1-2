@@ -245,23 +245,26 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
 app.route.post('/payslip/confirmedIssues',async function(req,cb){
     var pays=[]
     var auths = await app.model.Authorizer.findAll({fields:[aid]});
+    var count_of_auths = auths.length;
     var options = {
-        month: req.query.month,
-        year: req.query.year,
+        status : 'pending',
+        count : {$gte : count_of_auths }
     }
-    var pids = await app.model.Payslip.findAll(options,{fields:[pid]});
+    var pids = await app.model.Issue.findAll(options,{fields:[pid]});
     for(pid in pids){
-        var count = true
-        for(auth in auths){
-            let response = await app.model.Cs.exists({pid:pid,aid:auth})
-            if(!response){
-                count=false;
-                break;
+            var count = 0;
+            for(auth in auths){
+                let response = await app.model.Cs.exists({pid:pid,aid:auth})
+                if(response){
+                    count+=1;
+                }
             }
-        }
-        if(count === true){
-            pays.push(await app.model.Payslip.findOne({pid:pid}));
-        }
+            if(count === count_of_auths){
+                pays.push(await app.model.Payslip.findOne({pid:pid}));
+            }
+            else{
+                app.sdb.update("issue",{count:count},{pid:pid})
+            }
     }
     return pays;
 })
@@ -398,5 +401,6 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             aid:aid,
             sign: base64sign
         });
+        return "success";
 })
 
