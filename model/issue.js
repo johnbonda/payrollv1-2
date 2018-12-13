@@ -38,7 +38,7 @@ module.exports = {
         },
         {
             name:'count',
-            type: 'number',
+            type: 'Number',
             length: 255
         }
     ]

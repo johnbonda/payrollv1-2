@@ -218,9 +218,7 @@ app.route.post('/getToken', module.exports.getToken)
 //start
 app.route.post('/payslip/pendingIssues', async function(req, cb){  // High intensive call, need to find an alternative
     var result = await app.model.Employee.findAll({});
-    var array = [];
-    // var pid = [];
-    // var rejlist = await app.model.Reject.findAll({fields:['pid']});
+    var array = []; 
     for(obj in result){
         var options = {
             empid: result[obj].empID,
@@ -231,12 +229,12 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
         if(!response){
              array.push(result[obj]);
         }
-        else{
-            let rejresponse = await app.model.Reject.findOne({condition:{pid:response.pid}})
-            if(rejresponse){
-                array.push(result[obj]);
-            }
-        }
+        // else{
+        //     let rejresponse = await app.model.Reject.findOne({condition:{pid:response.pid}})
+        //     if(rejresponse){
+        //         array.push(result[obj]);
+        //     }
+        // }
     }
     return array;
 })
@@ -327,14 +325,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     }
     var result = await app.model.Payslip.findOne(options);
     if(result){
-        var rej = await app.model.Reject.findOne({pid:result.pid})
-        if(!rej){
-            return 'Payslip already issued.'
-        }
-        else{
-            app.sdb.del('Payslip',{pid: result.pid});
-            app.sdb.del('Reject',{pid: result.pid});
-        }
+        return 'Payslip already issued';
     }
     app.sdb.create("payslip", payslip);
     var hash = util.getHash(JSON.stringify(payslip));
@@ -348,7 +339,8 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         sign: base64sign,
         publickey:publickey,
         timestamp:payslip.timestamp,
-        status:"pending"
+        status:"pending",
+        count : 0
     });
 });
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
@@ -405,7 +397,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
         });
         var hash = util.getHash(JSON.stringify(payslip));
         var base64hash = hash.toString('base64');
-        if(uissue.hash !== base64hash) return "Issuer donga";
+        if(uissue.hash !== base64hash) return "Invalid Issuer";
         var base64sign = (util.getSignatureByHash(hash, secret)).toString('base64');
         app.sdb.create('cs', {
             iid:iid,
@@ -419,6 +411,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
 app.route.post('/authorizer/reject',async function(req,cb){
     var pid = req.query.pid;
     var message = req.query.message;
-    app.sdb.del('Issue',{pid:pid})
-    app.adb.create('Reject',{pid:pid, message:message})
+    //mail code is written here
+    app.sdb.del('Issue',{pid:pid});
+    app.adb.del('Payslip',{pid:pid});
 })
