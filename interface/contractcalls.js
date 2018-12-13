@@ -14,5 +14,18 @@ var auth = require("../interface/authController");
 
 
 app.route.post("/issueTransactionCall", async function(req, res){
+    var transactionParams = {};
+    var pid = req.query.pid;
+    var payslip = await app.model.Payslip.findOne({
+        condition: {
+            pid: pid
+        }
+    });
+
+    if(!payslip) return "Invalid Payslip";
+    var authorizers = await app.model.Authorizer.findAll({
+        fields: ['aid']
+    });
+
     
 })

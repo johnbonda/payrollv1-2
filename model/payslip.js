@@ -3,12 +3,6 @@ module.exports = {
     name: 'payslips',
     fields: [
         {
-            name: 'toaddr',
-            type: 'String',
-            length: 100,
-            not_null: true,
-        },
-        {
             name: 'pid',
             type: 'String',
             length: 100,   
