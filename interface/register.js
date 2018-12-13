@@ -245,23 +245,26 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
 app.route.post('/payslip/confirmedIssues',async function(req,cb){
     var pays=[]
     var auths = await app.model.Authorizer.findAll({fields:[aid]});
+    var count_of_auths = auths.length;
     var options = {
-        month: req.query.month,
-        year: req.query.year,
+        status : 'pending',
+        count : {$gte : count_of_auths }
     }
-    var pids = await app.model.Payslip.findAll(options,{fields:[pid]});
+    var pids = await app.model.Issue.findAll(options,{fields:[pid]});
     for(pid in pids){
-        var count = true
-        for(auth in auths){
-            let response = await app.model.Cs.exists({pid:pid,aid:auth})
-            if(!response){
-                count=false;
-                break;
+            var count = 0;
+            for(auth in auths){
+                let response = await app.model.Cs.exists({pid:pid,aid:auth})
+                if(response){
+                    count+=1;
+                }
             }
-        }
-        if(count === true){
-            pays.push(await app.model.Payslip.findOne({pid:pid}));
-        }
+            if(count === count_of_auths){
+                pays.push(await app.model.Payslip.findOne({pid:pid}));
+            }
+            else{
+                app.sdb.update("issue",{count:count},{pid:pid})
+            }
     }
     return pays;
 })
@@ -336,15 +339,68 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         status:"pending"
     });
 });
-app.route.post('authorizers/pendingSigns',async function(req,cb){
+app.route.post('/authorizers/pendingSigns',async function(req,cb){
         var pids = await app.model.Issue.findall({condition:{status:"pending"}},{fields:[pid]})
         var remaining = [];
         var aid = req.query.aid;
         for(pid in pids){
-            let repsonse = await app.model.Cs.exists({condition:{pid:pid, aid:aid}});
+            let response = await app.model.Cs.exists({condition:{pid:pid, aid:aid}});
             if(!response){
                 remaining.push(await app.model.Payslip.findOne({pid:pid},{fields:[email,pid]}))
             }
         }
         return remaining;
 });
+
+
+app.route.post("/authorizers/Verification",async function(req,cb){
+    var pid = req.query.pid;
+ 
+    var response=await app.model.Payslip.findOne({condition:{pid:pid}});
+    return response;
+})
+
+app.route.post('/authorizer/authorize',async function(req,cb){
+    var secret = req.query.secret
+    var iid = req.query.iid
+    var authid = req.query.authid
+    var dappid = req.query.dappid
+    var pid=req.query.pid
+    app.sdb.lock("authorize@" +iid);
+        // Check Authorizer
+        var publickey = util.getPublicKey(secret);
+        var checkauth = await app.model.Authorizer.findOne({
+            condition:{
+                aid: authid
+            }
+        });
+        if(!checkauth) return "Invalid Authorizer";
+
+        if(checkauth.publickey === '-'){
+            app.sdb.update('authorizer', {publickey: publickey}, {id: authid});
+        }
+        var check = await app.model.Cs.findOne({
+            condition: {
+                upid: iid,
+                aid: authid
+            }
+        });
+        if(check) return "Already authorized";
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid:pid
+            }
+        });
+        var hash = util.getHash(JSON.stringify(payslip));
+        var base64hash = hash.toString('base64');
+        if(uissue.hash !== base64hash) return "Issuer donga";
+        var base64sign = (util.getSignatureByHash(hash, secret)).toString('base64');
+        app.sdb.create('cs', {
+            iid:iid,
+            pid:pid,
+            aid:aid,
+            sign: base64sign
+        });
+        return "success";
+})
+

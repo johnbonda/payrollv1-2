@@ -4,22 +4,27 @@ module.exports = {
         {
             name :'iid',
             type : 'String',
-            length: 255,
+            length: 255
         },
         {  
-            name: 'upid',
+            name: 'pid',
             type: 'String', 
-            length: 255,
+            length: 255
         },
         {
             name: 'aid',
             type: 'String',
-            length: 255,
+            length: 255
         },
         {
             name: 'sign',
             type: 'String',
-            length: 255,
+            length: 255
+        },
+        {
+            name:'count',
+            type: 'number',
+            length: 255
         }
     ]
 }

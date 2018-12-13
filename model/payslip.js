@@ -108,6 +108,5 @@ module.exports = {
             type: 'String',
             length: 255
         }
-
     ]
 }
