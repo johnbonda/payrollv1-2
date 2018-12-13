@@ -9,6 +9,11 @@ module.exports = {
             not_null: true,
         },
         {
+            name: 'pid',
+            type: 'String',
+            length: 100,   
+        },
+        {
             name: 'email',
             type: 'String',
             length: 100,
@@ -104,5 +109,11 @@ module.exports = {
             type: 'String',
             length: 100,
         },
+        {
+            name: 'timestamp',
+            type: 'String',
+            length: 255
+        }
+
     ]
 }

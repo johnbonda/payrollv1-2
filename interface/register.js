@@ -1,6 +1,17 @@
 var util = require("../utils/util.js");
 var config = require("../config.json");
 var SwaggerCall = require("../utils/SwaggerCall");
+var ByteBuffer = require("bytebuffer");
+var mail = require("../utils/sendmail");
+var api = require("../utils/api");
+var SuperDappCall = require("../utils/SuperDappCall")
+var TokenCall = require("../utils/TokenCall");
+var mailer = require("../utils/mailTemplate/TemplateMail/index");
+var registrationMail = require("../utils/mailTemplate/TemplateMail/register");
+var addressquery = require("../utils/mailTemplate/TemplateMail/addressquery");
+var register = require("../interface/register");
+var registrations = require("../interface/registrations");
+var auth = require("../interface/authController");
 
 // returns payslip if exists, takes parameters empid, month , year
 app.route.post('/payslip/issuedOrNot', async function(req, cb){ 
@@ -24,57 +35,6 @@ app.route.post('/payslip/issuedOrNot', async function(req, cb){
     return "false";
 })
 
-app.route.post('/payslip/pendingIssues', async function(req, cb){  // High intensive call, need to find an alternative
-    var result = await app.model.Employee.findAll({});
-    var array = [];
-    var pid = [];
-
-    for(obj in result){
-        var options = {
-            empid: result[obj].empID,
-            month: req.query.month,
-            year: req.query.year,
-        }
-        let response = await app.model.Payslip.findOne(options,{fields:[pid]});
-        if(!response){
-             array.push(result[obj]);
-        }else{
-            let check = await app.model.Issue.findOne({condition:{pid: response}},{fields:[status]})
-            if(check === 'rejected'){
-                array.push(result[obj]);
-            }
-        }
-    }
-    return array;
-})
-
-//On issuer dashboard to display confirmed payslips which are confirmed by all authorizers 
-//GET call
-//inputs:month and year
-//outpu: pays array ehich contain the sonfirmed payslips
-app.route.post('/payslip/confirmedissues',async function(req,cb){
-    var pays=[]
-    var auths = await app.model.Authorizer.findAll({fields:[aid]});
-    var options = {
-        month: req.query.month,
-        year: req.query.year,
-    }
-    var pids = await app.model.Payslip.findAll(options,{fields:[pid]});
-    for(pid in pids){
-        var count = true
-        for(auth in auths){
-            let response = await app.model.Cs.exists({pid:pid,aid:auth})
-            if(!response){
-                count=false;
-                break;
-            }
-        }
-        if(count === true){
-            pays.push(await app.model.Payslip.findOne({pid:pid}));
-        }
-    }
-    return pays;
-})
 
 // For the employee table,
 // GET call
@@ -253,4 +213,138 @@ module.exports.getToken = async function(req, cb){
 }
 
 app.route.post('/getToken', module.exports.getToken)
+//start
+app.route.post('/payslip/pendingIssues', async function(req, cb){  // High intensive call, need to find an alternative
+    var result = await app.model.Employee.findAll({});
+    var array = [];
+    var pid = [];
 
+    for(obj in result){
+        var options = {
+            empid: result[obj].empID,
+            month: req.query.month,
+            year: req.query.year,
+        }
+        let response = await app.model.Payslip.findOne(options,{fields:[pid]});
+        if(!response){
+             array.push(result[obj]);
+        }else{
+            let check = await app.model.Issue.findOne({condition:{pid: response}},{fields:[status]})
+            if(check === 'rejected'){
+                array.push(result[obj]);
+            }
+        }
+    }
+    return array;
+})
+
+//On issuer dashboard to display confirmed payslips which are confirmed by all authorizers 
+//GET call
+//inputs:month and year
+//outpu: pays array which contains the confirmed payslips.
+app.route.post('/payslip/confirmedIssues',async function(req,cb){
+    var pays=[]
+    var auths = await app.model.Authorizer.findAll({fields:[aid]});
+    var options = {
+        month: req.query.month,
+        year: req.query.year,
+    }
+    var pids = await app.model.Payslip.findAll(options,{fields:[pid]});
+    for(pid in pids){
+        var count = true
+        for(auth in auths){
+            let response = await app.model.Cs.exists({pid:pid,aid:auth})
+            if(!response){
+                count=false;
+                break;
+            }
+        }
+        if(count === true){
+            pays.push(await app.model.Payslip.findOne({pid:pid}));
+        }
+    }
+    return pays;
+})
+
+app.route.post('/payslip/initialIssue',async function(req,cb){
+     var payslip={
+        toaddr:req.query.toaddr,
+        pid:req.query.pid,
+        email:req.query.email,
+        empid:req.query.empid,
+        name:req.query.name,
+        employer:req.query.employer,
+        month:req.query.month,
+        year:req.query.year,
+        designation:req.query.designation,
+        bank:req.query.bank,
+        accountNumber:req.query.accountNumber,
+        pan:req.query.pan,
+        basicPay:req.query.basicPay,
+        hra:req.query.hra,
+        lta:req.query.lta,
+        ma:req.query.ma,
+        providentFund:req.query.providentFund,
+        professionalTax:req.query.professionalTax,
+        grossSalary:req.query.grossSalary,
+        totalDeductions:req.query.totalDeductions,
+        netSalary:req.query.netSalary,
+        timestamp: new Date().getTime().toString() 
+     };
+     issuerid=req.query.issuerid;
+     secret=req.query.secret;
+     var publickey = util.getPublicKey(secret);
+     var checkissuer = await app.model.Issuer.findOne({
+         condition:{
+             id: req.query.issuerid  
+         }
+     });
+     if(!checkissuer) return "Invalid Issuer";
+
+     if(checkissuer.publickey === '-'){
+         app.sdb.update('issuer', {publickey: publickey}, {iid:issuerid});
+     }
+     // Check Employee
+     var check = await app.model.Employee.exists({
+        email: payslip.email
+    })
+    if(!check) return "Invalid Employee";
+    
+    // Check Payslip already issued
+    var options = {
+        condition: {
+            empid: payslip.empid,
+            employer: payslip.employer,
+            month: payslip.month,
+            year: payslip.year
+        }
+    }
+    var result = await app.model.Payslip.findOne(options);
+    if(result) return "Payslip already issued";
+    app.sdb.create("payslip", payslip);
+    var hash = util.getHash(JSON.stringify(payslip));
+    var sign = util.getSignatureByHash(hash, secret);
+    var base64hash = hash.toString('base64');
+    var base64sign = sign.toString('base64');
+    app.sdb.create("issue", {
+        pid:payslip.pid,
+        iid:issuerid,
+        hash: base64hash,
+        sign: base64sign,
+        publickey:publickey,
+        timestamp:payslip.timestamp,
+        status:"pending"
+    });
+});
+app.route.post('authorizers/pendingSigns',async function(req,cb){
+        var pids = await app.model.Issue.findall({condition:{status:"pending"}},{fields:[pid]})
+        var remaining = [];
+        var aid = req.query.aid;
+        for(pid in pids){
+            let repsonse = await app.model.Cs.exists({condition:{pid:pid, aid:aid}});
+            if(!response){
+                remaining.push(await app.model.Payslip.findOne({pid:pid},{fields:[email,pid]}))
+            }
+        }
+        return remaining;
+});

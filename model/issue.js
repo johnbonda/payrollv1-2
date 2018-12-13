@@ -1,6 +1,16 @@
 module.exports = {
     name: "issues",
     fields: [
+        {
+            name: 'pid',
+            type: 'String', 
+            length: 255,
+        },
+        {
+            name: 'iid',
+            type: 'String', 
+            length: 255,
+        },
         {  
             name: 'hash',
             type: 'String', 
