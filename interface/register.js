@@ -311,12 +311,10 @@ app.route.post('/payslip/getPayslip', async function(req, cb){
 })
 
 app.route.post('/authorizer/authorize',async function(req,cb){
-    var secret = req.query.secret
-    var iid = req.query.iid
-    var authid = req.query.authid
-    var dappid = req.query.dappid
-    var pid=req.query.pid
-    app.sdb.lock("authorize@" +iid);
+    var secret = req.query.secret;
+    var authid = req.query.aid;
+    var pid=req.query.pid;
+    app.sdb.lock("authorize@" +aid + pid);
         // Check Authorizer
         var publickey = util.getPublicKey(secret);
         var checkauth = await app.model.Authorizer.findOne({
@@ -324,14 +322,32 @@ app.route.post('/authorizer/authorize',async function(req,cb){
                 aid: authid
             }
         });
-        if(!checkauth) return "Invalid Authorizer";
+        if(!checkauth) return {
+            message: "Invalid Authorizer",
+            isSuccess: false
+        }
+
+        var issue = await app.model.Issue.findOne({
+            condition: {
+                pid: pid
+            }
+        });
+        if(!issue) return {
+            message: "Invalid issue",
+            isSuccess: false
+        }
+
+        if(issue.status !== "pending") return {
+            message: "Payslip not pending",
+            isSuccess: false
+        }
 
         if(checkauth.publickey === '-'){
             app.sdb.update('authorizer', {publickey: publickey}, {id: authid});
         }
         var check = await app.model.Cs.findOne({
             condition: {
-                upid: iid,
+                pid: pid,
                 aid: authid
             }
         });
@@ -341,23 +357,39 @@ app.route.post('/authorizer/authorize',async function(req,cb){
                 pid:pid
             }
         });
+
+        var issuer = await app.model.Issuer.findOne({
+            condition: {
+                iid: issue.iid
+            }
+        });
+        if(!issuer) return {
+            message: "Invalid issuer",
+            isSuccess: false
+        }
+
         var hash = util.getHash(JSON.stringify(payslip));
         var base64hash = hash.toString('base64');
-        if(uissue.hash !== base64hash) return "Invalid Issuer";
+        if(issue.hash !== base64hash) return {
+            message: "Hash doesn't match",
+            isSuccess: false
+        }
         var base64sign = (util.getSignatureByHash(hash, secret)).toString('base64');
         app.sdb.create('cs', {
-            iid:iid,
             pid:pid,
             aid:aid,
             sign: base64sign
         });
-        return "success";
+        return {
+            message: "Successfully Authorized",
+            isSuccess: true   
+        };
 })
 
 app.route.post('/authorizer/reject',async function(req,cb){
     var pid = req.query.pid;
     var message = req.query.message;
-    //mail code is written here
+    //mail code is written here 
     app.sdb.del('Issue',{pid:pid});
     app.adb.del('Payslip',{pid:pid});
 })
