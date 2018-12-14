@@ -370,6 +370,8 @@ app.route.post('/authorizer/authorize',async function(req,cb){
 
         var hash = util.getHash(JSON.stringify(payslip));
         var base64hash = hash.toString('base64');
+        console.log("issue.hash: " + issue.hash);
+        console.log("base64hash: " + base64hash);
         if(issue.hash !== base64hash) return {
             message: "Hash doesn't match",
             isSuccess: false
