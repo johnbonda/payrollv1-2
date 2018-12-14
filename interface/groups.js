@@ -38,64 +38,64 @@ app.route.post('/authorizers/data', async function(req, cb){
     return result;
 });
 
-app.route.post('/authorizers/pendingSigns', async function(req, cb){
-    var check = await app.model.Authorizer.findOne({
-        condition:{
-            email: req.query.email
-        }
-    });
-    if(!check) return "Invalid authorizer email";
-    var signed = await app.model.Cs.findAll({
-        condition: {
-            aid: check.id
-        },
-        fields: ['upid']
-    });
+// app.route.post('/authorizers/pendingSigns', async function(req, cb){
+//     var check = await app.model.Authorizer.findOne({
+//         condition:{
+//             email: req.query.email
+//         }
+//     });
+//     if(!check) return "Invalid authorizer email";
+//     var signed = await app.model.Cs.findAll({
+//         condition: {
+//             aid: check.id
+//         },
+//         fields: ['upid']
+//     });
 
-    var signedIdArray = ['-1'];
-    for(i in signed){
-        signedIdArray.push(signed[i].upid);
-    }
+//     var signedIdArray = ['-1'];
+//     for(i in signed){
+//         signedIdArray.push(signed[i].upid);
+//     }
 
-    console.log("Signed: " + signed);
-    console.log("signedIdArray: " + signedIdArray);
+//     console.log("Signed: " + signed);
+//     console.log("signedIdArray: " + signedIdArray);
 
-    var pendingSigns = await app.model.Ui.findAll({
-        condition: {
-            id: {
-                $nin: signedIdArray
-            }
-        }
-    });
+//     var pendingSigns = await app.model.Ui.findAll({
+//         condition: {
+//             id: {
+//                 $nin: signedIdArray
+//             }
+//         }
+//     });
 
-    var pendingArray = ["-1"];
-    for (i in pendingSigns){
-        pendingArray.push(pendingSigns[i].id);
-    }
+//     var pendingArray = ["-1"];
+//     for (i in pendingSigns){
+//         pendingArray.push(pendingSigns[i].id);
+//     }
 
-    var details = await app.model.Ucps.findAll({
-        condition: {
-            id: {
-                $in: pendingArray
-            }
-        }
-    });
+//     var details = await app.model.Ucps.findAll({
+//         condition: {
+//             id: {
+//                 $in: pendingArray
+//             }
+//         }
+//     });
 
-    var dictionary = {};
-    for(x in details){
-        dictionary[details[x].id] = {
-            email: details[x].email,
-            issuedOn: details[x].timestamp
-        }
-    }
+//     var dictionary = {};
+//     for(x in details){
+//         dictionary[details[x].id] = {
+//             email: details[x].email,
+//             issuedOn: details[x].timestamp
+//         }
+//     }
 
-    for(i in pendingSigns){
-        pendingSigns[i].email = dictionary[pendingSigns[i].id].email;
-        pendingSigns[i].timestamp = dictionary[pendingSigns[i].id].issuedOn;
-    }
+//     for(i in pendingSigns){
+//         pendingSigns[i].email = dictionary[pendingSigns[i].id].email;
+//         pendingSigns[i].timestamp = dictionary[pendingSigns[i].id].issuedOn;
+//     }
 
-    return pendingSigns;
-});
+//     return pendingSigns;
+// });
 
 app.route.post('/payslips/unconfirmed', async function(req, cb){
     var unconfirmedPayslips = await app.model.Ui.findAll({});
