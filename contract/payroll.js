@@ -403,13 +403,13 @@ module.exports = {
         switch(role){
             case "issuer": 
                 result = await app.model.Issuer.exists({
-                    id: id
+                    iid: id
                 });
                 break;
 
             case "authorizer":
                 result = await app.model.Authorizer.exists({
-                    id: id
+                    aid: id
                 });
                 break;
 
@@ -450,7 +450,7 @@ module.exports = {
         switch(role){
             case "issuer": 
                 app.sdb.create('issuer', {
-                    id: id,
+                    iid: id,
                     publickey: "-",
                     email: email,
                     designation: designation,
@@ -459,7 +459,7 @@ module.exports = {
                 break;
             case "authorizer":
                 app.sdb.create('authorizer', {
-                    id: id,
+                    aid: id,
                     publickey: "-",
                     email: email,
                     designation: designation,
