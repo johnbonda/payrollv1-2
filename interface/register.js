@@ -83,12 +83,12 @@ app.route.post('/verifypayslip', async function(req,cb){
     //var obj = JSON.parse(objtext);
     //var objtext = JSON.stringify(req.params.data);
     //console.log("Recieved data: " + objtext);
-    console.log("recieving: " + req.query.data);
+    console.log("recieving: " + req.query.datFroma);
     var hash = util.getHash(req.query.data);
     //console.log("Verifier: " + hash);
     //var hash = util.getHash(objtext);
 
-    //mail.sendMail("john@belfricsbt.com", "From verify", objtext + "Hash from verify: " +hash);
+    //mail.sendMail("john@belfricsbt.com", " verify", objtext + "Hash from verify: " +hash);
 
 
     var base64hash = hash.toString('base64');
@@ -272,7 +272,6 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 
 app.route.post('/payslip/initialIssue',async function(req,cb){
      var payslip={
-        toaddr:req.query.toaddr,
         pid:req.query.pid,
         email:req.query.email,
         empid:req.query.empid,
@@ -300,7 +299,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
      var publickey = util.getPublicKey(secret);
      var checkissuer = await app.model.Issuer.findOne({
          condition:{
-             id: req.query.issuerid  
+             iid: req.query.issuerid  
          }
      });
      if(!checkissuer) return "Invalid Issuer";
@@ -343,26 +342,30 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         count : 0
     });
 });
+
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
-        var pids = await app.model.Issue.findall({condition:{status:"pending"},fields:['pid']})
+        var pids = await app.model.Issue.findall({condition:{status:"pending"}})
         var remaining = [];
         var aid = req.query.aid;
         for(pid in pids){
             let response = await app.model.Cs.exists({condition:{pid:pid, aid:aid}});
             if(!response){
-                remaining.push(await app.model.Payslip.findOne({pid:pid},{fields:[email,pid]}))
+                remaining.push(pids[pid]);
             }
         }
         return remaining;
 });
 
-
-app.route.post("/authorizers/Verification",async function(req,cb){
-    var pid = req.query.pid;
- 
-    var response=await app.model.Payslip.findOne({condition:{pid:pid}});
-    return response;
+app.route.post('/payslip/getPayslip', async function(req, cb){
+    var payslip = await app.model.Payslip.findOne({
+        condition: {
+            pid: req.query.pid
+        }
+    });
+    return payslip;
 })
+
+
 
 app.route.post('/authorizer/authorize',async function(req,cb){
     var secret = req.query.secret
