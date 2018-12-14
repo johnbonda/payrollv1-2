@@ -292,10 +292,10 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
         var pids = await app.model.Issue.findAll({condition:{status:"pending"}})
         var remaining = [];
         var aid = req.query.aid;
-        for(pid in pids){
-            let response = await app.model.Cs.exists({condition:{pid:pids[pid].pid, aid:aid}});
+        for(p in pids){
+            let response = await app.model.Cs.exists({pid:pids[p].pid, aid:aid});
             if(!response){
-                remaining.push(pids[pid]);
+                remaining.push(pids[p]);
             }
         }
         return remaining;
