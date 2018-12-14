@@ -271,6 +271,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     if(result){
         return 'Payslip already issued';
     }
+    console.log("Generated Payslip: " + JSON.stringify(payslip));
     app.sdb.create("payslip", payslip);
     var hash = util.getHash(JSON.stringify(payslip));
     var sign = util.getSignatureByHash(hash, secret);
@@ -367,6 +368,8 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             message: "Invalid issuer",
             isSuccess: false
         }
+
+        console.log("Queried Payslip: " + JSON.stringify(payslip));
 
         var hash = util.getHash(JSON.stringify(payslip));
         var base64hash = hash.toString('base64');
