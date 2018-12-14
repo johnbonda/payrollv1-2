@@ -352,7 +352,10 @@ app.route.post('/authorizer/authorize',async function(req,cb){
                 aid: authid
             }
         });
-        if(check) return "Already authorized";
+        if(check) return {
+            message: "Already authorized",
+            isSuccess: false
+        }
         var payslip = await app.model.Payslip.findOne({
             condition: {
                 pid:pid
