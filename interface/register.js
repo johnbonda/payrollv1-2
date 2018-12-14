@@ -289,7 +289,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
 });
 
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
-        var pids = await app.model.Issue.findall({condition:{status:"pending"}})
+        var pids = await app.model.Issue.findAll({condition:{status:"pending"}})
         var remaining = [];
         var aid = req.query.aid;
         for(pid in pids){
