@@ -377,7 +377,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
         var base64sign = (util.getSignatureByHash(hash, secret)).toString('base64');
         app.sdb.create('cs', {
             pid:pid,
-            aid:aid,
+            aid:authid,
             sign: base64sign
         });
         return {
