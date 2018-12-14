@@ -314,7 +314,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
     var secret = req.query.secret;
     var authid = req.query.aid;
     var pid=req.query.pid;
-    app.sdb.lock("authorize@" +aid + pid);
+    app.sdb.lock("authorize@" +authid + pid);
         // Check Authorizer
         var publickey = util.getPublicKey(secret);
         var checkauth = await app.model.Authorizer.findOne({
