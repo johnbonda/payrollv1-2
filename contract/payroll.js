@@ -1,13 +1,9 @@
 var ByteBuffer = require("bytebuffer");
 var util = require("../utils/util.js");
-var mail = require("../utils/sendmail");
 var api = require("../utils/api");
 var SwaggerCall = require("../utils/SwaggerCall");
 var SuperDappCall = require("../utils/SuperDappCall")
 var TokenCall = require("../utils/TokenCall");
-var mailer = require("../utils/mailTemplate/TemplateMail/index");
-var registrationMail = require("../utils/mailTemplate/TemplateMail/register");
-var addressquery = require("../utils/mailTemplate/TemplateMail/addressquery");
 var register = require("../interface/register");
 var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
@@ -221,7 +217,6 @@ module.exports = {
                 upid: iid
             });
 
-            mailer.mailing(payslip, payslip.email, payslip.name, dappid);
         }
         else{
             app.sdb.create('cs', {
@@ -242,7 +237,6 @@ module.exports = {
         console.log("Verifier: " + hash);
         //var hash = util.getHash(objtext);
 
-        //mail.sendMail("john@belfricsbt.com", "From verify", objtext + "Hash from verify: " +hash);
 
 
         var base64hash = hash.toString('base64');
@@ -373,9 +367,7 @@ module.exports = {
 
             app.sdb.create('employee', creat);
 
-            //mail.sendMail(email, "Your BKVS wallet information", JSON.stringify(wallet));
 
-            registrationMail.mailing(wallet, email, name);
 
             var mapEntryObj = {
                 address: wallet.address,
@@ -400,7 +392,6 @@ module.exports = {
             }
             app.sdb.create("pendingemp", crea);
             console.log("Asking address")
-            addressquery.mailing(jwtToken, email, dappid);
         }
     },
 
