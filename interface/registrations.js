@@ -171,11 +171,8 @@ app.route.post('/userlogin', async function (req, cb) {
         var obj = parseAddress(transactionsArray[i].args);
         console.log("The parsed object" + JSON.stringify(obj));
         if(address === obj.address){
-            var issued = await app.model.Mi.exists({
-                id: obj.id
-            })
-            if(issued)
-                result.push(transactionsArray[i]);
+            transactionsArray[i].certType = "paylsip";
+            result.push(transactionsArray[i]);
         }
     }
     return result;
