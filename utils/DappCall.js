@@ -23,6 +23,7 @@ module.exports = {
                    reject(e);
                }
             }
+            console.log(JSON.stringify(options));
             request(options, callback);
         });
     }
