@@ -54,6 +54,7 @@ app.route.post("/issueTransactionCall", async function(req, res){
 
     console.log(JSON.stringify(transactionParams));
 
+    return transactionParams;
     var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid);
     return response;
 
