@@ -194,7 +194,8 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
     var count_of_auths = auths.length;
     var options = {
         status : 'pending',
-        count : {$gte : count_of_auths }
+        count : {$gte : count_of_auths },
+        iid: req.query.iid
     }
     var pids = await app.model.Issue.findAll({condition: options,fields:['pid']});
     for(pid in pids){
