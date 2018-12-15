@@ -389,6 +389,8 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             aid:authid,
             sign: base64sign
         });
+        var count = issue.count + 1;
+        app.sdb.update('issue', {count: count}, {iid: issue.iid});
         return {
             message: "Successfully Authorized",
             isSuccess: true   
