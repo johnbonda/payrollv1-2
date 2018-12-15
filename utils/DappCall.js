@@ -12,7 +12,7 @@ module.exports = {
                     'magic': '594fe0f3',
              'version': ''
                 },
-                body: payload
+                body: JSON.stringify(payload);
             };
             function callback(error, response, body) {
                 if(error) return reject(error);
