@@ -201,16 +201,16 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
     for(pid in pids){
             var count = 0;
             for(auth in auths){
-                let response = await app.model.Cs.exists({pid:pid,aid:auths[auth]})
+                let response = await app.model.Cs.exists({pid:pids[pid].pid,aid:auths[auth].aid})
                 if(response){
                     count+=1;
                 }
             }
             if(count === count_of_auths){
-                pays.push(await app.model.Payslip.findOne({condition: {pid:pid}}));
+                pays.push(await app.model.Payslip.findOne({condition: {pid:pids[pid].pid}}));
             }
             else{
-                app.sdb.update("issue",{count:count},{pid:pid})
+                app.sdb.update("issue",{count:count},{pid:pids[pid].pid})
             }
     }
     return pays;
