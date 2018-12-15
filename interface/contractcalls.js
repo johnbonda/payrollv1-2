@@ -55,8 +55,11 @@ app.route.post("/issueTransactionCall", async function(req, res){
     console.log(JSON.stringify(transactionParams));
 
     var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
+    if(response.success){
+        app.sdb.update('issue', {status: "issued"}, {pid: pid});    
+    }
+    
     return response;
-
 })
 
 app.route.post("/testingTransactionCall", async function(req, cb){
