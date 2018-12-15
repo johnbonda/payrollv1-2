@@ -272,6 +272,11 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     if(result){
         return 'Payslip already issued';
     }
+
+    var check = await app.model.Payslip.exists({
+        pid: req.query.pid
+    });
+    if(check) return "Duplicate pid";
     console.log("Generated Payslip: " + JSON.stringify(payslip));
     app.sdb.create("payslip", payslip);
     var hash = util.getHash(JSON.stringify(payslip));
