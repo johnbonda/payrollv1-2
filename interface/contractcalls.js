@@ -46,11 +46,13 @@ app.route.post("/issueTransactionCall", async function(req, res){
     }
     args += "]";
 
-    transactionParams.args;
+    transactionParams.args = args;
     transactionParams.type = 1003;
     transactionParams.fee = req.query.fee;
     transactionParams.secret = req.query.secret;
     transactionParams.senderPublicKey = req.query.senderPublicKey;
+
+    console.log(JSON.stringify(transactionParams));
 
     var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid);
     return response;
