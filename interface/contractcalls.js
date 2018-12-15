@@ -10,7 +10,6 @@ var auth = require("../interface/authController");
 var DappCall = require("../utils/DappCall");
 
 
-
 app.route.post("/issueTransactionCall", async function(req, res){
     var transactionParams = {};
     var pid = req.query.pid;
@@ -39,7 +38,7 @@ app.route.post("/issueTransactionCall", async function(req, res){
     });
     if(!employee) return "Invalid employee";
     
-    if(issue.status !== "Authorized") return "Payslip not authorized yet";
+    // if(issue.status !== "authorized") return "Payslip not authorized yet";
 
     var args = "[\"" + employee.walletAddress + "\"," + "\"payslip\"";
     for(i in payslip){
