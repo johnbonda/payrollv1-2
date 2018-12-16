@@ -8,6 +8,7 @@ var register = require("../interface/register");
 var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
 var DappCall = require("../utils/DappCall");
+var mailCall = require("../utils/mailCall");
 
 
 app.route.post("/issueTransactionCall", async function(req, res){
@@ -58,11 +59,20 @@ app.route.post("/issueTransactionCall", async function(req, res){
     if(response.success){
         app.sdb.update('issue', {status: "issued"}, {pid: pid});    
     }
-    
-    return response;
-})
 
-app.route.post("/testingTransactionCall", async function(req, cb){
-    var response = await DappCall.call('PUT', "/unsigned", req.query, req.query.dappid, 0);
+    var mailBody = {
+        mailType: "sendPayslip",
+        mailOptions: {
+            to: [employee.email],
+            empname: employee.name,
+            month: payslip.month,
+            year: payslip.year,
+            jsonBody: payslip,
+            dappid: req.query.dappid
+        }
+    }
+
+    mailCall.call("POST", "", mailBody, 0);
+
     return response;
 })

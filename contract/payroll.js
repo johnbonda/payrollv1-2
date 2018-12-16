@@ -7,6 +7,7 @@ var TokenCall = require("../utils/TokenCall");
 var register = require("../interface/register");
 var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
+var mailCall = require("../utils/mailCall");
 
 module.exports = {
 
@@ -263,14 +264,22 @@ module.exports = {
 
             app.sdb.create('employee', creat);
 
-
-
             var mapEntryObj = {
                 address: wallet.address,
                 dappid: dappid
             }
             var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
             console.log(JSON.stringify(mapcall));
+
+            var mailBody = {
+                mailType: "sendRegistered",
+                mailOptions: {
+                    to: [creat.email],
+                    empname: creat.name,
+                    wallet: wallet
+                }
+            }
+            mailCall.call("POST", "", mailBody, 0);
         }
             
         else{
@@ -287,7 +296,17 @@ module.exports = {
                 token: jwtToken
             }
             app.sdb.create("pendingemp", crea);
-            console.log("Asking address")
+            console.log("Asking address");
+
+            var mailBody = {
+                mailType: "sendAddressQuery",
+                mailOptions: {
+                    to: [creat.email],
+                    token: jwtToken,
+                    dappid: dappid
+                }
+            }
+            mailCall.call("POST", "", mailBody, 0);
         }
     },
 
