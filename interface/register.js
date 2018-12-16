@@ -67,7 +67,7 @@ app.route.post("/payslips/verify", async function(req, cb){
 
     var issuer = await app.model.Issuer.findOne({
         condition: {
-            id: result.iid
+            iid: result.iid
         }
     });
     if(!issuer) return {
