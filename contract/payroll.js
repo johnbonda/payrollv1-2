@@ -301,7 +301,7 @@ module.exports = {
             var mailBody = {
                 mailType: "sendAddressQuery",
                 mailOptions: {
-                    to: [creat.email],
+                    to: [crea.email],
                     token: jwtToken,
                     dappid: dappid
                 }
