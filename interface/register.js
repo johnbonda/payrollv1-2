@@ -8,6 +8,7 @@ var TokenCall = require("../utils/TokenCall");
 var register = require("../interface/register");
 var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
+var mailCall = require("../utils/mailCall");
 
 
 // For the employee table,
@@ -403,9 +404,28 @@ app.route.post('/authorizer/authorize',async function(req,cb){
 })
 
 app.route.post('/authorizer/reject',async function(req,cb){
+    var payslip = await app.model.Payslip.findOne({
+        condition: {
+            pid: req.query.pid
+        }
+    });
+    if(!payslip) return "Invalid payslip";
+
     var pid = req.query.pid;
     var message = req.query.message;
     //mail code is written here 
     app.sdb.del('Issue',{pid:pid});
     app.adb.del('Payslip',{pid:pid});
+
+    var mailBody = {
+        mailType: "sendRejected",
+        mailOptions: {
+            to: [employee.email],
+            message: message,
+            payslip: payslip
+        }
+    }
+
+    mailCall.call("POST", "", mailBody, 0);
 })
+
