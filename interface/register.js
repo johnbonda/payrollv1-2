@@ -411,6 +411,13 @@ app.route.post('/authorizer/reject',async function(req,cb){
     });
     if(!payslip) return "Invalid payslip";
 
+    var authorizer = await app.model.Authorizer.findOne({
+        condition: {
+            aid: req.query.aid
+        }
+    });
+    if(!authorizer) return "Invalid Authorizer";
+
     var pid = req.query.pid;
     var message = req.query.message;
     //mail code is written here 
@@ -421,6 +428,7 @@ app.route.post('/authorizer/reject',async function(req,cb){
         mailType: "sendRejected",
         mailOptions: {
             to: [employee.email],
+            authorizerEmail: authorizer.email, 
             message: message,
             payslip: payslip
         }
