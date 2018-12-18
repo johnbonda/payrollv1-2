@@ -61,14 +61,12 @@ app.route.post("/issueTransactionCall", async function(req, res){
     }
 
     var mailBody = {
-        mailType: "sendPayslip",
+        mailType: "sendIssued",
         mailOptions: {
             to: [employee.email],
-            empname: employee.name,
+            name: employee.name,
             month: payslip.month,
-            year: payslip.year,
-            jsonBody: payslip,
-            dappid: req.query.dappid
+            year: payslip.year
         }
     }
 

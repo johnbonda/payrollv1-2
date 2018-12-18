@@ -136,22 +136,22 @@ app.route.post('/payslips/signatures', async function(req, cb){
 
 app.route.post('/authorizers/remove', async function(req, cb){
     var check = await app.model.Authorizer.exists({
-       id:req.query.id
+       aid:req.query.aid
     })
     if(!check) return "not found";
     app.sdb.del('Authorizer', {
-       id: req.query.id
+       aid: req.query.aid
     });
     return true;
 });
 
 app.route.post('/issuers/remove', async function(req, cb){
     var check = await app.model.Issuer.exists({
-       id:req.query.id
+       iid:req.query.iid
     })
     if(!check) return "not found";
     app.sdb.del('issuer', {
-       id: req.query.id
+       iid: req.query.iid
     });
     return true;
 });

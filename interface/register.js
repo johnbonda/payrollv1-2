@@ -1,3 +1,4 @@
+var ByteBuffer = require("bytebuffer");
 var util = require("../utils/util.js");
 var config = require("../config.json");
 var SwaggerCall = require("../utils/SwaggerCall");
@@ -9,6 +10,8 @@ var register = require("../interface/register");
 var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
 var mailCall = require("../utils/mailCall");
+var SwaggerCall = require("../utils/SwaggerCall");
+
 
 
 // For the employee table,
@@ -297,12 +300,25 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
 });
 
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
+        var checkAuth = await app.model.Authorizer.exists({
+            aid: req.query.aid
+        })
+        if(!checkAuth) return "Invalid Authorizer";
+
         var pids = await app.model.Issue.findAll({condition:{status:"pending"}})
         var remaining = [];
         var aid = req.query.aid;
         for(p in pids){
             let response = await app.model.Cs.exists({pid:pids[p].pid, aid:aid});
             if(!response){
+                // Sending email in response too
+                var payslip = await app.model.Payslip.findOne({
+                    condition: {
+                        pid: pids[p].pid
+                    }
+                });
+                pids[p].email = payslip.email;
+                
                 remaining.push(pids[p]);
             }
         }
@@ -435,5 +451,185 @@ app.route.post('/authorizer/reject',async function(req,cb){
     }
 
     mailCall.call("POST", "", mailBody, 0);
+})
+
+app.route.post("/sharePayslips", async function(req, cb){
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            email: req.query.email
+        }
+    });
+    var mailBody = {
+        mailType: "sendShared",
+        mailOptions: {
+            to: [employee.email],
+            name: employee.name,
+            pids: req.query.pids,
+            dappid: req.query.dappid
+        }
+    }
+
+    mailCall.call("POST", "", mailBody, 0);
+})
+
+app.route.post("/registerEmployee", async function(req, cb){
+    app.sdb.lock("registerEmployee@" + uuid);
+    var countryCode = req.query.countryCode;
+    var email = req.query.email;
+    var lastName = req.query.lastName;
+    var name = req.query.name;
+    var uuid = req.query.uuid;
+    var designation = req.query.designation;
+    var bank = req.query.bank;
+    var accountNumber = req.query.bank;
+    var pan = req.query.pan;
+    var salary = req.query.salary;
+    var dappid = req.query.dappid;
+        var result = await app.model.Employee.exists({
+            email: email
+        });
+        if(result) return "Employee already registered";
+
+        // Checking if the employee's registration is pending
+        result = await app.model.Pendingemp.exists({
+            email:email
+        });
+        if(result) return "Employee didn't share his Wallet Address yet";
+
+        var request = {
+            query: {
+                email: email
+            }
+        }
+        var response = await registrations.exists(request, 0);
+        
+
+        if(response.isSuccess == false) {
+            var token = await register.getToken(0,0);
+
+            console.log(token);
+
+            if(token === "0" || token ==="-1") return "Error in retrieving token";
+            
+            console.log(email)
+
+            console.log("Passed email already exists or not");
+
+            function makePassword() {
+                var text = "";
+                var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                var smalls = "abcdefghijklmnopqrstuvwxyz";
+                var symbols = "!@#$%^&*";
+                var numbers = "1234567890";
+            
+                for (var i = 0; i < 3; i++){
+                text += caps.charAt(Math.floor(Math.random() * caps.length));
+                text += smalls.charAt(Math.floor(Math.random() * smalls.length));
+                text += symbols.charAt(Math.floor(Math.random() * symbols.length));
+                text += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                }
+                return text;
+            }
+
+            var password = makePassword();        
+
+
+            var options = {
+                countryCode: countryCode,
+                email: email,
+                lastName: lastName,
+                name: name,
+                password: password,
+                uuid: uuid
+            }
+
+            console.log("About to call registration call with parameters: " + JSON.stringify(options));
+
+            var response = await SwaggerCall.call('POST', '/api/v1/registration/verifier', options);
+
+            console.log("Verifier Registration response is complete with response: " + JSON.stringify(response));
+
+            if(!response) return "No response from verifier call";
+            if(!response.isSuccess) return JSON.stringify(response);
+
+            var data = response.data;
+
+            var wallet = JSON.parse(data.wallet);
+            wallet.loginPassword = password;
+
+            var opt = {
+                roleId: '3',
+                userId: data.uid
+            }
+
+            console.log("About to make change role call");
+
+            var resp = await TokenCall.call('PATCH', '/api/v1/users/role', opt, token);
+
+            console.log("Change role call made with response: " + JSON.stringify(resp));
+
+            if(!resp) return "No response from change role call";
+            if(!resp.isSuccess) return JSON.stringify(resp);
+
+            var creat = {
+                email: email,
+                empID: uuid,
+                name: name + lastName,
+                designation: designation,
+                bank: bank,
+                accountNumber: accountNumber,
+                pan: pan,
+                salary: salary,
+                walletAddress: wallet.address
+            }
+
+            console.log("About to make a row");
+
+            app.sdb.create('employee', creat);
+
+            var mapEntryObj = {
+                address: wallet.address,
+                dappid: dappid
+            }
+            var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
+            console.log(JSON.stringify(mapcall));
+
+            var mailBody = {
+                mailType: "sendRegistered",
+                mailOptions: {
+                    to: [creat.email],
+                    empname: creat.name,
+                    wallet: wallet
+                }
+            }
+            mailCall.call("POST", "", mailBody, 0);
+        }
+            
+        else{
+            var jwtToken = auth.getJwt(email);
+            var crea = {
+                email: email,
+                empID: uuid,
+                name: name + lastName,
+                designation: designation,
+                bank: bank,
+                accountNumber: accountNumber,
+                pan: pan,
+                salary: salary,
+                token: jwtToken
+            }
+            app.sdb.create("pendingemp", crea);
+            console.log("Asking address");
+
+            var mailBody = {
+                mailType: "sendAddressQuery",
+                mailOptions: {
+                    to: [crea.email],
+                    token: jwtToken,
+                    dappid: dappid
+                }
+            }
+            mailCall.call("POST", "", mailBody, 0);
+        }
 })
 
