@@ -19,7 +19,7 @@ module.exports = {
                 try {
                     console.log("from callback in mailcall.js: " + body);
                     // JSON.parse() can throw an exception if not valid JSON
-                   resolve(1);
+                   resolve(JSON.parse(body));
                } catch(e) {
                    reject(e);
                }

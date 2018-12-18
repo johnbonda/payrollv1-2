@@ -17,6 +17,7 @@ module.exports = {
             function callback(error, response, body) {
                 if(error) return reject(error);
                 try {
+                    console.log("SuperDappcall is: " + body);
                     // JSON.parse() can throw an exception if not valid JSON
                    resolve(JSON.parse(body));
                } catch(e) {
