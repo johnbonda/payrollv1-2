@@ -481,7 +481,7 @@ app.route.post("/registerEmployee", async function(req, cb){
     var uuid = req.query.uuid;
     var designation = req.query.designation;
     var bank = req.query.bank;
-    var accountNumber = req.query.bank;
+    var accountNumber = req.query.accountNumber;
     var pan = req.query.pan;
     var salary = req.query.salary;
     var dappid = req.query.dappid;
