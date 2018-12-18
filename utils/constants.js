@@ -7,7 +7,7 @@ module.exports = {
   URX: "http://54.254.174.74:8080",
   CRX: "http://18.188.23.5:9305/api/dapps/2197e1a71e1105989b207d81d67f6a882dc14d02dc8ea4cd4ac060a7b2f0ecb9",
   LSR: "http://18.188.23.5:9305/api/dapps/",
-  MRI: "http://52.201.227.220:8080/sendMail/",
+  MRI: "http://52.201.227.220:80/sendMail/",
   fees: {
     send: 0.001,
     inTransfer: 0.001,
