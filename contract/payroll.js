@@ -327,7 +327,7 @@ module.exports = {
 
             case "authorizer":
             var count = await app.model.Count.findOne({
-                condition:{id:0}, fields:['iid']
+                condition:{id:0}, fields:['aid']
              });
                 result = await app.model.Authorizer.exists({
                     aid: count.aid + 1
