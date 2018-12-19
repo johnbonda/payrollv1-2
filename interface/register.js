@@ -105,7 +105,7 @@ async function verifyPayslip(req, cb){
         });
         if(!authorizer) {
             authorizer = {
-                aid: "Delected Authorizer";
+                aid: "Delected Authorizer"
             }
         }
         if(!util.Verify(hash, new Buffer(signatures[i].sign, 'base64'), new Buffer(signatures[i].publickey, 'hex'))) return {
@@ -378,7 +378,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
         }
 
         if(checkauth.publickey === '-'){
-            app.sdb.update('authorizer', {publickey: publickey}, {id: authid});
+            app.sdb.update('authorizer', {publickey: publickey}, {aid: authid});
         }
         var check = await app.model.Cs.findOne({
             condition: {
@@ -424,10 +424,10 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             publickey: publickey
         });
         var count = issue.count + 1;
-        app.sdb.update('issue', {count: count}, {iid: issue.iid});
+        app.sdb.update('issue', {count: count}, {pid: issue.pid});
         return {
             message: "Successfully Authorized",
-            isSuccess: true   
+            isSuccess: true
         };
 })
 
@@ -646,7 +646,7 @@ app.route.post("/registerEmployee", async function(req, cb){
 
 app.route.post("/payslips/verifyMultiple", async function(req, cb){
     var pids = req.query.pids;
-    var result = [];
+    var result = {};
 
     for(pid in pids){
         var payslip = await app.model.Payslip.findOne({
