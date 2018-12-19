@@ -228,6 +228,9 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 })
 
 app.route.post('/payslip/initialIssue',async function(req,cb){
+    var result = await app.model.Count.findOne({
+       condition:{id:0}, fields:['pid']
+    });
      var payslip={
         pid:req.query.pid,
         email:req.query.email,
@@ -304,6 +307,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         status:"pending",
         count : 0
     });
+    app.sdb.update('count',{pid:result.pid+1}, {id:0});
 });
 
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
@@ -512,8 +516,10 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
         }
         var response = await registrations.exists(request, 0);
-        
-
+        //getting the count of all the registered employee
+        var result = await app.model.Count.findOne({
+            condition:{id:0},fields:['empid']
+        });
         if(response.isSuccess == false) {
             token = await register.getToken(0,0);
 
@@ -564,10 +570,10 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
             console.log("Registration response is complete with response: " + JSON.stringify(response));
             var wallet = response.data;
-
+           
             var creat = {
                 email: email,
-                empID: uuid,
+                empID:result.empid,
                 name: name + lastName,
                 designation: designation,
                 bank: bank,
@@ -580,7 +586,8 @@ app.route.post("/registerEmployee", async function(req, cb){
             console.log("About to make a row");
 
             app.sdb.create('employee', creat);
-
+            //updating the total count of emp registered
+            app.sdb.update('count',{empid:result.empid+1}, {id:0});
             var mapEntryObj = {
                 address: wallet.walletAddress,
                 dappid: dappid
@@ -607,7 +614,7 @@ app.route.post("/registerEmployee", async function(req, cb){
             var jwtToken = auth.getJwt(email);
             var crea = {
                 email: email,
-                empID: uuid,
+                empID: result.empid,
                 name: name + lastName,
                 designation: designation,
                 bank: bank,
@@ -617,6 +624,8 @@ app.route.post("/registerEmployee", async function(req, cb){
                 token: jwtToken
             }
             app.sdb.create("pendingemp", crea);
+//updating the total emp registered count
+            app.sdb.update('count',{empid:result.empid+1}, {id:0});
             console.log("Asking address");
 
             var mailBody = {
