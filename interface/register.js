@@ -374,7 +374,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
         }
 
         if(checkauth.publickey === '-'){
-            app.sdb.update('authorizer', {publickey: publickey}, {id: authid});
+            app.sdb.update('authorizer', {publickey: publickey}, {aid: authid});
         }
         var check = await app.model.Cs.findOne({
             condition: {
@@ -420,10 +420,10 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             publickey: publickey
         });
         var count = issue.count + 1;
-        app.sdb.update('issue', {count: count}, {iid: issue.iid});
+        app.sdb.update('issue', {count: count}, {pid: issue.pid});
         return {
             message: "Successfully Authorized",
-            isSuccess: true   
+            isSuccess: true
         };
 })
 

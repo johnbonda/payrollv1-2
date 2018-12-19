@@ -18,7 +18,7 @@ module.exports = {
             length: 255
         },
         {
-            name: 'pulblickey',
+            name: 'publickey',
             type: 'String',
             length: 255
         }
