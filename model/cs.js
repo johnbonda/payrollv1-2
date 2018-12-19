@@ -16,6 +16,11 @@ module.exports = {
             name: 'sign',
             type: 'String',
             length: 255
+        },
+        {
+            name: 'pulblickey',
+            type: 'String',
+            length: 255
         }
     ]
 }

@@ -103,7 +103,12 @@ async function verifyPayslip(req, cb){
                 aid: signatures[i].aid
             }
         });
-        if(!util.Verify(hash, new Buffer(signatures[i].sign, 'base64'), new Buffer(authorizer.publickey, 'hex'))) return {
+        if(!authorizer) {
+            authorizer = {
+                aid: "Delected Authorizer";
+            }
+        }
+        if(!util.Verify(hash, new Buffer(signatures[i].sign, 'base64'), new Buffer(signatures[i].publickey, 'hex'))) return {
             message: "Wrong Authorizer signature of Authorizer ID: " + authorizer.aid,
             isSuccess: false
         }
@@ -411,7 +416,8 @@ app.route.post('/authorizer/authorize',async function(req,cb){
         app.sdb.create('cs', {
             pid:pid,
             aid:authid,
-            sign: base64sign
+            sign: base64sign,
+            publickey: publickey
         });
         var count = issue.count + 1;
         app.sdb.update('issue', {count: count}, {iid: issue.iid});
