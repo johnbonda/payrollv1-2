@@ -52,7 +52,7 @@ app.route.post('/employeeData', async function(req,cb){
     return result;
 })
 
-app.route.post("/payslips/verify", async function(req, cb){
+async function verifyPayslip(req, cb){
     var hash = util.getHash(req.query.data);
     var base64hash = hash.toString('base64');
 
@@ -143,7 +143,9 @@ app.route.post("/payslips/verify", async function(req, cb){
     result.isSuccess = true;
     return result;
 
-})
+}
+
+app.route.post("/payslips/verify", verifyPayslip);
 
 module.exports.getToken = async function(req, cb){
     var options = {
@@ -568,8 +570,14 @@ app.route.post("/registerEmployee", async function(req, cb){
 
             console.log("Change role call made with response: " + JSON.stringify(resp));
 
-            if(!resp) return "No response from change role call";
-            if(!resp.isSuccess) return JSON.stringify(resp);
+            if(!resp) return {
+                message: "No response from change role call",
+                isSuccess: false
+            }
+            if(!resp.isSuccess) return {
+                message: JSON.stringify(resp),
+                isSuccess: false
+            }
 
             var creat = {
                 email: email,
@@ -603,6 +611,10 @@ app.route.post("/registerEmployee", async function(req, cb){
                 }
             }
             mailCall.call("POST", "", mailBody, 0);
+            return {
+                message: "Registered",
+                isSuccess: true
+            }
         }
             
         else{
@@ -630,6 +642,11 @@ app.route.post("/registerEmployee", async function(req, cb){
                 }
             }
             mailCall.call("POST", "", mailBody, 0);
+            return {
+                message: "Awaiting wallet address",
+                isSuccess: true
+            }
         }
 })
+
 
