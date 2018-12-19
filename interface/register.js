@@ -105,7 +105,7 @@ async function verifyPayslip(req, cb){
         });
         if(!authorizer) {
             authorizer = {
-                aid: "Delected Authorizer";
+                aid: "Delected Authorizer"
             }
         }
         if(!util.Verify(hash, new Buffer(signatures[i].sign, 'base64'), new Buffer(signatures[i].publickey, 'hex'))) return {
