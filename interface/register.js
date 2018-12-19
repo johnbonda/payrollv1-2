@@ -637,7 +637,7 @@ app.route.post("/registerEmployee", async function(req, cb){
 
 app.route.post("/payslips/verifyMultiple", async function(req, cb){
     var pids = req.query.pids;
-    var result = [];
+    var result = {};
 
     for(pid in pids){
         var payslip = await app.model.Payslip.findOne({
