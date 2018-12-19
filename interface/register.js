@@ -228,11 +228,11 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 })
 
 app.route.post('/payslip/initialIssue',async function(req,cb){
-    var result = await app.model.Count.findOne({
+    var count = await app.model.Count.findOne({
        condition:{id:0}, fields:['pid']
     });
      var payslip={
-        pid:result.pid + 1,
+        pid:count.pid + 1,
         email:req.query.email,
         empid:req.query.empid,
         name:req.query.name,
@@ -307,7 +307,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         status:"pending",
         count : 0
     });
-    app.sdb.update('count',{pid:result.pid+1}, {id:0});
+    app.sdb.update('count',{pid:count.pid+1}, {id:0});
 });
 
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
