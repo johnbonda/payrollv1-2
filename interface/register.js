@@ -509,7 +509,7 @@ app.route.post("/registerEmployee", async function(req, cb){
         
 
         if(response.isSuccess == false) {
-            //var token = await register.getToken(0,0);
+            token = await register.getToken(0,0);
 
             console.log(token);
 
@@ -547,8 +547,17 @@ app.route.post("/registerEmployee", async function(req, cb){
             console.log("About to call registration call with parameters: " + JSON.stringify(options));
 
             var response = await TokenCall.call('POST', '/api/v1/merchant/user/register', options, token);
-        
+
+            if(!response) return {
+                message: "No response from register call",
+                isSuccess: false
+            }
+            if(!response.isSuccess) return {
+                message: JSON.stringify(response),
+                isSuccess: false
+            }
             console.log("Registration response is complete with response: " + JSON.stringify(response));
+            var wallet = response.data;
 
             var creat = {
                 email: email,
@@ -559,7 +568,7 @@ app.route.post("/registerEmployee", async function(req, cb){
                 accountNumber: accountNumber,
                 pan: pan,
                 salary: salary,
-                walletAddress: wallet.address
+                walletAddress: wallet.walletAddress
             }
 
             console.log("About to make a row");
@@ -567,7 +576,7 @@ app.route.post("/registerEmployee", async function(req, cb){
             app.sdb.create('employee', creat);
 
             var mapEntryObj = {
-                address: wallet.address,
+                address: wallet.walletAddress,
                 dappid: dappid
             }
             var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
