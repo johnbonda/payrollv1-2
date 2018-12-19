@@ -649,4 +649,25 @@ app.route.post("/registerEmployee", async function(req, cb){
         }
 })
 
+app.route.post("/payslips/verifyMultiple", async function(req, cb){
+    var pids = req.query.pids;
+    var result = [];
+
+    for(pid in pids){
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: pids[pid]
+            }
+        });
+        var req = {
+            query: {
+                data: JSON.stringify(payslip)
+            }
+        }
+        var verificationResult = await payslipVerificationResult(req, 0);
+        verificationResult.jsonPayslip = JSON.stringify(payslip);
+        result[pids[pid]] = verificationResult;
+    }
+    return result;
+});
 
