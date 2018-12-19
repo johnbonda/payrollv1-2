@@ -487,7 +487,7 @@ app.route.post("/sharePayslips", async function(req, cb){
 app.route.post("/registerEmployee", async function(req, cb){
     app.sdb.lock("registerEmployee@" + uuid);
     
-    var result = await app.model.Count.findOne({
+    var count = await app.model.Count.findOne({
         condition:{id:0}, fields:['empid']
      });
 
@@ -495,7 +495,7 @@ app.route.post("/registerEmployee", async function(req, cb){
     var email = req.query.email;
     var lastName = req.query.lastName;
     var name = req.query.name;
-    var uuid = result.empid + 1;
+    var uuid = count.empid + 1;
     var designation = req.query.designation;
     var bank = req.query.bank;
     var accountNumber = req.query.accountNumber;
@@ -607,7 +607,7 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
             mailCall.call("POST", "", mailBody, 0);
 
-            app.sdb.update("count", {empid: result.empid + 1}, {id: 0});
+            app.sdb.update("count", {empid: count.empid + 1}, {id: 0});
 
             return {
                 message: "Registered",
@@ -642,8 +642,8 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
             mailCall.call("POST", "", mailBody, 0);
 
-            app.sdb.update("count", {empid: result.empid + 1}, {id: 0});
-            
+            app.sdb.update("count", {empid: count.empid + 1}, {id: 0});
+
             return {
                 message: "Awaiting wallet address",
                 isSuccess: true
