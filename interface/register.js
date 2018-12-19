@@ -487,6 +487,8 @@ app.route.post("/registerEmployee", async function(req, cb){
     var pan = req.query.pan;
     var salary = req.query.salary;
     var dappid = req.query.dappid;
+    var token = req.query.token;
+    var groupName = req.query.groupName;
         var result = await app.model.Employee.exists({
             email: email
         });
@@ -507,15 +509,11 @@ app.route.post("/registerEmployee", async function(req, cb){
         
 
         if(response.isSuccess == false) {
-            var token = await register.getToken(0,0);
+            //var token = await register.getToken(0,0);
 
             console.log(token);
 
             if(token === "0" || token ==="-1") return "Error in retrieving token";
-            
-            console.log(email)
-
-            console.log("Passed email already exists or not");
 
             function makePassword() {
                 var text = "";
@@ -539,45 +537,18 @@ app.route.post("/registerEmployee", async function(req, cb){
             var options = {
                 countryCode: countryCode,
                 email: email,
+                groupName: groupName,
                 lastName: lastName,
                 name: name,
                 password: password,
-                uuid: uuid
+                type: 'user'
             }
 
             console.log("About to call registration call with parameters: " + JSON.stringify(options));
 
-            var response = await SwaggerCall.call('POST', '/api/v1/registration/verifier', options);
-
-            console.log("Verifier Registration response is complete with response: " + JSON.stringify(response));
-
-            if(!response) return "No response from verifier call";
-            if(!response.isSuccess) return JSON.stringify(response);
-
-            var data = response.data;
-
-            var wallet = JSON.parse(data.wallet);
-            wallet.loginPassword = password;
-
-            var opt = {
-                roleId: '3',
-                userId: data.uid
-            }
-
-            console.log("About to make change role call");
-
-            var resp = await TokenCall.call('PATCH', '/api/v1/users/role', opt, token);
-
-            console.log("Change role call made with response: " + JSON.stringify(resp));
-
-            if(!resp) return {
-                message: "No response from change role call",
-                isSuccess: false
-            }
-            if(!resp.isSuccess) return {
-                message: JSON.stringify(resp),
-                isSuccess: false
-            }
+            var response = await TokenCall.call('POST', '/api/v1/merchant/user/register', options, token);
+        
+            console.log("Registration response is complete with response: " + JSON.stringify(response));
 
             var creat = {
                 email: email,
