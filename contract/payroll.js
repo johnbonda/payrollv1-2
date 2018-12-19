@@ -317,17 +317,20 @@ module.exports = {
 
         switch(role){
             case "issuer": 
-            var result = await app.model.Count.findOne({
+            var count = await app.model.Count.findOne({
                 condition:{id:0}, fields:['iid']
              });
                 result = await app.model.Issuer.exists({
-                    iid: id
+                    iid: count.iid + 1
                 });
                 break;
 
             case "authorizer":
+            var count = await app.model.Count.findOne({
+                condition:{id:0}, fields:['iid']
+             });
                 result = await app.model.Authorizer.exists({
-                    aid: id
+                    aid: count.aid + 1
                 });
                 break;
 
