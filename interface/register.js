@@ -458,13 +458,13 @@ app.route.post('/authorizer/reject',async function(req,cb){
 app.route.post("/sharePayslips", async function(req, cb){
     var employee = await app.model.Employee.findOne({
         condition: {
-            email: req.query.email
+            empID: req.query.empID
         }
     });
     var mailBody = {
         mailType: "sendShared",
         mailOptions: {
-            to: [employee.email],
+            to: [req.query.email],
             name: employee.name,
             pids: req.query.pids,
             dappid: req.query.dappid
@@ -644,7 +644,7 @@ app.route.post("/payslips/verifyMultiple", async function(req, cb){
                 data: JSON.stringify(payslip)
             }
         }
-        var verificationResult = await payslipVerificationResult(req, 0);
+        var verificationResult = await verifyPayslip(req, 0);
         verificationResult.jsonPayslip = JSON.stringify(payslip);
         result[pids[pid]] = verificationResult;
     }
