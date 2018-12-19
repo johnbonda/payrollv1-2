@@ -232,7 +232,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
        condition:{id:0}, fields:['pid']
     });
      var payslip={
-        pid:count.pid + 1,
+        pid:String(count.pid + 1),
         email:req.query.email,
         empid:req.query.empid,
         name:req.query.name,
