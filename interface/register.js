@@ -232,7 +232,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
        condition:{id:0}, fields:['pid']
     });
      var payslip={
-        pid:req.query.pid,
+        pid:result.pid + 1,
         email:req.query.email,
         empid:req.query.empid,
         name:req.query.name,
@@ -288,7 +288,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     }
 
     var check = await app.model.Payslip.exists({
-        pid: req.query.pid
+        pid: payslip.pid
     });
     if(check) return "Duplicate pid";
     console.log("Generated Payslip: " + JSON.stringify(payslip));
@@ -486,11 +486,16 @@ app.route.post("/sharePayslips", async function(req, cb){
 
 app.route.post("/registerEmployee", async function(req, cb){
     app.sdb.lock("registerEmployee@" + uuid);
+    
+    var result = await app.model.Count.findOne({
+        condition:{id:0}, fields:['empid']
+     });
+
     var countryCode = req.query.countryCode;
     var email = req.query.email;
     var lastName = req.query.lastName;
     var name = req.query.name;
-    var uuid = req.query.uuid;
+    var uuid = result.empid + 1;
     var designation = req.query.designation;
     var bank = req.query.bank;
     var accountNumber = req.query.accountNumber;
@@ -516,10 +521,8 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
         }
         var response = await registrations.exists(request, 0);
-        //getting the count of all the registered employee
-        var result = await app.model.Count.findOne({
-            condition:{id:0},fields:['empid']
-        });
+        
+
         if(response.isSuccess == false) {
             token = await register.getToken(0,0);
 
@@ -570,10 +573,10 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
             console.log("Registration response is complete with response: " + JSON.stringify(response));
             var wallet = response.data;
-           
+
             var creat = {
                 email: email,
-                empID:result.empid,
+                empID: uuid,
                 name: name + lastName,
                 designation: designation,
                 bank: bank,
@@ -586,8 +589,7 @@ app.route.post("/registerEmployee", async function(req, cb){
             console.log("About to make a row");
 
             app.sdb.create('employee', creat);
-            //updating the total count of emp registered
-            app.sdb.update('count',{empid:result.empid+1}, {id:0});
+
             var mapEntryObj = {
                 address: wallet.walletAddress,
                 dappid: dappid
@@ -604,17 +606,21 @@ app.route.post("/registerEmployee", async function(req, cb){
                 }
             }
             mailCall.call("POST", "", mailBody, 0);
+
+            app.sdb.update("count", {empid: result.empid + 1}, {id: 0});
+
             return {
                 message: "Registered",
                 isSuccess: true
             }
+
         }
             
         else{
-            var jwtToken = auth.getJwt(email);
+            var jwtToken = auth.getJwt(email);  
             var crea = {
                 email: email,
-                empID: result.empid,
+                empID: uuid,
                 name: name + lastName,
                 designation: designation,
                 bank: bank,
@@ -624,8 +630,6 @@ app.route.post("/registerEmployee", async function(req, cb){
                 token: jwtToken
             }
             app.sdb.create("pendingemp", crea);
-//updating the total emp registered count
-            app.sdb.update('count',{empid:result.empid+1}, {id:0});
             console.log("Asking address");
 
             var mailBody = {
@@ -637,6 +641,9 @@ app.route.post("/registerEmployee", async function(req, cb){
                 }
             }
             mailCall.call("POST", "", mailBody, 0);
+
+            app.sdb.update("count", {empid: result.empid + 1}, {id: 0});
+            
             return {
                 message: "Awaiting wallet address",
                 isSuccess: true

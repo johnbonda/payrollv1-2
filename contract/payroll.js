@@ -317,6 +317,9 @@ module.exports = {
 
         switch(role){
             case "issuer": 
+            var result = await app.model.Count.findOne({
+                condition:{id:0}, fields:['iid']
+             });
                 result = await app.model.Issuer.exists({
                     iid: id
                 });
