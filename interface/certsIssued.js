@@ -30,14 +30,14 @@ return res;
 app.route.post('/recentIssued', async function(req, cb)
 { 
     var num = await app.model.Issue.count({status:"issued"});
-    var res=await app.model.Issue.findAll({
+    var res=(await app.model.Issue.findAll({
         condition:{
             status:"issued"
         },
         fields:['pid'], 
         offset: num - 6,
         limit: 6 
-    }).reverse();
+    })).reverse();
     
   return res;
 });
