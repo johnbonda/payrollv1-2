@@ -311,7 +311,7 @@ module.exports = {
     },
 
     registerUser: async function(email, designation, countryId, countryCode, name, password, type, role, dappid){
-        app.sdb.lock("registerUser@" + email + "@" + role);
+        app.sdb.lock("registerUser@" + role);
 
         console.log("Entered Register User");
 

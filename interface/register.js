@@ -228,6 +228,7 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 })
 
 app.route.post('/payslip/initialIssue',async function(req,cb){
+    app.sdb.lock("Initiate");
     var count = await app.model.Count.findOne({
        condition:{id:0}, fields:['pid']
     });
@@ -486,7 +487,7 @@ app.route.post("/sharePayslips", async function(req, cb){
 })
 
 app.route.post("/registerEmployee", async function(req, cb){
-    app.sdb.lock("registerEmployee@" + uuid);
+    app.sdb.lock("registerEmployee");
     
     var count = await app.model.Count.findOne({
         condition:{id:0}, fields:['empid']
