@@ -77,3 +77,17 @@ app.route.post('/sortTesting', async function(req, cb){
     });
     return result;
 })
+
+app.route.post('/getPendingAuthorizationCount', async function(req, cb){
+    var authCount = await app.model.Authorizer.count({});
+    var result = await app.model.Issue.count({
+        status: "pending",
+        count: {
+            $gte: authCount
+        }
+    });
+    return {
+        totalUnauthorizedCertificates: result,
+        isSuccess: true
+    }
+});
