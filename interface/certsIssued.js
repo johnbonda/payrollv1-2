@@ -83,7 +83,7 @@ app.route.post('/getPendingAuthorizationCount', async function(req, cb){
     var result = await app.model.Issue.count({
         status: "pending",
         count: {
-            $gte: authCount
+            $lte: authCount
         }
     });
     return {
