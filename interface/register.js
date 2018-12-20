@@ -305,7 +305,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         hash: base64hash,
         sign: base64sign,
         publickey:publickey,
-        timestamp:timestamp.toString(),
+        timestampp:timestamp.toString(),
         status:"pending",
         count : 0
     });

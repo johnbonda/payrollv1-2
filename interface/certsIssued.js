@@ -34,9 +34,9 @@ app.route.post('/recentIssued', async function(req, cb)
         condition:{
             status:"issued"
         },
-        fields:['pid', 'timestamp'], 
+        fields:['pid', 'timestampp'], 
         sort: {
-            timestamp: -1
+            timestampp: -1
         },
         limit: 6 
     });
