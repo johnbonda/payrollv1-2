@@ -28,7 +28,7 @@ module.exports = {
         },
         {
             name: 'timestamp',
-            type: 'String',
+            type: 'Number',
             length: 255
         },
         {

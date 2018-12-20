@@ -57,7 +57,7 @@ app.route.post("/issueTransactionCall", async function(req, res){
 
     var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
     if(response.success){
-        app.sdb.update('issue', {status: "issued"}, {pid: pid});    
+        app.sdb.update('issue', {status: "issued", timestamp: new Date().getTime()}, {pid: pid});    
     }
 
     var mailBody = {

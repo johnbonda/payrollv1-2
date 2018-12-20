@@ -231,6 +231,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     var count = await app.model.Count.findOne({
        condition:{id:0}, fields:['pid']
     });
+    var timestamp = new Date().getTime();
      var payslip={
         pid:String(count.pid + 1),
         email:req.query.email,
@@ -252,7 +253,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         grossSalary:req.query.grossSalary,
         totalDeductions:req.query.totalDeductions,
         netSalary:req.query.netSalary,
-        timestamp: new Date().getTime().toString() 
+        timestamp: timestamp.toString() 
      };
      issuerid=req.query.issuerid;
      secret=req.query.secret;
@@ -303,7 +304,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         hash: base64hash,
         sign: base64sign,
         publickey:publickey,
-        timestamp:payslip.timestamp,
+        timestamp:timestamp,
         status:"pending",
         count : 0
     });
@@ -704,7 +705,7 @@ app.route.post("/payslip/month/status", async function(req, cb){
         });
         if(issue.status === "issued"){
             resultArray[employees[i].empID] = {
-                name: employee[i].name,
+                name: employees[i].name,
                 designation: employees[i].designation,
                 status: "Issued"
             }
@@ -727,7 +728,7 @@ app.route.post("/payslip/month/status", async function(req, cb){
             }
             if(count === count_of_auths){
                 resultArray[employees[i].empID] = {
-                    name: employee[i].name,
+                    name: employees[i].name,
                     designation: employees[i].designation,
                     status: "Authorized"
                 }
@@ -736,7 +737,7 @@ app.route.post("/payslip/month/status", async function(req, cb){
         }
         
         resultArray[employees[i].empID] = {
-            name: employee[i].name,
+            name: employees[i].name,
             designation: employees[i].designation,
             status: "Initiated"
         }
