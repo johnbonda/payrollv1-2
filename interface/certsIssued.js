@@ -58,6 +58,9 @@ app.route.post('/getEmployeeById', async function(req, cb)
 
 app.route.post('/sortTesting', async function(req, cb){
     var result = await app.model.Authorizer.findAll({
+        condition: {
+            publickey = "-"
+        },
         sort: {
             aid: -1
         },
