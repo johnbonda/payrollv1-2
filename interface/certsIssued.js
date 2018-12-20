@@ -55,3 +55,12 @@ app.route.post('/getEmployeeById', async function(req, cb)
 { 
     return await app.model.Employee.findOne( {condition : { empID : req.query.id }} );
 })
+
+app.route.post('/sortTesting', async function(req, cb){
+    var result = await app.model.Authorizer.findAll({
+        sort: {
+            aid: -1
+        }
+    });
+    return result;
+})
