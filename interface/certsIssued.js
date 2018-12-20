@@ -61,6 +61,7 @@ app.route.post('/sortTesting', async function(req, cb){
         sort: {
             aid: -1
         },
+        fields: ['aid'],
         limit: 6
     });
     return result;
