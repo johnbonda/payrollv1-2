@@ -40,7 +40,15 @@ app.route.post('/recentIssued', async function(req, cb)
         },
         limit: 6 
     });
-    
+    for (i in res){
+        var payslip=await app.model.Payslip.findOne({
+            condition:{
+                pid:res[i].pid
+            }
+        });
+        res[i].name=payslip.name;
+        res[i].empid=payslip.empid;
+    } 
   return res;
 });
 

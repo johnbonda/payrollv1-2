@@ -12,6 +12,7 @@ var mailCall = require("../utils/mailCall");
 
 
 app.route.post("/issueTransactionCall", async function(req, res){
+    app.sdb.lock("issueTransactionCall")
     var transactionParams = {};
     var pid = req.query.pid;
     var payslip = await app.model.Payslip.findOne({
