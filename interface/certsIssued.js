@@ -32,12 +32,11 @@ app.route.post('/recentIssued', async function(req, cb)
     var res=await app.model.Issue.findAll({
         condition:{
             status:"issued"
-        },
+        }, 
+        limit: 6,
         sort: {
             timestamp: -1
-        },
-        fields:['pid'], 
-        limit: 6 
+        }
     });
     
   return res;
