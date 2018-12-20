@@ -60,7 +60,8 @@ app.route.post('/sortTesting', async function(req, cb){
     var result = await app.model.Authorizer.findAll({
         sort: {
             aid: -1
-        }
+        },
+        limit: 6
     });
     return result;
 })
