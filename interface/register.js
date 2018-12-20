@@ -673,3 +673,84 @@ app.route.post("/payslips/verifyMultiple", async function(req, cb){
     return result;
 });
 
+app.route.post("/payslip/month/status", async function(req, cb){
+    var month = req.query.month;
+    var year = req.query.year;
+    var resultArray = {};
+    var employees = await app.model.Employee.findAll({
+        fields: ['empID', 'name', 'designation']
+    });
+    for(i in employees){
+        var initiated = await app.model.Payslip.findOne({
+            condition:{
+                empid: employees[i].empID,
+                month: month,
+                year: year
+            }
+        });
+        if(!initiated){
+            resultArray[employees[i].empID] = {
+                name: employees[i].name,
+                designation: employees[i].designation,
+                status: "Pending"
+            }
+            continue;
+        }
+
+        var issue = await app.model.Issue.findOne({
+            condition: {
+                pid: initiated.pid
+            }
+        });
+        if(issue.status === "issued"){
+            resultArray[employees[i].empID] = {
+                name: employee[i].name,
+                designation: employees[i].designation,
+                status: "Issued"
+            }
+            continue;
+        }
+        
+        var auths = await app.model.Authorizer.findAll({fields:['aid']});
+        var count_of_auths = auths.length;
+
+        if(issue.count >= count_of_auths){
+            var count = 0;
+            for (auth in auths){
+                let response = await app.model.Cs.exists({
+                    pid: issue.pid,
+                    aid: auths[auth].aid
+                });
+                if(response){
+                    count += 1;
+                }
+            }
+            if(count === count_of_auths){
+                resultArray[employees[i].empID] = {
+                    name: employee[i].name,
+                    designation: employees[i].designation,
+                    status: "Authorized"
+                }
+                continue;
+            }
+        }
+        
+        resultArray[employees[i].empID] = {
+            name: employee[i].name,
+            designation: employees[i].designation,
+            status: "Initiated"
+        }
+    }
+    return resultArray;
+});
+
+app.route.post('/payslips/sentForAuthorization', async function(req, cb){
+    var count = await app.model.Issue.count({
+        status: 'pending'
+    });
+    return {
+        count: count,
+        isSuccess: true
+    };
+})
+
