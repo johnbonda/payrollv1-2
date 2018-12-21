@@ -16,20 +16,26 @@ var SwaggerCall = require("../utils/SwaggerCall");
 
 // For the employee table,
 // GET call
-// inputs: No inputs
+// inputs: limit, offset
 // outputs: empid, name, designations
 app.route.post('/employees', async function(req, cb){
 
     // if(!req.query.dappToken) return "Need Dapp Token, please Login";
     // if(! (await auth.checkSession(req.query.dappToken))) return "Unauthorized Token";
 
+    var total = await app.model.Employee.count({});
     var options = {
-        fields: ['empID', 'name', 'designation']
+        fields: ['empID', 'name', 'designation'],
+        limit: req.query.limit,
+        offset: req.query.offset
     }
 
     var result = await app.model.Employee.findAll(options);
 
-    return result;
+    return {
+        total: total,
+        employees: result
+    };
 })
 
 // For issue auto-fill,
@@ -675,12 +681,16 @@ app.route.post("/payslips/verifyMultiple", async function(req, cb){
     return result;
 });
 
+// inputs: limit, offset
 app.route.post("/payslip/month/status", async function(req, cb){
     var month = req.query.month;
     var year = req.query.year;
     var resultArray = {};
+    var total = await app.model.Employee.count({});
     var employees = await app.model.Employee.findAll({
-        fields: ['empID', 'name', 'designation']
+        fields: ['empID', 'name', 'designation'],
+        limit: limit,
+        offset: offset
     });
     for(i in employees){
         var initiated = await app.model.Payslip.findOne({
@@ -743,7 +753,10 @@ app.route.post("/payslip/month/status", async function(req, cb){
             status: "Initiated"
         }
     }
-    return resultArray;
+    return {
+        total: total,
+        result: resultArray
+    };
 });
 
 app.route.post('/payslips/sentForAuthorization', async function(req, cb){

@@ -21,12 +21,18 @@ app.route.post('/totalEmployee', async function(req, cb)
 });
 
 //- get all employees name, id, designation with dappid
+//Inputs: limit, offset
 app.route.post('/employee/details',async function(req,cb){
-var res=await app.model.Employee.findAll({fields:['empID','name','designation']})
+var res=await app.model.Employee.findAll({
+    fields:['empID','name','designation'],
+    limit: req.query.limit,
+    offset: req.query.offset,
+})
 return res;
 });
 
 
+// Inputs: limit
 app.route.post('/recentIssued', async function(req, cb)
 { 
     //var num = await app.model.Issue.count({status:"issued"});
@@ -38,7 +44,7 @@ app.route.post('/recentIssued', async function(req, cb)
         sort: {
             timestampp: -1
         },
-        limit: 6 
+        limit: req.query.limit
     });
     for (i in res){
         var payslip=await app.model.Payslip.findOne({
@@ -53,10 +59,18 @@ app.route.post('/recentIssued', async function(req, cb)
 });
 
 
-
+// Inputs: limit, offset
 app.route.post('/getEmployees', async function(req, cb)
 { 
-    return await app.model.Employee.findAll({});
+    var total = await app.model.Employee.count({});
+    var employees = await app.model.Employee.findAll({
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+    return {
+        total: total,
+        employees: employees
+    }
 })
 
 app.route.post('/getEmployeeById', async function(req, cb)
