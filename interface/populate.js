@@ -82,23 +82,23 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 count: 10,   
             });
 
-            var args = "[\"" + employees[i].walletAddress + "\"," + "\"payslip\"";
-            for(k in payslip){
-                args += ",\"" + payslip[k] + "\"";
-            }
-            args += "]";
+            // var args = "[\"" + employees[i].walletAddress + "\"," + "\"payslip\"";
+            // for(k in payslip){
+            //     args += ",\"" + payslip[k] + "\"";
+            // }
+            // args += "]";
 
-            var transactionParams = {};
-            transactionParams.args = args;
-            transactionParams.type = 1003;
-            transactionParams.fee = req.query.fee;
-            transactionParams.secret = req.query.secret;
-            transactionParams.senderPublicKey = req.query.senderPublicKey;
+            // var transactionParams = {};
+            // transactionParams.args = args;
+            // transactionParams.type = 1003;
+            // transactionParams.fee = req.query.fee;
+            // transactionParams.secret = req.query.secret;
+            // transactionParams.senderPublicKey = req.query.senderPublicKey;
 
-            //console.log(JSON.stringify(transactionParams));
+            // //console.log(JSON.stringify(transactionParams));
 
-            var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
-            console.log("Result is: " + JSON.stringify(response));
+            // var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
+            // console.log("Result is: " + JSON.stringify(response));
         }
     }
 })
