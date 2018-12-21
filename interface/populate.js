@@ -42,7 +42,7 @@ app.route.post('/generateEmployees', async function(req, cb){
 });
 
 app.route.post('/generateAndIssuePayslips', async function(req, cb){
-    var employees = await app.model.Employees.findAll({
+    var employees = await app.model.Employee.findAll({
         fields: ['empID']
     });
     for ( i in employees){
