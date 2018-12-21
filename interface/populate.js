@@ -45,13 +45,14 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
     var employees = await app.model.Employee.findAll({});
     for ( i in employees){
         console.log("employee mail is: " + employees[i].email);
+        for(var j = 1; j <= 12; j++){
             var payslip = {
                 pid: "PPId" + i,
                 email: employees[i].email,
                 empid: employees[i].empID,
                 name: employees[i].name,
                 employer: "PPEmployer",
-                month: "PPMonth" + i,
+                month: "PPMonth" + j,
                 year: "PPYear",
                 designation: employees[i].designation,
                 bank: employees[i].bank,
@@ -76,7 +77,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 hash: "PPHash" + i,
                 sign: "PPSign" + i,
                 publickey: "-",
-                timestampp: new Date().getTime().toString,
+                timestampp: new Date().getTime().toString(),
                 status: "issued",
                 count: 10,   
             });
@@ -99,4 +100,5 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
             // var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
             // console.log("Result is: " + JSON.stringify(response));
         }
+    }
 })
