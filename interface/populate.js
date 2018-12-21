@@ -83,8 +83,8 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
             });
 
             var args = "[\"" + employees[i].walletAddress + "\"," + "\"payslip\"";
-            for(i in payslip){
-                args += ",\"" + payslip[i] + "\"";
+            for(k in payslip){
+                args += ",\"" + payslip[k] + "\"";
             }
             args += "]";
 
@@ -95,7 +95,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
             transactionParams.secret = req.query.secret;
             transactionParams.senderPublicKey = req.query.senderPublicKey;
 
-            console.log(JSON.stringify(transactionParams));
+            //console.log(JSON.stringify(transactionParams));
 
             var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
         }
