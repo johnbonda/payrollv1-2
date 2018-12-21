@@ -13,7 +13,7 @@ module.exports = {
 
     issuePaySlip: async function(toaddr, type, pid, email, empid, name, employer, month, year, designation, bank, accountNumber, pan, basicPay, hra, lta, ma, providentFund, professionalTax, grossSalary, totalDeductions, netSalary, issuerid, timestamp){
 
-        app.sdb.lock('payroll.issuePaySlip@'+empid);
+        //app.sdb.lock('payroll.issuePaySlip@'+empid);
 
     },
 
