@@ -63,7 +63,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 lta: "PPLta" + i,
                 ma: "PPMa" + i,
                 providentFund: "PPProvidentFund" + i,
-                professinalTax: "PPProfessionalTax" + i,
+                professionalTax: "PPProfessionalTax" + i,
                 grossSalary: "PPGrossSalary" + i,
                 totalDeductions: "PPTotalDeductions" + i,
                 netSalary: "PPNetSalary" + i,
