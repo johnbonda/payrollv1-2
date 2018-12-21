@@ -33,7 +33,7 @@ app.route.post('/generateEmployees', async function(req, cb){
 
         var mapEntryObj = {
             address: "payrollAddress" + i,
-            dappid: dappid
+            dappid: req.query.dappid
         }
         var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
         console.log(JSON.stringify(mapcall));
