@@ -98,6 +98,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
             //console.log(JSON.stringify(transactionParams));
 
             var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
+            console.log("Result is: " + JSON.stringify(response));
         }
     }
 })
