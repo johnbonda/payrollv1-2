@@ -44,6 +44,7 @@ app.route.post('/generateEmployees', async function(req, cb){
 app.route.post('/generateAndIssuePayslips', async function(req, cb){
     var employees = await app.model.Employee.findAll({});
     for ( i in employees){
+        console.log("employee mail is: " + employees[i].email);
         for(var j = 1; j <= 12; j++){
             var payslip = {
                 pid: "PPId" + i,
