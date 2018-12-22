@@ -474,18 +474,12 @@ app.route.post('/authorizer/reject',async function(req,cb){
 });
 
 app.route.post('/searchEmployee', async function(req, cb){
-    var result = {};
-    var keys = req.query.keys;
-    for(i in keys){
-        let key = keys[i];
-        result[key] = await app.model.Employee.findAll({
-            condition: {
-                key: {
-                    $like: "%" + req.query.text + "%"
-                }
-            }
-        });
-    }
+    var result = await app.model.Employee.findAll({
+        condition: {
+            name: "%" + req.query.text + "%"
+        },
+        fields: ['empID', 'name', 'designation']
+    });
     return result;
 })
 
