@@ -13,7 +13,7 @@ module.exports = {
 
     issuePaySlip: async function(toaddr, type, pid, email, empid, name, employer, month, year, designation, bank, accountNumber, pan, basicPay, hra, lta, ma, providentFund, professionalTax, grossSalary, totalDeductions, netSalary, issuerid, timestamp){
 
-        app.sdb.lock('payroll.issuePaySlip@'+empid);
+        //app.sdb.lock('payroll.issuePaySlip@'+empid);
 
     },
 
@@ -310,21 +310,27 @@ module.exports = {
         }
     },
 
-    registerUser: async function(id, email, designation, countryId, countryCode, name, password, type, role, dappid){
-        app.sdb.lock("registerUser@" + email + "@" + role);
+    registerUser: async function(email, designation, countryId, countryCode, name, password, type, role, dappid){
+        app.sdb.lock("registerUser@" + role);
 
         console.log("Entered Register User");
 
         switch(role){
             case "issuer": 
+            var count = await app.model.Count.findOne({
+                condition:{id:0}, fields:['iid']
+             });
                 result = await app.model.Issuer.exists({
-                    iid: id
+                    iid: count.iid + 1
                 });
                 break;
 
             case "authorizer":
+            var count = await app.model.Count.findOne({
+                condition:{id:0}, fields:['aid']
+             });
                 result = await app.model.Authorizer.exists({
-                    aid: id
+                    aid: count.aid + 1
                 });
                 break;
 
@@ -364,22 +370,31 @@ module.exports = {
         // Need some exception handling flow for the case when a email with a particular role is already registered on the dapp.
         switch(role){
             case "issuer": 
+            //getting the last registered id of an issuer
+            var result = await app.model.Count.findOne({
+                condition:{id:0},fields:['iid']
+            });
                 app.sdb.create('issuer', {
-                    iid: id,
+                    iid: result.iid+1,
                     publickey: "-",
                     email: email,
                     designation: designation,
                     timestamp: new Date().getTime()
                 });
+                app.sdb.update('count',{iid:result.iid+1}, {id:0});
                 break;
             case "authorizer":
+            var result = await app.model.Count.findOne({
+                condition:{id:0},fields:['aid']
+            });
                 app.sdb.create('authorizer', {
-                    aid: id,
+                    aid:result.aid+1,
                     publickey: "-",
                     email: email,
                     designation: designation,
                     timestamp: new Date().getTime()
                 });
+                app.sdb.update('count',{aid:result.aid+1}, {id:0});
                 break;
             default: return "Invalid role";
         }

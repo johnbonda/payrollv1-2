@@ -8,9 +8,17 @@ var SwaggerCall = require('../utils/SwaggerCall.js');
 var request = require('request');
 var auth = require('./authController');
 
+// inputs: limit, offset
 app.route.post('/issuers', async function(req, cb){
-    var result = await app.model.Issuer.findAll({});
-    return result; 
+    var total = await app.model.Issuer.count({});
+    var result = await app.model.Issuer.findAll({
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+    return {
+        total: total,
+        issuers: result
+    }; 
 });
 
 app.route.post('/issuers/data', async function(req, cb){
@@ -23,9 +31,17 @@ app.route.post('/issuers/data', async function(req, cb){
     return result;
 });
 
+// inputs: limit, offset
 app.route.post('/authorizers', async function(req, cb){
-    var result = await app.model.Authorizer.findAll({});
-    return result;
+    var total = await app.model.Authorizer.count({});
+    var result = await app.model.Authorizer.findAll({
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+    return {
+        total: total,
+        authorizer: result
+    }; 
 });
 
 app.route.post('/authorizers/data', async function(req, cb){
@@ -97,80 +113,80 @@ app.route.post('/authorizers/data', async function(req, cb){
 //     return pendingSigns;
 // });
 
-app.route.post('/payslips/unconfirmed', async function(req, cb){
-    var unconfirmedPayslips = await app.model.Ui.findAll({});
-    return unconfirmedPayslips;
-});
+// app.route.post('/payslips/unconfirmed', async function(req, cb){
+//     var unconfirmedPayslips = await app.model.Ui.findAll({});
+//     return unconfirmedPayslips;
+// });
 
-app.route.post('/payslips/unconfirmed/data', async function(req, cb){
-    var data = await app.model.Ucps.findOne({
-        condition: {
-            id: req.query.id
-        }
-    });
-    return data;
-});
+// app.route.post('/payslips/unconfirmed/data', async function(req, cb){
+//     var data = await app.model.Ucps.findOne({
+//         condition: {
+//             id: req.query.id
+//         }
+//     });
+//     return data;
+// });
 
-app.route.post('/payslips', async function(req, cb){
-    var confirmedPayslips = await app.model.Mi.findAll({});
-    return confirmedPayslips;
-});
+// app.route.post('/payslips', async function(req, cb){
+//     var confirmedPayslips = await app.model.Mi.findAll({});
+//     return confirmedPayslips;
+// });
 
-app.route.post('/payslips/data', async function(req, cb){
-    var data = await app.model.Mps.findOne({
-        condition: {
-            id: req.query.id
-        }
-    });
-    return data;
-});
+// app.route.post('/payslips/data', async function(req, cb){
+//     var data = await app.model.Mps.findOne({
+//         condition: {
+//             id: req.query.id
+//         }
+//     });
+//     return data;
+// });
 
-app.route.post('/payslips/signatures', async function(req, cb){
-    var data = await app.model.Authsign.findAll({
-        condition: {
-            mid: req.query.id
-        }
-    });
-    return data;
-});
+// app.route.post('/payslips/signatures', async function(req, cb){
+//     var data = await app.model.Authsign.findAll({
+//         condition: {
+//             mid: req.query.id
+//         }
+//     });
+//     return data;
+// });
 
 app.route.post('/authorizers/remove', async function(req, cb){
     var check = await app.model.Authorizer.exists({
-       id:req.query.id
+       aid:req.query.aid
     })
     if(!check) return "not found";
     app.sdb.del('Authorizer', {
-       id: req.query.id
+       aid: req.query.aid
     });
     return true;
 });
 
 app.route.post('/issuers/remove', async function(req, cb){
     var check = await app.model.Issuer.exists({
-       id:req.query.id
+       iid:req.query.iid
     })
     if(!check) return "not found";
     app.sdb.del('issuer', {
-       id: req.query.id
+       iid: req.query.iid
     });
     return true;
 });
 
-app.route.post('/payslips/pendingsigns', async function(req, cb){
-    var check = await app.model.Ui.exists({
-        id: req.query.id
-    });
-    if(!check) return "Invalid id";
-    var signs = await app.model.Cs.findAll({
-        condition: {
-            upid: req.query.id
-        },fields: ['aid']
-    });
-    var totalAuthorizers=await app.model.Authorizer.findAll({fields: ['id']
-    });
-    var obj={
-        signs:signs.length,
-        totalAuthorizers:totalAuthorizers.length
-    }
-    return obj;
- });
+// app.route.post('/payslips/pendingsigns', async function(req, cb){
+//     var check = await app.model.Ui.exists({
+//         id: req.query.id
+//     });
+//     if(!check) return "Invalid id";
+//     var signs = await app.model.Cs.findAll({
+//         condition: {
+//             upid: req.query.id
+//         },fields: ['aid']
+//     });
+//     var totalAuthorizers=await app.model.Authorizer.findAll({fields: ['id']
+//     });
+//     var obj={
+//         signs:signs.length,
+//         totalAuthorizers:totalAuthorizers.length
+//     }
+//     return obj;
+// });

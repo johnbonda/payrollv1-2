@@ -12,6 +12,7 @@ var mailCall = require("../utils/mailCall");
 
 
 app.route.post("/issueTransactionCall", async function(req, res){
+    app.sdb.lock("issueTransactionCall")
     var transactionParams = {};
     var pid = req.query.pid;
     var payslip = await app.model.Payslip.findOne({
@@ -57,18 +58,17 @@ app.route.post("/issueTransactionCall", async function(req, res){
 
     var response = await DappCall.call('PUT', "/unsigned", transactionParams, req.query.dappid,0);
     if(response.success){
-        app.sdb.update('issue', {status: "issued"}, {pid: pid});    
+        app.sdb.update('issue', {status: "issued"}, {pid: pid});  
+        app.sdb.update('issue', {timestampp: new Date().getTime()}, {pid: pid});  
     }
 
     var mailBody = {
-        mailType: "sendPayslip",
+        mailType: "sendIssued",
         mailOptions: {
             to: [employee.email],
-            empname: employee.name,
+            name: employee.name,
             month: payslip.month,
-            year: payslip.year,
-            jsonBody: payslip,
-            dappid: req.query.dappid
+            year: payslip.year
         }
     }
 
