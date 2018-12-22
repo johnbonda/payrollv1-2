@@ -435,5 +435,21 @@ app.route.post('/authorizer/reject',async function(req,cb){
     }
 
     mailCall.call("POST", "", mailBody, 0);
+});
+
+app.route.post('/searchEmployee', async function(req, cb){
+    var result = {};
+    var keys = req.query.keys;
+    for(i in keys){
+        let key = keys[i];
+        result[key] = await app.model.Employee.findAll({
+            condition: {
+                key: {
+                    $like: "%" + req.query.text + "%"
+                }
+            }
+        });
+    }
+    return result;
 })
 
