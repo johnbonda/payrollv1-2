@@ -21,7 +21,7 @@ app.route.post('/generateEmployees', async function(req, cb){
         }
     });
 
-    for(var i = count.empid+1; i <= count.empid+10; i++){
+    for(var i = count.empid+1; i <= count.empid+req.query.count; i++){
         var creat = {
             email: "PEEmail" + i + "@yopmail.com",
             empID: i,
@@ -44,7 +44,7 @@ app.route.post('/generateEmployees', async function(req, cb){
         }
         var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
         console.log(JSON.stringify(mapcall));
-        app.sdb.update('count', {empid: count.empid + 10}, {id: 0});
+        app.sdb.update('count', {empid: count.empid + req.query.count}, {id: 0});
     }
 });
 
