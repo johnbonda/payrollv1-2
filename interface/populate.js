@@ -15,7 +15,13 @@ var DappCall = require("../utils/DappCall");
 
 
 app.route.post('/generateEmployees', async function(req, cb){
-    for(var i = 1; i <= 10; i++){
+    var count = await app.model.Count.findOne({
+        condition: {
+            id: 0
+        }
+    });
+
+    for(var i = count.empid+1; i <= count.empid+10; i++){
         var creat = {
             email: "PEEmail" + i + "@yopmail.com",
             empID: i,
@@ -38,6 +44,7 @@ app.route.post('/generateEmployees', async function(req, cb){
         }
         var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
         console.log(JSON.stringify(mapcall));
+        app.sdb.update('count', {empid: count.empid + 10}, {id: 0});
     }
 });
 
@@ -47,7 +54,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
         console.log("employee mail is: " + employees[i].email);
         for(var j = 1; j <= 12; j++){
             var payslip = {
-                pid: "PPId" + i,
+                pid: "PPId" + i*j,
                 email: employees[i].email,
                 empid: employees[i].empID,
                 name: employees[i].name,
