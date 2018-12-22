@@ -54,7 +54,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
         console.log("employee mail is: " + employees[i].email);
         for(var j = 1; j <= 12; j++){
             var payslip = {
-                pid: "PPId" + i*j,
+                pid: "PPId" + (i+1)*j,
                 email: employees[i].email,
                 empid: employees[i].empID,
                 name: employees[i].name,
@@ -79,7 +79,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
             app.sdb.create('payslip', payslip);
 
             app.sdb.create('issue', {
-                pid: "PPId" + i,
+                pid: payslip.pid,
                 iid: 1,
                 hash: "PPHash" + i,
                 sign: "PPSign" + i,
