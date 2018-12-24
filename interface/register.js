@@ -471,6 +471,18 @@ app.route.post('/authorizer/reject',async function(req,cb){
     }
 
     mailCall.call("POST", "", mailBody, 0);
+});
+
+app.route.post('/searchEmployee', async function(req, cb){
+    var result = await app.model.Employee.findAll({
+        condition: {
+            name: {
+                $like: "%" + req.query.text + "%"
+            }
+        },
+        fields: ['empID', 'name', 'designation']
+    });
+    return result;
 })
 
 app.route.post("/sharePayslips", async function(req, cb){
