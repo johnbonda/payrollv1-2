@@ -35,6 +35,7 @@ app.route.post('/generateEmployees', async function(req, cb){
         }
 
         console.log("About to make a row");
+        app.logger.log("LOLOLOLOLLLOOLOLOLOLOLOLOL");
 
         app.sdb.create('employee', creat);
 
@@ -43,7 +44,6 @@ app.route.post('/generateEmployees', async function(req, cb){
             dappid: req.query.dappid
         }
         var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
-        console.log(JSON.stringify(mapcall));
         app.sdb.update('count', {empid: count.empid + req.query.count}, {id: 0});
     }
 });
