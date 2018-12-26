@@ -470,6 +470,12 @@ app.route.post('/authorizer/reject',async function(req,cb){
     });
     if(!payslip) return "Invalid payslip";
 
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            empID: payslip.empid
+        }
+    });
+
     var authorizer = await app.model.Authorizer.findOne({
         condition: {
             aid: req.query.aid
