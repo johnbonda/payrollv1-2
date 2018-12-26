@@ -17,6 +17,7 @@ module.exports = {
 
         logger.info("Entered issuePaySlip contract");
         //app.sdb.lock('payroll.issuePaySlip@'+empid);
+        app.sdb.update('issue', {transactionId: this.trs.id}, {pid: pid});
 
     },
 

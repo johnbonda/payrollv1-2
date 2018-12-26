@@ -45,6 +45,11 @@ module.exports = {
             name: 'empid',
             type: 'String',
             length: 255
+        },
+        {
+            name: 'transactionId',
+            type: 'String',
+            length: 255
         }
     ]
 }

@@ -329,7 +329,8 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         timestampp:timestamp.toString(),
         status:"pending",
         count : 0,
-        empid: employee.empID
+        empid: employee.empID,
+        transactionId: '-'
     });
     app.sdb.update('count',{pid:count.pid+1}, {id:0});
 });
@@ -829,6 +830,9 @@ app.route.post('/authorizer/authorizedAssets', async function(req, cb){
         issue.email = payslip.email;
         result.push(issue);
     }
-    return result;
+    return {
+        result: result,
+        isSuccess: true
+    }
 })
 
