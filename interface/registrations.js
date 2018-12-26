@@ -10,6 +10,8 @@ var SwaggerCall = require('../utils/SwaggerCall.js');
 var request = require('request');
 var auth = require('./authController');
 var UploadCall = require('../utils/UploadCall');
+var logger = require("../utils/logger");
+
 
 
 // // Return Payslip with empname

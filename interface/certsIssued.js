@@ -1,6 +1,8 @@
 var util = require("../utils/util.js");
 var config = require("../config.json");
 var SwaggerCall = require("../utils/SwaggerCall");
+var logger = require("../utils/logger");
+
 
 app.route.post('/totalCertsIssued', async function(req, cb)
 { 

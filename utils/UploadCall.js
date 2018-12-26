@@ -1,6 +1,6 @@
 'use strict';var request = require('request');
 var constants = require('./constants.js');
-
+var logger = require('./logger');
 const URI = constants.URI;
 module.exports = {
     call: async function(method, url_path, formy, cb){

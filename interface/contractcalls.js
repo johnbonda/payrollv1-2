@@ -9,6 +9,8 @@ var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
 var DappCall = require("../utils/DappCall");
 var mailCall = require("../utils/mailCall");
+var logger = require("../utils/logger");
+
 
 
 app.route.post("/issueTransactionCall", async function(req, res){

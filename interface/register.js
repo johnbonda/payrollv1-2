@@ -11,6 +11,7 @@ var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
 var mailCall = require("../utils/mailCall");
 var SwaggerCall = require("../utils/SwaggerCall");
+var logger = require("../utils/logger");
 
 
 

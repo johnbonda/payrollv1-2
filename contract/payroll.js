@@ -8,17 +8,21 @@ var register = require("../interface/register");
 var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
 var mailCall = require("../utils/mailCall");
+var logger = require("../utils/logger");
+
 
 module.exports = {
 
     issuePaySlip: async function(toaddr, type, pid, email, empid, name, employer, month, year, designation, bank, accountNumber, pan, basicPay, hra, lta, ma, providentFund, professionalTax, grossSalary, totalDeductions, netSalary, issuerid, timestamp){
 
+        logger.info("Entered issuePaySlip contract");
         //app.sdb.lock('payroll.issuePaySlip@'+empid);
 
     },
 
     authorize: async function(iid, secret, authid, dappid){
         app.sdb.lock("authorize@" + iid);
+        logger.error("Entered authorize contract - Deprecated");
         // Check Authorizer
         var publickey = util.getPublicKey(secret);
         var checkauth = await app.model.Authorizer.findOne({
@@ -126,6 +130,7 @@ module.exports = {
 
     verify: async function(obj){
         
+        logger.error("Entered verify contract - Deprecated")
         //app.logger.debug(objtext);
         //var obj = JSON.parse(objtext);
         var objtext = JSON.stringify(obj);
@@ -162,6 +167,7 @@ module.exports = {
 
     registerEmployee: async function(countryCode, email, lastName, name, uuid, designation, bank, accountNumber, pan, salary, dappid){
         app.sdb.lock("registerEmployee@" + uuid);
+        logger.error("Entered registerEmployee - Deprecated");
         var result = await app.model.Employee.exists({
             email: email
         });
@@ -313,6 +319,7 @@ module.exports = {
     registerUser: async function(email, designation, countryId, countryCode, name, password, type, role, dappid){
         app.sdb.lock("registerUser@" + role);
 
+        logger.info("Entered registerUser with email: " + email + " and role: " + role + "and dappid: " + dappid);
         console.log("Entered Register User");
 
         switch(role){
@@ -334,10 +341,15 @@ module.exports = {
                 });
                 break;
 
-            default: return "Invalid role";
+            default: 
+                    logger.error("Invalid role");
+                    return "Invalid role";
         }
 
-        if(result) return "User already registered";
+        if(result){
+            logger.error("User already registered");
+            return "User already registered";
+        }
 
         var request = {
             query: {
@@ -359,6 +371,7 @@ module.exports = {
             }
             var resultt = await registrations.signup(req, 0);
             if(resultt !== "success") return JSON.stringify(resultt);
+            logger.info("Registered a new user");
         }
         
         var mapObj = {
@@ -382,6 +395,7 @@ module.exports = {
                     timestamp: new Date().getTime()
                 });
                 app.sdb.update('count',{iid:result.iid+1}, {id:0});
+                logger.info("Created an issuer");
                 break;
             case "authorizer":
             var result = await app.model.Count.findOne({
@@ -395,6 +409,7 @@ module.exports = {
                     timestamp: new Date().getTime()
                 });
                 app.sdb.update('count',{aid:result.aid+1}, {id:0});
+                logger.info("Created an authorizer");
                 break;
             default: return "Invalid role";
         }

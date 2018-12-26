@@ -12,6 +12,8 @@ var auth = require("../interface/authController");
 var mailCall = require("../utils/mailCall");
 var SwaggerCall = require("../utils/SwaggerCall");
 var DappCall = require("../utils/DappCall");
+var logger = require("../utils/logger");
+
 
 
 app.route.post('/generateEmployees', async function(req, cb){

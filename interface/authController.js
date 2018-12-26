@@ -1,5 +1,7 @@
 var config = require("../config.json");
 var jwt = require('jsonwebtoken');
+var logger = require("../utils/logger");
+
 
 module.exports.getJwt = function(email){
     // create a token

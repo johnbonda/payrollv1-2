@@ -7,6 +7,8 @@ var BKVSCall = require('../utils/BKVSCall.js');
 var SwaggerCall = require('../utils/SwaggerCall.js');
 var request = require('request');
 var auth = require('./authController');
+var logger = require("../utils/logger");
+
 
 // inputs: limit, offset
 app.route.post('/issuers', async function(req, cb){
