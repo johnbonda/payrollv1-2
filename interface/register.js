@@ -271,7 +271,10 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
              iid: req.query.issuerid  
          }
      });
-     if(!checkissuer) return "Invalid Issuer";
+     if(!checkissuer) return {
+         message: "Invalid Issuer",
+         isSuccess: false
+     }
 
      if(checkissuer.publickey === '-'){
          app.sdb.update('issuer', {publickey: publickey}, {iid:issuerid});
@@ -282,7 +285,10 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
             email: payslip.email
          }
     })
-    if(!employee) return "Invalid Employee";
+    if(!employee) return {
+        message: "Invalid Employee",
+        isSuccess: false
+    }
     
     // Check Payslip already issued
     var options = {
@@ -295,13 +301,19 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     }
     var result = await app.model.Payslip.findOne(options);
     if(result){
-        return 'Payslip already issued';
+        return {
+            message: 'Payslip already issued',
+            isSuccess: false
+        }
     }
 
     var check = await app.model.Payslip.exists({
         pid: payslip.pid
     });
-    if(check) return "Duplicate pid";
+    if(check) return {
+        message: "Duplicate pid",
+        isSuccess: false
+    }
     console.log("Generated Payslip: " + JSON.stringify(payslip));
     app.sdb.create("payslip", payslip);
     var hash = util.getHash(JSON.stringify(payslip));
@@ -326,7 +338,10 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
         var checkAuth = await app.model.Authorizer.exists({
             aid: req.query.aid
         })
-        if(!checkAuth) return "Invalid Authorizer";
+        if(!checkAuth) return {
+            message: "Invalid Authorizer",
+            isSuccess: false
+        }
 
         var pids = await app.model.Issue.findAll({condition:{status:"pending"}})
         var remaining = [];
@@ -345,7 +360,10 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
                 remaining.push(pids[p]);
             }
         }
-        return remaining;
+        return {
+            result: remaining,
+            isSuccess: true
+        }
 });
 
 app.route.post('/payslip/getPayslip', async function(req, cb){

@@ -343,12 +343,18 @@ module.exports = {
 
             default: 
                     logger.error("Invalid role");
-                    return "Invalid role";
+                    return {
+                        message: "Invalid role",
+                        isSuccess: false
+                    }
         }
 
         if(result){
             logger.error("User already registered");
-            return "User already registered";
+            return {
+                message: "User already registered",
+                isSuccess: false
+            }
         }
 
         var request = {
@@ -370,7 +376,10 @@ module.exports = {
                 }
             }
             var resultt = await registrations.signup(req, 0);
-            if(resultt !== "success") return JSON.stringify(resultt);
+            if(resultt !== "success") return {
+                message: JSON.stringify(resultt),
+                isSuccess: false
+            }
             logger.info("Registered a new user");
         }
         
@@ -411,7 +420,10 @@ module.exports = {
                 app.sdb.update('count',{aid:result.aid+1}, {id:0});
                 logger.info("Created an authorizer");
                 break;
-            default: return "Invalid role";
+            default: return {
+                message: "Invalid role",
+                isSuccess: false
+            }
         }
 
 
