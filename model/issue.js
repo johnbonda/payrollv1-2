@@ -40,6 +40,11 @@ module.exports = {
             name:'count',
             type: 'Number',
             length: 255
+        },
+        {
+            name: 'empid',
+            type: 'String',
+            length: 255
         }
     ]
 }

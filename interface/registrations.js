@@ -177,3 +177,31 @@ app.route.post('/userlogin', async function (req, cb) {
     }
     return result;
 });
+
+app.route.post('/payslips/employee/issued', async function(req, cb){
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            walletAddress: req.query.walletAddress
+        }, 
+        fields: ['empID']
+    });
+    if(!employee) return {
+        message: "Address not associated with any employee",
+        isSuccess: false
+    }
+
+    var result = await app.model.Issue.findAll({
+        condition: {
+            empid: employee.empID,
+            status: 'issued'
+        },
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+
+    return {
+        issuedPayslips: result,
+        isSuccess: true
+    }
+
+})

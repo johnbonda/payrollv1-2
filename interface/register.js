@@ -276,10 +276,12 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
          app.sdb.update('issuer', {publickey: publickey}, {iid:issuerid});
      }
      // Check Employee
-     var check = await app.model.Employee.exists({
-        email: payslip.email
+     var employee = await app.model.Employee.findOne({
+         condition: {
+            email: payslip.email
+         }
     })
-    if(!check) return "Invalid Employee";
+    if(!employee) return "Invalid Employee";
     
     // Check Payslip already issued
     var options = {
@@ -313,7 +315,8 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         publickey:publickey,
         timestampp:timestamp.toString(),
         status:"pending",
-        count : 0
+        count : 0,
+        empid: employee.empID
     });
     app.sdb.update('count',{pid:count.pid+1}, {id:0});
 });
