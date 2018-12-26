@@ -784,3 +784,32 @@ app.route.post('/payslips/sentForAuthorization', async function(req, cb){
     };
 })
 
+app.route.post('/authorizer/authorizedAssets', async function(req, cb){
+    var aid = req.query.aid;
+    var result = [];
+    var css = await app.model.Cs.findAll({
+        condition: {
+            aid: aid
+        }, 
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+    for(i in css){
+        var issue = await app.model.Issue.findOne({
+            condition: {
+                pid: css[i].pid
+            }
+        })
+
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: css[i].pid
+            }
+        });
+
+        issue.email = payslip.email;
+        result.push(issue);
+    }
+    return result;
+})
+
