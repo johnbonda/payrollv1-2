@@ -201,6 +201,16 @@ app.route.post('/payslips/employee/issued', async function(req, cb){
         offset: req.query.offset
     });
 
+    for(i in result){
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: result[i].pid
+            }
+        });
+        result[i].month = payslip.month;
+        result[i].year = payslip.year;
+    }
+
     return {
         issuedPayslips: result,
         isSuccess: true

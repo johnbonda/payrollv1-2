@@ -481,7 +481,7 @@ app.route.post('/authorizer/reject',async function(req,cb){
     var message = req.query.message;
     //mail code is written here 
     app.sdb.del('Issue',{pid:pid});
-    app.adb.del('Payslip',{pid:pid});
+    app.sdb.del('Payslip',{pid:pid});
 
     var mailBody = {
         mailType: "sendRejected",
