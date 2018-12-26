@@ -86,7 +86,8 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 publickey: "-",
                 timestampp: new Date().getTime().toString(),
                 status: "issued",
-                count: 10,   
+                count: 10,
+                empid: employees[i].empID 
             });
 
             var args = "[\"" + employees[i].walletAddress + "\"," + "\"payslip\"";
