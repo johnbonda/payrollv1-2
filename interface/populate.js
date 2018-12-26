@@ -90,7 +90,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 status: "issued",
                 count: 10,
                 empid: employees[i].empID,
-                transactionId: this.trs.id
+                transactionId: '-'
             });
 
             var args = "[\"" + employees[i].walletAddress + "\"," + "\"payslip\"";
