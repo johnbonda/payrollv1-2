@@ -14,7 +14,8 @@ var logger = require("../utils/logger");
 
 
 app.route.post("/issueTransactionCall", async function(req, res){
-    app.sdb.lock("issueTransactionCall")
+    app.sdb.lock("issueTransactionCall");
+    logger.info("Entered /issueTransactionCall API");
     var transactionParams = {};
     var pid = req.query.pid;
     var payslip = await app.model.Payslip.findOne({
@@ -23,7 +24,10 @@ app.route.post("/issueTransactionCall", async function(req, res){
         }
     });
 
-    if(!payslip) return "Invalid Payslip";
+    if(!payslip) return {
+        message: "Invalid Payslip",
+        isSuccess: false
+    }
     var authorizers = await app.model.Authorizer.findAll({
         fields: ['aid']
     });
@@ -33,14 +37,20 @@ app.route.post("/issueTransactionCall", async function(req, res){
             pid: pid
         }
     });
-    if(issue.iid !== req.query.iid) return "Invalid issuer";
+    if(issue.iid !== req.query.iid) return {
+        message: "Invalid issuer",
+        isSuccess: false
+    }
     
     var employee = await app.model.Employee.findOne({
         condition: {
             empID: payslip.empid
         }
     });
-    if(!employee) return "Invalid employee";
+    if(!employee) return {
+        message: "Invalid employee",
+        isSuccess: false
+    }
     
     // if(issue.status !== "authorized") return "Payslip not authorized yet";
 

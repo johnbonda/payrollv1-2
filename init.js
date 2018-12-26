@@ -9,6 +9,7 @@ module.exports = async function () {
   app.registerContract(1007, 'payroll.registerEmployee')
   app.registerContract(1008, 'payroll.authorize')
   app.registerContract(1009, 'payroll.registerUser')
+  app.registerContract(1010, 'temp.saveTransactionId')
   //app.registerContract(1005, 'payroll.pay')
   //app.registerFee(1005, '0', 'BEL')
   app.registerFee(1003, '0', 'BEL')
@@ -17,6 +18,7 @@ module.exports = async function () {
   app.registerFee(1007, '0', 'BEL')
   app.registerFee(1008, '0', 'BEL')
   app.registerFee(1009, '0', 'BEL')
+  app.registerFee(1010, '0', 'BEL')
 app.sdb.create("count",{
   id:0,
   pid:0,

@@ -14,5 +14,11 @@ module.exports = {
                 walletAddress: "dummyAddress" + i
             })
         }
+    },
+
+    saveTransactionId: async function(){
+        app.sdb.create('testing', {
+            transactionid: this.trs.id
+        });
     }
 }

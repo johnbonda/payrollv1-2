@@ -6,6 +6,7 @@ var logger = require("../utils/logger");
 
 app.route.post('/totalCertsIssued', async function(req, cb)
 { 
+    logger.info("Entered /totalCertsIssued API");
     var totalCerts = await app.model.Issue.count({status:"issued"});
     return {
         totalCertificates: totalCerts,
@@ -15,6 +16,7 @@ app.route.post('/totalCertsIssued', async function(req, cb)
 
 app.route.post('/totalEmployee', async function(req, cb)
 { 
+    logger.info("Entered /totalEmployee API");
    var totalemp= await app.model.Employee.count({});
     return {
          totalEmployee: totalemp,
@@ -25,6 +27,7 @@ app.route.post('/totalEmployee', async function(req, cb)
 //- get all employees name, id, designation with dappid
 //Inputs: limit, offset
 app.route.post('/employee/details',async function(req,cb){
+    logger.info("Entered /employee/details");
 var res=await app.model.Employee.findAll({
     fields:['empID','name','designation'],
     limit: req.query.limit,
@@ -38,6 +41,7 @@ return res;
 app.route.post('/recentIssued', async function(req, cb)
 { 
     //var num = await app.model.Issue.count({status:"issued"});
+    logger.info("Entered /recentIssued API");
     var res= await app.model.Issue.findAll({
         condition:{
             status:"issued"
@@ -64,6 +68,7 @@ app.route.post('/recentIssued', async function(req, cb)
 // Inputs: limit, offset
 app.route.post('/getEmployees', async function(req, cb)
 { 
+    logger.info("Entered /getEmployees API");
     var total = await app.model.Employee.count({});
     var employees = await app.model.Employee.findAll({
         limit: req.query.limit,
@@ -77,10 +82,12 @@ app.route.post('/getEmployees', async function(req, cb)
 
 app.route.post('/getEmployeeById', async function(req, cb)
 { 
+    logger.info("Entered /getEmployeeById API");
     return await app.model.Employee.findOne( {condition : { empID : req.query.id }} );
 })
 
 app.route.post('/sortTesting', async function(req, cb){
+    logger.error("Entered /sortTesting API - Someone is calling this API");
     var result = await app.model.Authorizer.findAll({
         condition: {
             publickey: "-"
@@ -95,6 +102,7 @@ app.route.post('/sortTesting', async function(req, cb){
 })
 
 app.route.post('/getPendingAuthorizationCount', async function(req, cb){
+    logger.info("Entered /getPendingAuthorizationCount API");
     var authCount = await app.model.Authorizer.count({});
     var result = await app.model.Issue.count({
         status: "pending",
