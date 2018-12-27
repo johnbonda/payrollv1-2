@@ -23,6 +23,7 @@ app.route.post('/employees', async function(req, cb){
 
     // if(!req.query.dappToken) return "Need Dapp Token, please Login";
     // if(! (await auth.checkSession(req.query.dappToken))) return "Unauthorized Token";
+    logger.info("Entered /employees API");
 
     var total = await app.model.Employee.count({});
     var options = {
@@ -44,6 +45,7 @@ app.route.post('/employees', async function(req, cb){
 // inputs: empid
 // outputs: email, empid, name, designation, actualsalary
 app.route.post('/employeeData', async function(req,cb){
+    logger.info("Entered /employeeData API");
 
     // if(!req.query.dappToken) return "Need Dapp Token, please Login";
     // if(! (await auth.checkSession(req.query.dappToken))) return "Unauthorized Token";
@@ -60,6 +62,7 @@ app.route.post('/employeeData', async function(req,cb){
 })
 
 async function verifyPayslip(req, cb){
+    logger.info("Entered verifyPaysli p API");
     var hash = util.getHash(req.query.data);
     var base64hash = hash.toString('base64');
 
@@ -160,6 +163,7 @@ async function verifyPayslip(req, cb){
 app.route.post("/payslips/verify", verifyPayslip);
 
 module.exports.getToken = async function(req, cb){
+    logger.info("Entered /getToken API");
     var options = {
         email: config.token.email,
         password: config.token.password,
@@ -180,6 +184,8 @@ app.route.post('/getToken', module.exports.getToken)
 
 //start
 app.route.post('/payslip/pendingIssues', async function(req, cb){  // High intensive call, need to find an alternative
+
+    logger.info("Entered /payslip/pendingIssues API");
     var result = await app.model.Employee.findAll({});
     var array = []; 
     for(obj in result){
@@ -207,6 +213,7 @@ app.route.post('/payslip/pendingIssues', async function(req, cb){  // High inten
 //inputs:month and year
 //outpu: pays array which contains the confirmed payslips.
 app.route.post('/payslip/confirmedIssues',async function(req,cb){
+    logger.info("Enterd /payslip/confirmedIssues API");
     var pays=[]
     var auths = await app.model.Authorizer.findAll({fields:['aid']});
     var count_of_auths = auths.length;
@@ -236,6 +243,7 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 
 app.route.post('/payslip/initialIssue',async function(req,cb){
     app.sdb.lock("Initiate");
+    logger.info("Entered /payslip/initialIssue API");
     var count = await app.model.Count.findOne({
        condition:{id:0}, fields:['pid']
     });
@@ -336,6 +344,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
 });
 
 app.route.post('/authorizers/pendingSigns',async function(req,cb){
+    logger.info("Entered /authorizers/pendingSigns API");
         var checkAuth = await app.model.Authorizer.exists({
             aid: req.query.aid
         })
@@ -368,6 +377,7 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
 });
 
 app.route.post('/payslip/getPayslip', async function(req, cb){
+    logger.info("Entered /payslip/getPayslip API");
     var payslip = await app.model.Payslip.findOne({
         condition: {
             pid: req.query.pid
@@ -377,6 +387,7 @@ app.route.post('/payslip/getPayslip', async function(req, cb){
 })
 
 app.route.post('/authorizer/authorize',async function(req,cb){
+    logger.info("Entered /authorizer/authorize API");
     var secret = req.query.secret;
     var authid = req.query.aid;
     var pid=req.query.pid;
@@ -463,6 +474,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
 })
 
 app.route.post('/authorizer/reject',async function(req,cb){
+    logger.info("Entered /authorizer/reject API");
     var payslip = await app.model.Payslip.findOne({
         condition: {
             pid: req.query.pid
@@ -503,6 +515,7 @@ app.route.post('/authorizer/reject',async function(req,cb){
 });
 
 app.route.post('/searchEmployee', async function(req, cb){
+    logger.info("Entered /searchEmployee API");
     var result = await app.model.Employee.findAll({
         condition: {
             name: {
@@ -515,6 +528,7 @@ app.route.post('/searchEmployee', async function(req, cb){
 })
 
 app.route.post("/sharePayslips", async function(req, cb){
+    logger.info("Entered /sharePayslips API");
     var employee = await app.model.Employee.findOne({
         condition: {
             empID: req.query.empID
@@ -535,7 +549,7 @@ app.route.post("/sharePayslips", async function(req, cb){
 
 app.route.post("/registerEmployee", async function(req, cb){
     app.sdb.lock("registerEmployee");
-    
+    logger.info("Entered /registerEmployee API");
     var count = await app.model.Count.findOne({
         condition:{id:0}, fields:['empid']
      });
@@ -574,6 +588,8 @@ app.route.post("/registerEmployee", async function(req, cb){
 
         if(response.isSuccess == false) {
             token = await register.getToken(0,0);
+
+            logger.info("Registering the employee on BKVS");
 
             console.log(token);
 
@@ -666,6 +682,7 @@ app.route.post("/registerEmployee", async function(req, cb){
         }
             
         else{
+            logger.info("Sent email to the employee to share wallet address");
             var jwtToken = auth.getJwt(email);  
             var crea = {
                 email: email,
@@ -701,6 +718,7 @@ app.route.post("/registerEmployee", async function(req, cb){
 })
 
 app.route.post("/payslips/verifyMultiple", async function(req, cb){
+    logger.info("Entered /payslips/verifyMultiple API");
     var pids = req.query.pids;
     var result = {};
 
@@ -724,6 +742,7 @@ app.route.post("/payslips/verifyMultiple", async function(req, cb){
 
 // inputs: limit, offset
 app.route.post("/payslip/month/status", async function(req, cb){
+    logger.info("Entered /payslip/month/status API");
     var month = req.query.month;
     var year = req.query.year;
     var resultArray = {};
@@ -801,6 +820,7 @@ app.route.post("/payslip/month/status", async function(req, cb){
 });
 
 app.route.post('/payslips/sentForAuthorization', async function(req, cb){
+    logger.info("Entered /payslips/sentForAuthorization API");
     var count = await app.model.Issue.count({
         status: 'pending'
     });
@@ -811,6 +831,7 @@ app.route.post('/payslips/sentForAuthorization', async function(req, cb){
 })
 
 app.route.post('/authorizer/authorizedAssets', async function(req, cb){
+    logger.info("Entered /authorizer/authorizedAssets API");
     var aid = req.query.aid;
     var result = [];
     var css = await app.model.Cs.findAll({
@@ -841,4 +862,6 @@ app.route.post('/authorizer/authorizedAssets', async function(req, cb){
         isSuccess: true
     }
 })
+
+
 

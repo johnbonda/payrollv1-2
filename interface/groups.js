@@ -12,6 +12,7 @@ var logger = require("../utils/logger");
 
 // inputs: limit, offset
 app.route.post('/issuers', async function(req, cb){
+    logger.info("Entered /issuers API");
     var total = await app.model.Issuer.count({});
     var result = await app.model.Issuer.findAll({
         limit: req.query.limit,
@@ -24,6 +25,7 @@ app.route.post('/issuers', async function(req, cb){
 });
 
 app.route.post('/issuers/data', async function(req, cb){
+    logger.info("Entered /issuers/data API");
     var result = await app.model.Issuer.findOne({
         condition: {
             email: req.query.email
@@ -35,6 +37,7 @@ app.route.post('/issuers/data', async function(req, cb){
 
 // inputs: limit, offset
 app.route.post('/authorizers', async function(req, cb){
+    logger.info("Entered /authorizers API");
     var total = await app.model.Authorizer.count({});
     var result = await app.model.Authorizer.findAll({
         limit: req.query.limit,
@@ -47,6 +50,7 @@ app.route.post('/authorizers', async function(req, cb){
 });
 
 app.route.post('/authorizers/data', async function(req, cb){
+    logger.info("Entered /authoirzers/data");
     var result = await app.model.Authorizer.findOne({
         condition: {
             email: req.query.email
@@ -153,6 +157,7 @@ app.route.post('/authorizers/data', async function(req, cb){
 // });
 
 app.route.post('/authorizers/remove', async function(req, cb){
+    logger.info("Entered /authorizers/remove API");
     var check = await app.model.Authorizer.exists({
        aid:req.query.aid
     })
@@ -164,6 +169,7 @@ app.route.post('/authorizers/remove', async function(req, cb){
 });
 
 app.route.post('/issuers/remove', async function(req, cb){
+    logger.info("Entered /issuers/remove API");
     var check = await app.model.Issuer.exists({
        iid:req.query.iid
     })

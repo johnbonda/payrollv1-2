@@ -24,6 +24,8 @@ var logger = require("../utils/logger");
 
 module.exports.exists = async function(req, cb){
 
+    logger.info("Checking user exists on BKVS or not");
+
     var param = {
         email: req.query.email
     }
@@ -40,6 +42,7 @@ app.route.post('/user/exist', module.exports.exists);
 
 //BKVS login
 app.route.post('/userlogin', async function (req, cb) {
+    logger.info("Entered BKVS login");
     var ac_params = {
         email: req.query.email,
         password: req.query.password
@@ -83,6 +86,7 @@ app.route.post('/userlogin', async function (req, cb) {
  });
  
  module.exports.signup = async function (req, cb) {
+     logger.info("Entered BKVS signup");
     var params={
         countryId:req.query.countryId,
         countryCode:req.query.countryCode,
@@ -122,6 +126,7 @@ app.route.post('/userlogin', async function (req, cb) {
  app.route.post('/usersignup', module.exports.signup);
 
  app.route.post('/registerEmployeeToken', async function(req, cb){
+     logger.log("Entered /registerEmployeeToken API");
      var options = {
          condition: {
              token: req.query.token
@@ -149,6 +154,7 @@ app.route.post('/userlogin', async function (req, cb) {
  });
 
  app.route.post('/getPayslips', async function(req, cb){
+     logger.info("Entered /getPayslips API");
     var address = req.query.address;
     var options = {};
     var response = await DappCall.call('GET', '', options, req.query.dappid);
@@ -181,6 +187,7 @@ app.route.post('/userlogin', async function (req, cb) {
 });
 
 app.route.post('/payslips/employee/issued', async function(req, cb){
+    logger.info("Entered /payslips/employee/issued API");
     var employee = await app.model.Employee.findOne({
         condition: {
             walletAddress: req.query.walletAddress
@@ -197,6 +204,9 @@ app.route.post('/payslips/employee/issued', async function(req, cb){
             empid: employee.empID,
             status: 'issued'
         },
+        sort: {
+            timestampp: -1
+        },
         limit: req.query.limit,
         offset: req.query.offset
     });
@@ -207,6 +217,12 @@ app.route.post('/payslips/employee/issued', async function(req, cb){
                 pid: result[i].pid
             }
         });
+        var issuer = await app.model.Issuer.findOne({
+            condition: {
+                iid: result[i].iid
+            }
+        });
+        result[i].issuedBy = issuer.iid;
         result[i].month = payslip.month;
         result[i].year = payslip.year;
     }
