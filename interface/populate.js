@@ -89,7 +89,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 hash: prefix + "PPHash" + i*j,
                 sign: prefix + "PPSign" + i*j,
                 publickey: prefix + "-",
-                timestampp: prefix + new Date().getTime().toString(),
+                timestampp: new Date().getTime().toString(),
                 status: "issued",
                 count: 10,
                 empid: employees[i].empID,
