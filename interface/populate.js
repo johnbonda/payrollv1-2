@@ -28,7 +28,7 @@ app.route.post('/generateEmployees', async function(req, cb){
     for(var i = count.empid+1; i <= count.empid+req.query.count; i++){
         var creat = {
             email: prefix + "PEEmail" + i + "@yopmail.com",
-            empID: prefix + i,
+            empID: prefix + "Employee" + i,
             name: prefix + "PEName" + i,
             designation: prefix + "PEmplDesignation" + i,
             bank: prefix + "PEBank" + i,
