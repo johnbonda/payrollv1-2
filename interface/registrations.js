@@ -222,7 +222,7 @@ app.route.post('/payslips/employee/issued', async function(req, cb){
                 iid: result[i].iid
             }
         });
-        result[i].issuedBy = issuer.iid;
+        result[i].issuedBy = issuer.email;
         result[i].month = payslip.month;
         result[i].year = payslip.year;
     }
