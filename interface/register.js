@@ -539,9 +539,9 @@ app.route.post('/searchEmployee', async function(req, cb){
             fields: ['empID', 'name', 'designation']
         });
     }catch(err){
-        logger.error(JSON.stringify(err));
+        logger.error("searchBy parameter not an Employee table column");
         return {
-            message: JSON.stringify(err),
+            message: "searchBy parameter not an Employee table column",
             isSuccess: false
         }
     }
@@ -773,6 +773,8 @@ app.route.post("/payslip/month/status", async function(req, cb){
     var total = await app.model.Employee.count({});
     var employees = await app.model.Employee.findAll({
         fields: ['empID', 'name', 'designation'],
+        limit: req.query.limit,
+        offset: req.query.offset
     });
     for(i in employees){
         var initiated = await app.model.Payslip.findOne({
