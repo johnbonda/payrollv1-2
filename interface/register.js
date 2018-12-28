@@ -825,7 +825,8 @@ app.route.post("/payslip/month/status", async function(req, cb){
                 resultArray[employees[i].empID] = {
                     name: employees[i].name,
                     designation: employees[i].designation,
-                    status: "Authorized"
+                    status: "Authorized",
+                    iid: issue.iid
                 }
                 continue;
             }
