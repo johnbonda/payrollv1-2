@@ -773,8 +773,6 @@ app.route.post("/payslip/month/status", async function(req, cb){
     var total = await app.model.Employee.count({});
     var employees = await app.model.Employee.findAll({
         fields: ['empID', 'name', 'designation'],
-        limit: limit,
-        offset: offset
     });
     for(i in employees){
         var initiated = await app.model.Payslip.findOne({
