@@ -533,10 +533,18 @@ app.route.post('/searchEmployee', async function(req, cb){
     condition[req.query.searchBy] = {
         $like: "%" + req.query.text + "%"
     };
-    var result = await app.model.Employee.findAll({
-        condition: condition,
-        fields: ['empID', 'name', 'designation']
-    });
+    try{
+        var result = await app.model.Employee.findAll({
+            condition: condition,
+            fields: ['empID', 'name', 'designation']
+        });
+    }catch(err){
+        logger.error(JSON.stringify(err));
+        return {
+            message: JSON.stringify(err),
+            isSuccess: false
+        }
+    }
     return {
         result: result,
         isSuccess: true
