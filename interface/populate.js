@@ -23,17 +23,19 @@ app.route.post('/generateEmployees', async function(req, cb){
         }
     });
 
+    var prefix = req.query.prefix;
+
     for(var i = count.empid+1; i <= count.empid+req.query.count; i++){
         var creat = {
-            email: "PEEmail" + i + "@yopmail.com",
-            empID: i,
-            name: "PEName" + i,
-            designation: "PEmplDesignation" + i,
-            bank: "PEBank" + i,
-            accountNumber: "PEAccountNumber" + i,
-            pan: "PEPan" + i,
-            salary: "PESalary" + i,
-            walletAddress: "PEAddress" + i
+            email: prefix + "PEEmail" + i + "@yopmail.com",
+            empID: prefix + "Employee" + i,
+            name: prefix + "PEName" + i,
+            designation: prefix + "PEmplDesignation" + i,
+            bank: prefix + "PEBank" + i,
+            accountNumber: prefix + "PEAccountNumber" + i,
+            pan: prefix + "PEPan" + i,
+            salary: prefix + "PESalary" + i,
+            walletAddress: prefix + "PEAddress" + i
         }
 
         console.log("About to make a row");
@@ -42,7 +44,7 @@ app.route.post('/generateEmployees', async function(req, cb){
         app.sdb.create('employee', creat);
 
         var mapEntryObj = {
-            address: "PEAddress" + i,
+            address: prefix + "PEAddress" + i,
             dappid: req.query.dappid
         }
         var mapcall = await SuperDappCall.call('POST', '/mapAddress', mapEntryObj);
@@ -52,40 +54,41 @@ app.route.post('/generateEmployees', async function(req, cb){
 
 app.route.post('/generateAndIssuePayslips', async function(req, cb){
     var employees = await app.model.Employee.findAll({});
+    var prefix = req.query.prefix
     for ( i in employees){
         console.log("employee mail is: " + employees[i].email);
         for(var j = 1; j <= 12; j++){
             var payslip = {
-                pid: "PPId" + (i+1)*j,
-                email: employees[i].email,
-                empid: employees[i].empID,
-                name: employees[i].name,
-                employer: "PPEmployer",
-                month: "PPMonth" + j,
-                year: "PPYear",
-                designation: employees[i].designation,
-                bank: employees[i].bank,
-                accountNumber: employees[i].accountNumber,
-                pan: employees[i].pan,
-                basicPay: "PPBasicPay" + i,
-                hra: "PPHra" + i,
-                lta: "PPLta" + i,
-                ma: "PPMa" + i,
-                providentFund: "PPProvidentFund" + i,
-                professionalTax: "PPProfessionalTax" + i,
-                grossSalary: "PPGrossSalary" + i,
-                totalDeductions: "PPTotalDeductions" + i,
-                netSalary: "PPNetSalary" + i,
-                timestamp: new Date().getTime().toString()
+                pid: prefix + "PPId" + (i+1)*j,
+                email: prefix + employees[i].email,
+                empid: prefix + employees[i].empID,
+                name: prefix + employees[i].name,
+                employer: prefix + "PPEmployer",
+                month: prefix + "PPMonth" + j,
+                year: prefix + "PPYear",
+                designation: prefix + employees[i].designation,
+                bank: prefix + employees[i].bank,
+                accountNumber: prefix + employees[i].accountNumber,
+                pan: prefix + employees[i].pan,
+                basicPay: prefix + "PPBasicPay" + i,
+                hra: prefix + "PPHra" + i,
+                lta: prefix + "PPLta" + i,
+                ma: prefix + "PPMa" + i,
+                providentFund: prefix + "PPProvidentFund" + i,
+                professionalTax: prefix + "PPProfessionalTax" + i,
+                grossSalary: prefix + "PPGrossSalary" + i,
+                totalDeductions: prefix + "PPTotalDeductions" + i,
+                netSalary: prefix + "PPNetSalary" + i,
+                timestamp: prefix + new Date().getTime().toString()
             };
             app.sdb.create('payslip', payslip);
 
             app.sdb.create('issue', {
                 pid: payslip.pid,
                 iid: 1,
-                hash: "PPHash" + i,
-                sign: "PPSign" + i,
-                publickey: "-",
+                hash: prefix + "PPHash" + i*j,
+                sign: prefix + "PPSign" + i*j,
+                publickey: prefix + "-",
                 timestampp: new Date().getTime().toString(),
                 status: "issued",
                 count: 10,
