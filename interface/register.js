@@ -514,17 +514,33 @@ app.route.post('/authorizer/reject',async function(req,cb){
     mailCall.call("POST", "", mailBody, 0);
 });
 
+// app.route.post('/searchEmployee', async function(req, cb){
+//     logger.info("Entered /searchEmployee API");
+//     var result = await app.model.Employee.findAll({
+//         condition: {
+//             name: {
+//                 $like: "%" + req.query.text + "%"
+//             }
+//         },
+//         fields: ['empID', 'name', 'designation']
+//     });
+//     return result;
+// })
+
 app.route.post('/searchEmployee', async function(req, cb){
     logger.info("Entered /searchEmployee API");
+    var condition = {};
+    condition[req.query.searchBy] = {
+        $like: "%" + req.query.text + "%"
+    };
     var result = await app.model.Employee.findAll({
-        condition: {
-            name: {
-                $like: "%" + req.query.text + "%"
-            }
-        },
+        condition: condition,
         fields: ['empID', 'name', 'designation']
     });
-    return result;
+    return {
+        result: result,
+        isSuccess: true
+    }
 })
 
 app.route.post("/sharePayslips", async function(req, cb){
