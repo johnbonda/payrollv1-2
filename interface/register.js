@@ -537,7 +537,9 @@ app.route.post('/searchEmployee', async function(req, cb){
     try{
         var result = await app.model.Employee.findAll({
             condition: condition,
-            fields: ['empID', 'name', 'designation']
+            fields: ['empID', 'name', 'designation'],
+            limit: req.query.limit,
+            offset: req.query.offset
         });
     }catch(err){
         logger.error("searchBy parameter not an Employee table column");
