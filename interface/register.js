@@ -341,6 +341,10 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         transactionId: '-'
     });
     app.sdb.update('count',{pid:count.pid+1}, {id:0});
+    return {
+        message: "Payslip initiated",
+        isSuccess: true
+    }
 });
 
 app.route.post('/authorizers/pendingSigns',async function(req,cb){

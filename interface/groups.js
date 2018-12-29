@@ -66,7 +66,16 @@ app.route.post('/authorizers/getId', async function(req, cb){
             email: req.query.email
         }
     });
-    return result;
+    if(result){
+        return {
+            isSuccess: true,
+            result: result
+        }
+    }
+    return {
+        isSuccess: false,
+        message: "Authorizer not found"
+    }
 })
 
 app.route.post('/issuers/getId', async function(req, cb){
@@ -75,7 +84,16 @@ app.route.post('/issuers/getId', async function(req, cb){
             email: req.query.email
         }
     });
-    return result;
+    if(result){
+        return {
+            isSuccess: true,
+            result: result
+        }
+    }
+    return {
+        isSuccess: false,
+        message: "Issuer not found"
+    }
 })
 
 app.route.post('/authorizers/remove', async function(req, cb){
