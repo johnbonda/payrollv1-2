@@ -580,7 +580,7 @@ app.route.post("/registerEmployee", async function(req, cb){
     var email = req.query.email;
     var lastName = req.query.lastName;
     var name = req.query.name;
-    var uuid = app.autoID.increment('employee_max_empID');
+    var uuid = "Unallocated";
     var designation = req.query.designation;
     var bank = req.query.bank;
     var accountNumber = req.query.accountNumber;
@@ -663,7 +663,7 @@ app.route.post("/registerEmployee", async function(req, cb){
 
             var creat = {
                 email: email,
-                empID: uuid,
+                empID: app.autoID.increment('employee_max_empID'),
                 name: name + lastName,
                 designation: designation,
                 bank: bank,

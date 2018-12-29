@@ -146,10 +146,11 @@ app.route.post('/userlogin', async function (req, cb) {
      delete result.token;
 
      result.walletAddress = req.query.walletAddress;
+     result.empID = app.autoID.increment('employee_max_empID');
 
      app.sdb.create("employee", result);
 
-     app.sdb.del('pendingemp', {empID: result.empID});
+     app.sdb.del('pendingemp', {email: result.email});
      return "success";
  });
 
