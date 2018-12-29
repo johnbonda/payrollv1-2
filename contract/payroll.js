@@ -338,18 +338,12 @@ module.exports = {
 
             default: 
                     logger.error("Invalid role");
-                    return {
-                        message: "Invalid role",
-                        isSuccess: false
-                    }
+                    return "Invalid role";
         }
 
         if(result){
             logger.error("User already registered");
-            return {
-                message: "User already registered",
-                isSuccess: false
-            }
+            return "User already registered"
         }
 
         var request = {
@@ -407,10 +401,7 @@ module.exports = {
                 });
                 logger.info("Created an authorizer");
                 break;
-            default: return {
-                message: "Invalid role",
-                isSuccess: false
-            }
+            default: return "Invalid role"
         }
     }
 }
