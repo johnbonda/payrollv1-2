@@ -34,7 +34,7 @@ app.route.post('/generateEmployees', async function(req, cb){
             bank: prefix + "PEBank" + i,
             accountNumber: prefix + "PEAccountNumber" + i,
             pan: prefix + "PEPan" + i,
-            salary: prefix + "PESalary" + i,
+            salary: Math.floor(Math.random() * 50000 + 10000),
             walletAddress: prefix + "PEAddress" + i
         }
 
@@ -70,15 +70,15 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 bank: prefix + employees[i].bank,
                 accountNumber: prefix + employees[i].accountNumber,
                 pan: prefix + employees[i].pan,
-                basicPay: prefix + "PPBasicPay" + i,
-                hra: prefix + "PPHra" + i,
-                lta: prefix + "PPLta" + i,
-                ma: prefix + "PPMa" + i,
-                providentFund: prefix + "PPProvidentFund" + i,
-                professionalTax: prefix + "PPProfessionalTax" + i,
-                grossSalary: prefix + "PPGrossSalary" + i,
-                totalDeductions: prefix + "PPTotalDeductions" + i,
-                netSalary: prefix + "PPNetSalary" + i,
+                basicPay: Math.floor(Math.random() * 50000 + 10000),
+                hra: Math.floor(Math.random() * 2000 + 1000),
+                lta: Math.floor(Math.random() * 2000 + 1000),
+                ma: Math.floor(Math.random() * 2000 + 1000),
+                providentFund: Math.floor(Math.random() * 2000 + 1000),
+                professionalTax: Math.floor(Math.random() * 2000 + 1000),
+                grossSalary: Math.floor(Math.random() * 50000 + 10000),
+                totalDeductions: Math.floor(Math.random() * 10000 + 1000),
+                netSalary: Math.floor(Math.random() * 50000 + 10000),
                 timestamp: prefix + new Date().getTime().toString()
             };
             app.sdb.create('payslip', payslip);
