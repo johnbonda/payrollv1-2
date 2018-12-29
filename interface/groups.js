@@ -60,101 +60,23 @@ app.route.post('/authorizers/data', async function(req, cb){
     return result;
 });
 
-// app.route.post('/authorizers/pendingSigns', async function(req, cb){
-//     var check = await app.model.Authorizer.findOne({
-//         condition:{
-//             email: req.query.email
-//         }
-//     });
-//     if(!check) return "Invalid authorizer email";
-//     var signed = await app.model.Cs.findAll({
-//         condition: {
-//             aid: check.id
-//         },
-//         fields: ['upid']
-//     });
+app.route.post('/authorizers/getId', async function(req, cb){
+    var result = await app.model.Authorizer.findOne({
+        condition:{
+            email: req.query.email
+        }
+    });
+    return result;
+})
 
-//     var signedIdArray = ['-1'];
-//     for(i in signed){
-//         signedIdArray.push(signed[i].upid);
-//     }
-
-//     console.log("Signed: " + signed);
-//     console.log("signedIdArray: " + signedIdArray);
-
-//     var pendingSigns = await app.model.Ui.findAll({
-//         condition: {
-//             id: {
-//                 $nin: signedIdArray
-//             }
-//         }
-//     });
-
-//     var pendingArray = ["-1"];
-//     for (i in pendingSigns){
-//         pendingArray.push(pendingSigns[i].id);
-//     }
-
-//     var details = await app.model.Ucps.findAll({
-//         condition: {
-//             id: {
-//                 $in: pendingArray
-//             }
-//         }
-//     });
-
-//     var dictionary = {};
-//     for(x in details){
-//         dictionary[details[x].id] = {
-//             email: details[x].email,
-//             issuedOn: details[x].timestamp
-//         }
-//     }
-
-//     for(i in pendingSigns){
-//         pendingSigns[i].email = dictionary[pendingSigns[i].id].email;
-//         pendingSigns[i].timestamp = dictionary[pendingSigns[i].id].issuedOn;
-//     }
-
-//     return pendingSigns;
-// });
-
-// app.route.post('/payslips/unconfirmed', async function(req, cb){
-//     var unconfirmedPayslips = await app.model.Ui.findAll({});
-//     return unconfirmedPayslips;
-// });
-
-// app.route.post('/payslips/unconfirmed/data', async function(req, cb){
-//     var data = await app.model.Ucps.findOne({
-//         condition: {
-//             id: req.query.id
-//         }
-//     });
-//     return data;
-// });
-
-// app.route.post('/payslips', async function(req, cb){
-//     var confirmedPayslips = await app.model.Mi.findAll({});
-//     return confirmedPayslips;
-// });
-
-// app.route.post('/payslips/data', async function(req, cb){
-//     var data = await app.model.Mps.findOne({
-//         condition: {
-//             id: req.query.id
-//         }
-//     });
-//     return data;
-// });
-
-// app.route.post('/payslips/signatures', async function(req, cb){
-//     var data = await app.model.Authsign.findAll({
-//         condition: {
-//             mid: req.query.id
-//         }
-//     });
-//     return data;
-// });
+app.route.post('/issuers/getId', async function(req, cb){
+    var result = await app.model.Issuer.findOne({
+        condition:{
+            email: req.query.email
+        }
+    });
+    return result;
+})
 
 app.route.post('/authorizers/remove', async function(req, cb){
     logger.info("Entered /authorizers/remove API");
