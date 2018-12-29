@@ -535,6 +535,9 @@ app.route.post('/searchEmployee', async function(req, cb){
         $like: "%" + req.query.text + "%"
     };
     try{
+        var total = await app.model.Employee.count({
+            condition: condition
+        });
         var result = await app.model.Employee.findAll({
             condition: condition,
             fields: ['empID', 'name', 'designation'],
@@ -549,6 +552,7 @@ app.route.post('/searchEmployee', async function(req, cb){
         }
     }
     return {
+        total: total,
         result: result,
         isSuccess: true
     }
