@@ -5,7 +5,8 @@ module.exports = {
         {
             name: 'pid',
             type: 'String',
-            length: 100,   
+            length: 100,
+            primary_key: true 
         },
         {
             name: 'email',

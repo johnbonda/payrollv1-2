@@ -244,12 +244,10 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 app.route.post('/payslip/initialIssue',async function(req,cb){
     app.sdb.lock("Initiate");
     logger.info("Entered /payslip/initialIssue API");
-    var count = await app.model.Count.findOne({
-       condition:{id:0}, fields:['pid']
-    });
+
     var timestamp = new Date().getTime();
      var payslip={
-        pid:String(count.pid + 1),
+        pid:app.autoID.increment('payslip_max_pid'),
         email:req.query.email,
         empid:req.query.empid,
         name:req.query.name,
@@ -340,7 +338,6 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         empid: employee.empID,
         transactionId: '-'
     });
-    app.sdb.update('count',{pid:count.pid+1}, {id:0});
     return {
         message: "Payslip initiated",
         isSuccess: true
@@ -578,15 +575,12 @@ app.route.post("/sharePayslips", async function(req, cb){
 app.route.post("/registerEmployee", async function(req, cb){
     app.sdb.lock("registerEmployee");
     logger.info("Entered /registerEmployee API");
-    var count = await app.model.Count.findOne({
-        condition:{id:0}, fields:['empid']
-     });
 
     var countryCode = req.query.countryCode;
     var email = req.query.email;
     var lastName = req.query.lastName;
     var name = req.query.name;
-    var uuid = count.empid + 1;
+    var uuid = app.autoID.increment('employee_max_empID');
     var designation = req.query.designation;
     var bank = req.query.bank;
     var accountNumber = req.query.accountNumber;
@@ -700,8 +694,6 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
             mailCall.call("POST", "", mailBody, 0);
 
-            app.sdb.update("count", {empid: count.empid + 1}, {id: 0});
-
             return {
                 message: "Registered",
                 isSuccess: true
@@ -735,8 +727,6 @@ app.route.post("/registerEmployee", async function(req, cb){
                 }
             }
             mailCall.call("POST", "", mailBody, 0);
-
-            app.sdb.update("count", {empid: count.empid + 1}, {id: 0});
 
             return {
                 message: "Awaiting wallet address",

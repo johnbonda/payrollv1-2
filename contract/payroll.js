@@ -325,20 +325,14 @@ module.exports = {
 
         switch(role){
             case "issuer": 
-            var count = await app.model.Count.findOne({
-                condition:{id:0}, fields:['iid']
-             });
                 result = await app.model.Issuer.exists({
-                    iid: count.iid + 1
+                    email: email
                 });
                 break;
 
             case "authorizer":
-            var count = await app.model.Count.findOne({
-                condition:{id:0}, fields:['aid']
-             });
                 result = await app.model.Authorizer.exists({
-                    aid: count.aid + 1
+                    email: email
                 });
                 break;
 
@@ -365,7 +359,7 @@ module.exports = {
         }
         var response = await registrations.exists(request, 0);
 
-        if(response.isSuccess === false){
+        if(!response.isSuccess){
             var req = {
                 query: {
                     countryId:countryId,
@@ -394,31 +388,23 @@ module.exports = {
         switch(role){
             case "issuer": 
             //getting the last registered id of an issuer
-            var result = await app.model.Count.findOne({
-                condition:{id:0},fields:['iid']
-            });
                 app.sdb.create('issuer', {
-                    iid: result.iid+1,
+                    iid: app.autoID.increment('issuer_max_iid'),
                     publickey: "-",
                     email: email,
                     designation: designation,
                     timestamp: new Date().getTime()
                 });
-                app.sdb.update('count',{iid:result.iid+1}, {id:0});
                 logger.info("Created an issuer");
                 break;
             case "authorizer":
-            var result = await app.model.Count.findOne({
-                condition:{id:0},fields:['aid']
-            });
                 app.sdb.create('authorizer', {
-                    aid:result.aid+1,
+                    aid: app.autoID.increment('authorizer_max_aid'),
                     publickey: "-",
                     email: email,
                     designation: designation,
                     timestamp: new Date().getTime()
                 });
-                app.sdb.update('count',{aid:result.aid+1}, {id:0});
                 logger.info("Created an authorizer");
                 break;
             default: return {

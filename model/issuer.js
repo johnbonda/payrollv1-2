@@ -5,6 +5,7 @@ module.exports = {
             name: 'iid',
             type: 'String', 
             length: 255,
+            primary_key: true
         },
         {
             name: 'publickey',
