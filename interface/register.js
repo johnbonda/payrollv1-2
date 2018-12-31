@@ -542,7 +542,7 @@ app.route.post('/searchEmployee', async function(req, cb){
     condition[req.query.searchBy] = {
         $like: "%" + req.query.text + "%"
     };
-    try{
+    //try{
         var total = await app.model.Employee.count({
             condition: condition
         });
@@ -552,13 +552,13 @@ app.route.post('/searchEmployee', async function(req, cb){
             limit: req.query.limit,
             offset: req.query.offset
         });
-    }catch(err){
-        logger.error("searchBy parameter not an Employee table column");
-        return {
-            message: "searchBy parameter not an Employee table column",
-            isSuccess: false
-        }
-    }
+    // }catch(err){
+    //     logger.error("searchBy parameter not an Employee table column");
+    //     return {
+    //         message: "searchBy parameter not an Employee table column",
+    //         isSuccess: false
+    //     }
+    // }
     return {
         total: total,
         result: result,
