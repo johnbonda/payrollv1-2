@@ -245,20 +245,31 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     app.sdb.lock("Initiate");
     logger.info("Entered /payslip/initialIssue API");
 
+    // Check Employee
+    var employee = await app.model.Employee.findOne({
+        condition: {
+           empID: req.query.empid
+        }
+   });
+   if(!employee) return {
+       message: "Invalid Employee",
+       isSuccess: false
+   }
+   
     var timestamp = new Date().getTime();
      var payslip={
         pid: String(Number(app.autoID.get('payslip_max_pid')) + 1),
-        email:req.query.email,
-        empid:req.query.empid,
-        name:req.query.name,
+        email:employee.email,
+        empid:employee.empID,
+        name:employee.name,
         employer:req.query.employer,
         month:req.query.month,
         year:req.query.year,
-        designation:req.query.designation,
-        bank:req.query.bank,
-        accountNumber:req.query.accountNumber,
-        pan:req.query.pan,
-        basicPay:req.query.basicPay,
+        designation:employee.designation,
+        bank:employee.bank,
+        accountNumber:employee.accountNumber,
+        pan:employee.pan,
+        basicPay:employee.salary,
         hra:req.query.hra,
         lta:req.query.lta,
         ma:req.query.ma,
@@ -285,17 +296,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
      if(checkissuer.publickey === '-'){
          app.sdb.update('issuer', {publickey: publickey}, {iid:issuerid});
      }
-     // Check Employee
-     var employee = await app.model.Employee.findOne({
-         condition: {
-            email: payslip.email
-         }
-    })
-    if(!employee) return {
-        message: "Invalid Employee",
-        isSuccess: false
-    }
-    
+     
     // Check Payslip already issued
     var options = {
         condition: {
