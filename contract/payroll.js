@@ -387,6 +387,21 @@ module.exports = {
                 message: JSON.stringify(resultt),
                 isSuccess: false
             }
+
+            var wallet = {
+                password: password
+            }
+    
+            var mailBody = {
+                mailType: "sendRegistered",
+                mailOptions: {
+                    to: [email],
+                    empname: name,
+                    wallet: wallet
+                }
+            }
+            mailCall.call("POST", "", mailBody, 0);
+            
             logger.info("Registered a new user");
         }
         
@@ -422,18 +437,5 @@ module.exports = {
             default: return "Invalid role"
         }
 
-        var wallet = {
-            password: password
-        }
-
-        var mailBody = {
-            mailType: "sendRegistered",
-            mailOptions: {
-                to: [email],
-                empname: name,
-                wallet: wallet
-            }
-        }
-        mailCall.call("POST", "", mailBody, 0);
     }
 }
