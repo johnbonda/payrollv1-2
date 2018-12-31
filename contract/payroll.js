@@ -317,7 +317,7 @@ module.exports = {
         }
     },
 
-    registerUser: async function(email, designation, countryId, countryCode, name, password, type, role, dappid){
+    registerUser: async function(email, designation, countryId, countryCode, name, type, role, dappid){
         app.sdb.lock("registerUser@" + role);
 
         logger.info("Entered registerUser with email: " + email + " and role: " + role + "and dappid: " + dappid);
@@ -352,6 +352,24 @@ module.exports = {
             }
         }
         var response = await registrations.exists(request, 0);
+
+        function makePassword() {
+            var text = "";
+            var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var smalls = "abcdefghijklmnopqrstuvwxyz";
+            var symbols = "!@#$%^&*";
+            var numbers = "1234567890";
+        
+            for (var i = 0; i < 3; i++){
+            text += caps.charAt(Math.floor(Math.random() * caps.length));
+            text += smalls.charAt(Math.floor(Math.random() * smalls.length));
+            text += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            text += numbers.charAt(Math.floor(Math.random() * numbers.length));
+            }
+            return text;
+        }
+
+        var password = makePassword();        
 
         if(!response.isSuccess){
             var req = {
