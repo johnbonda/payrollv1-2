@@ -910,6 +910,7 @@ app.route.post('/issuer/issuedPayslips', async function(req, cb){
         limit: req.query.limit,
         offset: req.query.offset
     })
+    console.log("Issues: " + JSON.stringify(issues));
     for(i in issues){
         var payslip = await app.model.Payslip.findOne({
             condition: {
@@ -921,7 +922,9 @@ app.route.post('/issuer/issuedPayslips', async function(req, cb){
             issues[i][j] = payslip[j]
         }
     }
+    console.log("Issues: " + JSON.stringify(issues));
     return {
+        total: total,
         result: issues,
         isSuccess: true
     }
