@@ -400,8 +400,12 @@ module.exports = {
                     wallet: wallet
                 }
             }
+            try{
             mailCall.call("POST", "", mailBody, 0);
-            
+            }catch(err){
+                console.log("Mail error");
+            }
+
             logger.info("Registered a new user");
         }
         
