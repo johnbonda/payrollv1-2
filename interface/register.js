@@ -247,7 +247,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
 
     var timestamp = new Date().getTime();
      var payslip={
-        pid:app.autoID.increment('payslip_max_pid'),
+        pid: String(Number(app.autoID.get('payslip_max_pid')) + 1),
         email:req.query.email,
         empid:req.query.empid,
         name:req.query.name,
@@ -338,6 +338,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         empid: employee.empID,
         transactionId: '-'
     });
+    app.autoID.increment('payslip_max_pid');
     return {
         message: "Payslip initiated",
         isSuccess: true
