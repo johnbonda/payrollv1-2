@@ -914,7 +914,7 @@ app.route.post('/issuer/issuedPayslips', async function(req, cb){
             iid: req.query.iid,
             status: 'issued'
         },
-        fields: ['pid', 'timestampp'],
+        fields: ['pid', 'timestampp', 'empid'],
         limit: req.query.limit,
         offset: req.query.offset
     })
