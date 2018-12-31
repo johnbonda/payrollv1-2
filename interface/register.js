@@ -385,7 +385,14 @@ app.route.post('/payslip/getPayslip', async function(req, cb){
             pid: req.query.pid
         }
     });
-    return payslip;
+    if(!payslip) return {
+        isSuccess: false,
+        message: "Invalid Payslip ID"
+    }
+    return {
+        isSuccess: true,
+        result: payslip
+    }
 })
 
 app.route.post('/authorizer/authorize',async function(req,cb){
