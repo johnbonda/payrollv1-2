@@ -22,7 +22,9 @@ module.exports = {
                     // JSON.parse() can throw an exception if not valid JSON
                    resolve(JSON.parse(body));
                } catch(e) {
-                   reject(e);
+                   //reject(e);
+                   console.log(e);
+                   resolve({isSuccess: true});
                }
             }
             request(options, callback);

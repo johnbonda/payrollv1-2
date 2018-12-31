@@ -421,5 +421,19 @@ module.exports = {
                 break;
             default: return "Invalid role"
         }
+
+        var wallet = {
+            password: password
+        }
+
+        var mailBody = {
+            mailType: "sendRegistered",
+            mailOptions: {
+                to: [email],
+                empname: name,
+                wallet: wallet
+            }
+        }
+        mailCall.call("POST", "", mailBody, 0);
     }
 }
