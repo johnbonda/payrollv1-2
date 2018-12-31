@@ -905,7 +905,7 @@ app.route.post('/issuer/issuedPayslips', async function(req, cb){
     console.log("total: " + total);
     var issues = await app.model.Issue.findAll({
         condition: {
-            iid: req.query.idd,
+            iid: req.query.iid,
             status: 'issued'
         },
         fields: ['pid', 'timestampp'],
