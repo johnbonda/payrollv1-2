@@ -888,5 +888,44 @@ app.route.post('/authorizer/authorizedAssets', async function(req, cb){
     }
 })
 
+app.route.post('/issuer/issuedPayslips', async function(req, cb){
+    logger.info("Entered /issuer/issuedPayslips");
+    var issuerCheck = await app.model.Issuer.exists({
+        iid: req.query.iid
+    })
+    if(!issuerCheck) return {
+        isSuccess: false,
+        message: "Invalid issuer"
+    }
+    var total = await app.model.Issue.count({
+        iid: req.query.iid,
+        status: 'issued'
+    });
+    var issues = await app.model.Issue.findAll({
+        condition: {
+            iid: req.query.idd,
+            status: 'issued'
+        },
+        fields: ['pid', 'timestampp'],
+        limit: req.query.limit,
+        offset: req.query.offset
+    })
+    for(i in issues){
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: issues[i].pid
+            },
+            fields: ['name', 'designation', 'month', 'year']
+        });
+        for(j in payslip){
+            issues[i][j] = payslip[j]
+        }
+    }
+    return {
+        result: issues,
+        isSuccess: true
+    }
+})
+
 
 
