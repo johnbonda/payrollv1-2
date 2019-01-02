@@ -37,6 +37,12 @@ app.route.post("/issueTransactionCall", async function(req, res){
             pid: pid
         }
     });
+
+    if(issue.status === 'issued') return {
+        message: "Payslip already issued",
+        isSuccess: false
+    }
+    
     if(issue.iid !== req.query.iid) return {
         message: "Invalid issuer",
         isSuccess: false
