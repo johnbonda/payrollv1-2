@@ -833,7 +833,8 @@ app.route.post("/payslip/month/status", async function(req, cb){
                     name: employees[i].name,
                     designation: employees[i].designation,
                     status: "Authorized",
-                    iid: issue.iid
+                    iid: issue.iid,
+                    pid: issue.pid
                 }
                 continue;
             }
