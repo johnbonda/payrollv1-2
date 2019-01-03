@@ -634,7 +634,7 @@ app.route.post("/registerEmployee", async function(req, cb){
                 var text = "";
                 var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                 var smalls = "abcdefghijklmnopqrstuvwxyz";
-                var symbols = "!@#$%^&*";
+                var symbols = "@!$";
                 var numbers = "1234567890";
             
                 for (var i = 0; i < 3; i++){
