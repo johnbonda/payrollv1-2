@@ -1,12 +1,3 @@
-var ByteBuffer = require("bytebuffer");
-var util = require("../utils/util.js");
-var api = require("../utils/api");
-var SwaggerCall = require("../utils/SwaggerCall");
-var SuperDappCall = require("../utils/SuperDappCall")
-var TokenCall = require("../utils/TokenCall");
-var register = require("../interface/register");
-var registrations = require("../interface/registrations");
-var auth = require("../interface/authController");
 var DappCall = require("../utils/DappCall");
 var mailCall = require("../utils/mailCall");
 var logger = require("../utils/logger");
@@ -42,7 +33,7 @@ app.route.post("/issueTransactionCall", async function(req, res){
         message: "Payslip already issued",
         isSuccess: false
     }
-    
+
     if(issue.iid !== req.query.iid) return {
         message: "Invalid issuer",
         isSuccess: false

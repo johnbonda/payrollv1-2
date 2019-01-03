@@ -1,7 +1,5 @@
 var crypto = require("crypto");
 var sodium = require('sodium').api;
-var ByteBuffer = require("bytebuffer");
-var logger = require('./logger');
 
 module.exports = {
     

@@ -1,12 +1,3 @@
-var schema = require('../schema/accounts.js');
-var httpCall = require('../utils/httpCall.js');
-var constants = require('../utils/constants.js');
-var addressHelper = require('../utils/address.js');
-var z_schema = require('../utils/zschema-express.js');
-var BKVSCall = require('../utils/BKVSCall.js');
-var SwaggerCall = require('../utils/SwaggerCall.js');
-var request = require('request');
-var auth = require('./authController');
 var logger = require("../utils/logger");
 
 

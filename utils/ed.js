@@ -1,5 +1,4 @@
 var sodium = require('sodium').api;
-var logger = require('./logger');
 
 module.exports = {
   MakeKeypair: function (hash) {
