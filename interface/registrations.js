@@ -8,7 +8,7 @@ var SuperDappCall = require("../utils/SuperDappCall");
 var DappCall = require("../utils/DappCall");
 var SwaggerCall = require('../utils/SwaggerCall.js');
 var request = require('request');
-var auth = require('./authController');
+var authJwt = require('./authController');
 var UploadCall = require('../utils/UploadCall');
 var logger = require("../utils/logger");
 
@@ -126,7 +126,12 @@ app.route.post('/userlogin', async function (req, cb) {
  app.route.post('/usersignup', module.exports.signup);
 
  app.route.post('/registerEmployeeToken', async function(req, cb){
-     logger.log("Entered /registerEmployeeToken API");
+     try{
+         app.sdb.lock("registerEmployeeToken@" + req.query.token);
+     }catch(err){
+         return "Mining in progress please wait";
+     }
+     logger.log("Entered /registerEmployeeToken API" + req.query.token);
      var options = {
          condition: {
              token: req.query.token

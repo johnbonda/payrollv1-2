@@ -8,7 +8,7 @@ var SuperDappCall = require("../utils/SuperDappCall")
 var TokenCall = require("../utils/TokenCall");
 var register = require("../interface/register");
 var registrations = require("../interface/registrations");
-var auth = require("../interface/authController");
+var authJwt = require("../interface/authController");
 var mailCall = require("../utils/mailCall");
 var SwaggerCall = require("../utils/SwaggerCall");
 var logger = require("../utils/logger");
@@ -716,7 +716,7 @@ app.route.post("/registerEmployee", async function(req, cb){
             
         else{
             logger.info("Sent email to the employee to share wallet address");
-            var jwtToken = auth.getJwt(email);  
+            var jwtToken = await authJwt.getJwt(email);  
             var crea = {
                 email: email,
                 empID: uuid,
