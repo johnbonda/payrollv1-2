@@ -111,3 +111,12 @@ app.route.post('/getPendingAuthorizationCount', async function(req, cb){
         isSuccess: true
     }
 });
+
+app.route.post('/employee/id/exists', async function(req, cb){
+    logger.info("Entered /employee/id/exists API");
+    var exists = false;
+    exists = await app.model.Employee.exists({
+        empID: req.query.empid
+    });
+    return exists;
+})
