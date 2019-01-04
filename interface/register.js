@@ -18,8 +18,6 @@ var logger = require("../utils/logger");
 // outputs: empid, name, designations
 app.route.post('/employees', async function(req, cb){
 
-    // if(!req.query.dappToken) return "Need Dapp Token, please Login";
-    // if(! (await auth.checkSession(req.query.dappToken))) return "Unauthorized Token";
     logger.info("Entered /employees API");
 
     var total = await app.model.Employee.count({});
@@ -43,9 +41,6 @@ app.route.post('/employees', async function(req, cb){
 // outputs: email, empid, name, designation, actualsalary
 app.route.post('/employeeData', async function(req,cb){
     logger.info("Entered /employeeData API");
-
-    // if(!req.query.dappToken) return "Need Dapp Token, please Login";
-    // if(! (await auth.checkSession(req.query.dappToken))) return "Unauthorized Token";
 
     var options = {
         condition: {
@@ -120,36 +115,6 @@ async function verifyPayslip(req, cb){
             isSuccess: false
         }
     }
-
-    // var authsigns = await app.model.Authsign.findAll({
-    //     condition: {
-    //         mid: result.id
-    //     }
-    // });
-
-    // var authsignsArray = ['-1'];
-    // for(i in authsigns){
-    //     authsignsArray.push(authsigns[i].aid);
-    // }
-
-    // var authorizers = await app.model.Authorizer.findAll({
-    //     condition:{
-    //         id: {
-    //             $in: authsignsArray
-    //         }
-    //     }
-    // });
-
-    // var publickeydictionary = {};
-    // for(x in authorizers){
-    //     publickeydictionary[authorizers[x].id] = authorizers[x].publickey;
-    // }
-    // for(i in authsigns){
-    //     if(!util.Verify(hash, new Buffer(authsigns[i].sign, 'base64'), new Buffer(publickeydictionary[authsigns[i].aid], 'hex'))) return {
-    //         message:"Wrong Signature of Authorizer ID: " + authsigns[i].aid,
-    //         isSuccess: false
-    //     }
-    // }
 
     result.issuedBy = issuer.email;
     result.isSuccess = true;
@@ -781,67 +746,7 @@ app.route.post("/payslip/month/status", async function(req, cb){
         offset: req.query.offset
     });
     for(i in employees){
-        var initiated = await app.model.Payslip.findOne({
-            condition:{
-                empid: employees[i].empID,
-                month: month,
-                year: year
-            }
-        });
-        if(!initiated){
-            resultArray[employees[i].empID] = {
-                name: employees[i].name,
-                designation: employees[i].designation,
-                status: "Pending"
-            }
-            continue;
-        }
-
-        var issue = await app.model.Issue.findOne({
-            condition: {
-                pid: initiated.pid
-            }
-        });
-        if(issue.status === "issued"){
-            resultArray[employees[i].empID] = {
-                name: employees[i].name,
-                designation: employees[i].designation,
-                status: "Issued"
-            }
-            continue;
-        }
-        
-        var auths = await app.model.Authorizer.findAll({fields:['aid']});
-        var count_of_auths = auths.length;
-
-        if(issue.count >= count_of_auths){
-            var count = 0;
-            for (auth in auths){
-                let response = await app.model.Cs.exists({
-                    pid: issue.pid,
-                    aid: auths[auth].aid
-                });
-                if(response){
-                    count += 1;
-                }
-            }
-            if(count === count_of_auths){
-                resultArray[employees[i].empID] = {
-                    name: employees[i].name,
-                    designation: employees[i].designation,
-                    status: "Authorized",
-                    iid: issue.iid,
-                    pid: issue.pid
-                }
-                continue;
-            }
-        }
-        
-        resultArray[employees[i].empID] = {
-            name: employees[i].name,
-            designation: employees[i].designation,
-            status: "Initiated"
-        }
+        resultArray[employees[i].empID] = monthStatus(month, year, employees[i]);
     }
     return {
         total: total,
@@ -852,7 +757,7 @@ app.route.post("/payslip/month/status", async function(req, cb){
 app.route.post('/employee/payslip/month/status', async function(req, cb){
     var month = req.query.month;
     var year = req.query.year;
-    var result;
+    
     var employee = await app.model.Employee.findOne({
         condition: {
             empID: req.query.empid
@@ -863,6 +768,15 @@ app.route.post('/employee/payslip/month/status', async function(req, cb){
         isSuccess: false,
         message: "Employee not found"
     }
+    var result = await monthStatus(month, year, employee);
+    return {
+        result: result,
+        isSuccess: true
+    }
+})
+
+async function monthStatus(month, year, employee){
+
     var initiated = await app.model.Payslip.findOne({
         condition:{
             empid: employee.empID,
@@ -870,8 +784,9 @@ app.route.post('/employee/payslip/month/status', async function(req, cb){
             year: year
         }
     });
+    
     if(!initiated){
-        result = {
+        return {
             name: employee.name,
             designation: employee.designation,
             status: "Pending"
@@ -884,7 +799,7 @@ app.route.post('/employee/payslip/month/status', async function(req, cb){
         }
     });
     if(issue.status === "issued"){
-        result = {
+        return {
             name: employee.name,
             designation: employee.designation,
             status: "Issued"
@@ -906,7 +821,7 @@ app.route.post('/employee/payslip/month/status', async function(req, cb){
             }
         }
         if(count === count_of_auths){
-            result = {
+            return {
                 name: employee.name,
                 designation: employee.designation,
                 status: "Authorized",
@@ -916,17 +831,12 @@ app.route.post('/employee/payslip/month/status', async function(req, cb){
         }
     }
     
-    result = {
+    return {
         name: employee.name,
         designation: employee.designation,
         status: "Initiated"
     }
-
-    return {
-        result: result,
-        isSuccess: true
-    }
-})
+}
 
 app.route.post('/payslips/sentForAuthorization', async function(req, cb){
     logger.info("Entered /payslips/sentForAuthorization API");
@@ -1015,6 +925,3 @@ app.route.post('/issuer/issuedPayslips', async function(req, cb){
         isSuccess: true
     }
 })
-
-
-
