@@ -849,6 +849,85 @@ app.route.post("/payslip/month/status", async function(req, cb){
     };
 });
 
+app.route.post('/employee/payslip/month/status', async function(req, cb){
+    var month = req.query.month;
+    var year = req.query.year;
+    var result;
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            empID: req.query.empid
+        },
+        fields: ['empID', 'name', 'designation']
+    })
+    if(!employee) return {
+        isSuccess: false,
+        message: "Employee not found"
+    }
+    var initiated = await app.model.Payslip.findOne({
+        condition:{
+            empid: employee.empID,
+            month: month,
+            year: year
+        }
+    });
+    if(!initiated){
+        result = {
+            name: employee.name,
+            designation: employee.designation,
+            status: "Pending"
+        }
+    }
+
+    var issue = await app.model.Issue.findOne({
+        condition: {
+            pid: initiated.pid
+        }
+    });
+    if(issue.status === "issued"){
+        result = {
+            name: employee.name,
+            designation: employee.designation,
+            status: "Issued"
+        }
+    }
+    
+    var auths = await app.model.Authorizer.findAll({fields:['aid']});
+    var count_of_auths = auths.length;
+
+    if(issue.count >= count_of_auths){
+        var count = 0;
+        for (auth in auths){
+            let response = await app.model.Cs.exists({
+                pid: issue.pid,
+                aid: auths[auth].aid
+            });
+            if(response){
+                count += 1;
+            }
+        }
+        if(count === count_of_auths){
+            result = {
+                name: employee.name,
+                designation: employee.designation,
+                status: "Authorized",
+                iid: issue.iid,
+                pid: issue.pid
+            }
+        }
+    }
+    
+    result = {
+        name: employee.name,
+        designation: employee.designation,
+        status: "Initiated"
+    }
+
+    return {
+        result: result,
+        isSuccess: true
+    }
+})
+
 app.route.post('/payslips/sentForAuthorization', async function(req, cb){
     logger.info("Entered /payslips/sentForAuthorization API");
     var count = await app.model.Issue.count({
