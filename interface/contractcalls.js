@@ -75,9 +75,7 @@ app.route.post("/issueTransactionCall", async function(req, res){
         mailType: "sendIssued",
         mailOptions: {
             to: [employee.email],
-            name: employee.name,
-            month: payslip.month,
-            year: payslip.year
+            payslip: payslip
         }
     }
 
