@@ -118,5 +118,7 @@ app.route.post('/employee/id/exists', async function(req, cb){
     exists = await app.model.Employee.exists({
         empID: req.query.empid
     });
-    return exists;
+    return {
+        isSuccess: exists
+    };
 })
