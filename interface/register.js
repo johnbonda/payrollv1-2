@@ -746,7 +746,7 @@ app.route.post("/payslip/month/status", async function(req, cb){
         offset: req.query.offset
     });
     for(i in employees){
-        resultArray[employees[i].empID] = monthStatus(month, year, employees[i]);
+        resultArray[employees[i].empID] = await monthStatus(month, year, employees[i]);
     }
     return {
         total: total,
