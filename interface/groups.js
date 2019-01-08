@@ -69,6 +69,24 @@ app.route.post('/authorizers/getId', async function(req, cb){
     }
 })
 
+app.route.post('/employees/getId', async function(req, cb){
+    var result = await app.model.Employee.findOne({
+        condition:{
+            email: req.query.email
+        }
+    });
+    if(result){
+        return {
+            isSuccess: true,
+            result: result
+        }
+    }
+    return {
+        isSuccess: false,
+        message: "Employee not found"
+    }
+})
+
 app.route.post('/issuers/getId', async function(req, cb){
     var result = await app.model.Issuer.findOne({
         condition:{
