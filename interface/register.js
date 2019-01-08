@@ -936,25 +936,25 @@ app.route.post('/user/sharePayslips', async function(req, cb){
         }
     });
 
-    // var employee = await app.model.Employee.findOne({
-    //     condition: {
-    //         email: req.query.empEmail
-    //     },
-    //     fields: ['name']
-    // })
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            empID: req.query.empID
+        },
+        fields: ['name']
+    })
 
-    // if(!employee) return {
-    //     message: "Employee not found",
-    //     isSuccess: false
-    // }
+    if(!employee) return {
+        message: "Employee not found",
+        isSuccess: false
+    }
 
     var mailBody = {
         mailType: "sendPayslips",
         mailOptions: {
-            to: [req.query.to],
-            name: req.query.name,
+            to: [req.query.email],
+            name: employee.name,
             payslips: payslips,
-            dappid: dappid
+            dappid: req.query.dappid
         }
     }
 
