@@ -775,6 +775,7 @@ app.route.post('/employee/payslip/month/status', async function(req, cb){
         message: "Employee not found"
     }
     var result = await monthStatus(month, year, employee);
+    result.empid = req.query.empid;
     return {
         result: result,
         isSuccess: true
