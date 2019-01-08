@@ -926,3 +926,42 @@ app.route.post('/issuer/issuedPayslips', async function(req, cb){
         isSuccess: true
     }
 })
+
+app.route.post('/user/sharePayslips', async function(req, cb){
+    var payslips = await app.model.Payslip.findAll({
+        condition: {
+            pid: {
+                $in: req.query.payslips
+            }
+        }
+    });
+
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            email: req.query.empEmail
+        },
+        fields: ['name']
+    })
+
+    if(!employee) return {
+        message: "Employee not found",
+        isSuccess: false
+    }
+
+    var mailBody = {
+        mailType: "sendPayslips",
+        mailOptions: {
+            to: [employee.email],
+            name: employee.name,
+            payslips: payslips,
+            dappid: dappid
+        }
+    }
+
+    mailCall.call("POST", "", mailBody, 0);
+
+    return {
+        payslips: payslips,
+        isSuccess: true
+    }
+})
