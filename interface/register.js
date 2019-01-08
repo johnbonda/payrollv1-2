@@ -569,6 +569,11 @@ app.route.post("/registerEmployee", async function(req, cb){
         });
         if(result) return "Employee already registered";
 
+        var result = await app.model.Employee.exists({
+            empID: uuid
+        })
+        if(result) return "Employee with Employee ID already exists";
+
         // Checking if the employee's registration is pending
         result = await app.model.Pendingemp.exists({
             email:email

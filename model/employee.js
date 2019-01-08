@@ -10,8 +10,7 @@ module.exports = {
         {
             name: 'empID',
             type: 'String',
-            length: 255,
-            primary_key: true
+            length: 255
         },
         {
             name: 'name',
