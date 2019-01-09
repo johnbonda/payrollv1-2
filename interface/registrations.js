@@ -232,7 +232,7 @@ app.route.post('/payslips/employee/issued', async function(req, cb){
 
 })
 
-app.route.post('payslips/employee/issued/search', async function(req, cb){
+app.route.post('/payslips/employee/issued/search', async function(req, cb){
     logger.info("Entered payslips/employee/issued/search");
 
     var employee = await app.model.Employee.findOne({

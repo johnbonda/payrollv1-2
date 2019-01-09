@@ -9,6 +9,7 @@ var authJwt = require("../interface/authController");
 var mailCall = require("../utils/mailCall");
 var SwaggerCall = require("../utils/SwaggerCall");
 var logger = require("../utils/logger");
+var locker = require("../utils/locker");
 
 
 
@@ -204,7 +205,9 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 })
 
 app.route.post('/payslip/initialIssue',async function(req,cb){
-    app.sdb.lock("Initiate");
+
+    await locker("Initiated");
+    
     logger.info("Entered /payslip/initialIssue API");
 
     // Check Employee
