@@ -9,6 +9,7 @@ var registrations = require("../interface/registrations");
 var auth = require("../interface/authController");
 var mailCall = require("../utils/mailCall");
 var logger = require("../utils/logger");
+var locker = require("../utils/locker");
 
 
 module.exports = {
@@ -318,7 +319,7 @@ module.exports = {
     },
 
     registerUser: async function(email, designation, countryId, countryCode, name, type, role, dappid){
-        app.sdb.lock("registerUser@" + role);
+        await locker("registerUser@" + role);
 
         logger.info("Entered registerUser with email: " + email + " and role: " + role + "and dappid: " + dappid);
         console.log("Entered Register User");

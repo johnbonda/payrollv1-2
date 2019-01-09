@@ -207,7 +207,7 @@ app.route.post('/payslip/confirmedIssues',async function(req,cb){
 app.route.post('/payslip/initialIssue',async function(req,cb){
 
     await locker("Initiated");
-    
+
     logger.info("Entered /payslip/initialIssue API");
 
     // Check Employee
@@ -366,7 +366,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
     var secret = req.query.secret;
     var authid = req.query.aid;
     var pid=req.query.pid;
-    app.sdb.lock("authorize@" +authid + pid);
+    await locker("authorize@" +authid + pid);
         // Check Authorizer
         var publickey = util.getPublicKey(secret);
         var checkauth = await app.model.Authorizer.findOne({
@@ -551,7 +551,7 @@ app.route.post("/sharePayslips", async function(req, cb){
 })
 
 app.route.post("/registerEmployee", async function(req, cb){
-    app.sdb.lock("registerEmployee");
+    await locker("registerEmployee");
     logger.info("Entered /registerEmployee API");
 
     var countryCode = req.query.countryCode;

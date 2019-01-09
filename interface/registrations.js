@@ -3,6 +3,7 @@ var SuperDappCall = require("../utils/SuperDappCall");
 var DappCall = require("../utils/DappCall");
 var SwaggerCall = require('../utils/SwaggerCall.js');
 var logger = require("../utils/logger");
+var locker = require("../utils/locker");
 
 
 
@@ -40,7 +41,7 @@ app.route.post('/userlogin', async function (req, cb) {
         password: req.query.password
     };
 
-    app.sdb.lock('payroll.userlogin@'+req.query.email);
+    await locker('payroll.userlogin@'+req.query.email);
 
 
     var response = await BKVSCall.call('POST', `/api/v1/login`, ac_params);// Call: http://54.254.174.74:8080
@@ -88,7 +89,7 @@ app.route.post('/userlogin', async function (req, cb) {
         type:req.query.type
     }
 
-    app.sdb.lock('payroll.usersignup@'+req.query.email);
+    await locker('payroll.usersignup@'+req.query.email);
 
     var response = await BKVSCall.call('POST', `/api/v1/signup`, params);// Call: http://54.254.174.74:8080
     // if(response.isSuccess===true || response.status === "CONFLICT")
@@ -118,11 +119,7 @@ app.route.post('/userlogin', async function (req, cb) {
  app.route.post('/usersignup', module.exports.signup);
 
  app.route.post('/registerEmployeeToken', async function(req, cb){
-     try{
-         app.sdb.lock("registerEmployeeToken@" + req.query.token);
-     }catch(err){
-         return "Mining in progress please wait";
-     }
+        await locker("registerEmployeeToken@" + req.query.token);
      logger.log("Entered /registerEmployeeToken API" + req.query.token);
      var options = {
          condition: {

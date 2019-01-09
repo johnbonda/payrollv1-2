@@ -1,11 +1,12 @@
 var DappCall = require("../utils/DappCall");
 var mailCall = require("../utils/mailCall");
 var logger = require("../utils/logger");
+var locker = require("../utils/locker");
 
 
 
 app.route.post("/issueTransactionCall", async function(req, res){
-    app.sdb.lock("issueTransactionCall");
+    await locker("issueTransactionCall");
     logger.info("Entered /issueTransactionCall API");
     var transactionParams = {};
     var pid = req.query.pid;
