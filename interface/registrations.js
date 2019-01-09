@@ -231,3 +231,98 @@ app.route.post('/payslips/employee/issued', async function(req, cb){
     }
 
 })
+
+app.route.post('payslips/employee/issued/search', async function(req, cb){
+    logger.info("Entered payslips/employee/issued/search");
+
+    var employee = await app.model.Employee.findOne({
+        condition: {
+            walletAddress: req.query.walletAddress
+        }, 
+        fields: ['empID']
+    });
+    if(!employee) return {
+        message: "Address not associated with any employee",
+        isSuccess: false
+    }
+
+    if(req.query.month.length){
+        let payslip = await app.model.Payslip.findOne({
+            condition: {
+                empid: employee.empID,
+                month: req.query.month,
+                year: req.query.year
+            },
+            fields: ['pid', 'month', 'year']
+        });
+        if(!payslip) return {
+            message: "No payslip",
+            isSuccess: false
+        }
+        var issue = await app.model.Issue.findOne({
+            condition: {
+                pid: payslip.pid,
+                status: 'issued'
+            }
+        });
+
+        if(!issue) return {
+            message: "Payslip not issued yet",
+            isSuccess: false
+        }
+
+        var issuer = await app.model.Issuer.findOne({
+            condition: {
+                iid: issue.iid
+            },
+            fields: ['email']
+        });
+
+        if(issuer) issue.issuedBy = issuer.email;
+        else issue.issuedBy = "Deleted Issuer";
+
+        issue.month = payslip.month;
+        issue.year = payslip.year;     
+        
+        return {
+            issuedPayslips: issue,
+            isSuccess: true
+        }
+    }
+    else{
+        let result = [];
+        let payslips = await app.model.Payslip.findAll({
+            condition: {
+                empid: employee.empID,
+                year: req.query.year
+            },
+            fields: ['pid', 'month', 'year']
+        });
+        for(i in payslips){
+            let issue = await app.model.Issue.findOne({
+                condition: {
+                    pid: payslips[i].pid,
+                    status: 'issued'
+                }
+            });
+            if(!issue) continue;
+            let issuer = await app.model.Issuer.findOne({
+                condition: {
+                    iid: issue.iid
+                },
+                fields: ['email']
+            });
+            if(issuer) issue.issuedBy = issuer.email;
+            else issue.issuedBy = "Deleted Issuer";
+
+            issue.month = payslips[i].month;
+            issue.year = payslips[i].year;  
+            result.push(issue);
+        }
+
+        return {
+            issuedPayslips: result,
+            isSuccess: true
+        }
+    }
+})
