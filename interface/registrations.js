@@ -326,10 +326,10 @@ app.route.post('/payslips/employee/issued/search', async function(req, cb){
     }
 })
 
-app.route.post('/payslip/getByHash', async function(req, cb){
+app.route.post('/payslip/getIssuedByPid', async function(req, cb){
     var issue = await app.model.Issue.findOne({
         condition: {
-            hash: req.query.hash,
+            pid: req.query.pid,
             status: 'issued'
         }
     });
