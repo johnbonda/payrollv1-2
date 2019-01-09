@@ -325,3 +325,74 @@ app.route.post('/payslips/employee/issued/search', async function(req, cb){
         }
     }
 })
+
+app.route.post('/payslip/getByHash', async function(req, cb){
+    var issue = await app.model.Issue.findOne({
+        condition: {
+            hash: req.query.hash,
+            status: 'issued'
+        }
+    });
+
+    if(!issue) return {
+        message: "No Payslip",
+        isSuccess: false
+    }
+
+    var payslip = await app.model.Payslip.findOne({
+        condition: {
+            pid: issue.pid
+        }
+    });
+
+    var auths = await app.model.Cs.findAll({
+        condition: {
+            pid: issue.pid
+        }
+    });
+    
+    for(i in auths){
+        let authorizer = await app.model.Authorizer.findOne({
+            condition: {
+                aid: auths[i].aid
+            },
+            fields: ['email']
+        });
+        if(!authorizer) auths[i].email = "Deleted Authorizer";
+        else auths[i].email = authorizer.email;
+    }
+
+    var issuer = await app.model.Issuer.findOne({
+        condition: {
+            iid: issue.iid
+        },
+        fields: ['email']
+    });
+    if(!issuer) issue.issuedBy = "Deleted Issuer";
+    else issue.issuedBy = issuer.email;
+
+    return {
+        issue: issue,
+        payslip: payslip,
+        authorizedBy: auths,
+        isSuccess: true
+    }
+})
+
+app.route.post('/payslip/returnHash', async function(req, cb){
+    let issue = await app.model.Issue.findOne({
+        condition: {
+            pid: req.query.pid,
+            status: 'issued'
+        },
+        fields: ['hash']
+    });
+    if(!issue) return {
+        message: "Invalid Issued Payslip",
+        isSuccess: false
+    }
+    return {
+        hash: issue.hash,
+        isSuccess: true
+    }
+});
