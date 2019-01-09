@@ -5,7 +5,7 @@ module.exports = async function(str){
             app.sdb.lock(str);
             break;
         }catch(e){
-            sleep(2000);
+            await sleep(2000);
             continue;
         }
     }
