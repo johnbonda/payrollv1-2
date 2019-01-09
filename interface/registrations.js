@@ -247,6 +247,7 @@ app.route.post('/payslips/employee/issued/search', async function(req, cb){
     }
 
     if(req.query.month.length){
+        let result = [];
         let payslip = await app.model.Payslip.findOne({
             condition: {
                 empid: employee.empID,
@@ -282,10 +283,11 @@ app.route.post('/payslips/employee/issued/search', async function(req, cb){
         else issue.issuedBy = "Deleted Issuer";
 
         issue.month = payslip.month;
-        issue.year = payslip.year;     
+        issue.year = payslip.year;  
+        result.push(issue);   
         
         return {
-            issuedPayslips: issue,
+            issuedPayslips: result,
             isSuccess: true
         }
     }
