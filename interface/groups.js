@@ -1,4 +1,5 @@
 var logger = require("../utils/logger");
+var SuperDappCall = require("../utils/SuperDappCall")
 
 
 // inputs: limit, offset
@@ -107,26 +108,58 @@ app.route.post('/issuers/getId', async function(req, cb){
 
 app.route.post('/authorizers/remove', async function(req, cb){
     logger.info("Entered /authorizers/remove API");
-    var check = await app.model.Authorizer.exists({
-       aid:req.query.aid
-    })
-    if(!check) return "not found";
+    var check = await app.model.Authorizer.findOne({
+        condition:{
+            aid:req.query.aid
+        }
+    });
+    if(!check) return {
+        message: "Not found",
+        isSuccess: false
+    }
+    var removeObj = {
+        email: check.email,
+        role: 'authorizer'
+    }
+    var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUser', removeObj);
+    if(!removeInSuperDapp.isSuccess) return {
+        message: "Failed to delete",
+        isSuccess: false
+    }
     app.sdb.del('Authorizer', {
        aid: req.query.aid
     });
-    return true;
+    return {
+        isSuccess: true
+    };
 });
 
 app.route.post('/issuers/remove', async function(req, cb){
     logger.info("Entered /issuers/remove API");
-    var check = await app.model.Issuer.exists({
-       iid:req.query.iid
-    })
-    if(!check) return "not found";
-    app.sdb.del('issuer', {
+    var check = await app.model.Issuer.findOne({
+        condition:{
+            iid:req.query.iid
+        }
+    });
+    if(!check) return {
+        message: "Not found",
+        isSuccess: false
+    }
+    var removeObj = {
+        email: check.email,
+        role: 'issuer'
+    }
+    var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUser', removeObj);
+    if(!removeInSuperDapp && !removeInSuperDapp.isSuccess) return {
+        message: "Failed to delete",
+        isSuccess: false
+    }
+    app.sdb.del('Issuer', {
        iid: req.query.iid
     });
-    return true;
+    return {
+        isSuccess: true
+    };
 });
 
 // app.route.post('/payslips/pendingsigns', async function(req, cb){
