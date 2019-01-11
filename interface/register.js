@@ -974,3 +974,146 @@ app.route.post('/user/sharePayslips', async function(req, cb){
         isSuccess: true
     }
 })
+
+app.route.post('/registerUser/', async function(req, cb){
+    var email = req.query.email;
+    var designation = req.query.designation;
+    var countryCode = req.query.countryCode;
+    var name = req.query.name;
+    var type = req.query.type;
+    var dappid = req.query.dappid;
+    var role = req.query.role;
+
+    await locker("registerUser@" + role);
+
+        logger.info("Entered registerUser with email: " + email + " and role: " + role + "and dappid: " + dappid);
+        console.log("Entered Register User");
+
+        switch(role){
+            case "issuer": 
+                result = await app.model.Issuer.exists({
+                    email: email
+                });
+                break;
+
+            case "authorizer":
+                result = await app.model.Authorizer.exists({
+                    email: email
+                });
+                break;
+
+            default: 
+                    logger.error("Invalid role");
+                    return {
+                        message: "Invalid role",
+                        isSuccess: false
+                    }
+        }
+
+        if(result){
+            logger.error("User already registered");
+            return {
+                message: "User already registered",
+                isSuccess: false
+            }
+        }
+
+        var request = {
+            query: {
+                email: email
+            }
+        }
+        var response = await registrations.exists(request, 0);
+
+        function makePassword() {
+            var text = "";
+            var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var smalls = "abcdefghijklmnopqrstuvwxyz";
+            var symbols = "!@$";
+            var numbers = "1234567890";
+        
+            for (var i = 0; i < 3; i++){
+            text += caps.charAt(Math.floor(Math.random() * caps.length));
+            text += smalls.charAt(Math.floor(Math.random() * smalls.length));
+            text += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            text += numbers.charAt(Math.floor(Math.random() * numbers.length));
+            }
+            return text;
+        }
+
+        var password = makePassword();        
+
+        if(!response.isSuccess){
+            var req = {
+                query: {
+                    countryId:countryId,
+                    countryCode:countryCode,
+                    email:email,
+                    name:name,
+                    password:password,
+                    type:type
+                }
+            }
+            var resultt = await registrations.signup(req, 0);
+            if(resultt !== "success") return {
+                message: JSON.stringify(resultt),
+                isSuccess: false
+            }
+
+            var wallet = {
+                password: password
+            }
+    
+            var mailBody = {
+                mailType: "sendRegistered",
+                mailOptions: {
+                    to: [email],
+                    empname: name,
+                    wallet: wallet
+                }
+            }
+            mailCall.call("POST", "", mailBody, 0);
+
+            logger.info("Registered a new user");
+        }
+        
+        var mapObj = {
+            email: email,
+            dappid: dappid,
+            role: role
+        }
+        var mapcall = await SuperDappCall.call('POST', "/mapUser", mapObj);
+        // Need some exception handling flow for the case when a email with a particular role is already registered on the dapp.
+        if(!mapcall.isSuccess) return mapcall;
+        switch(role){
+            case "issuer": 
+            //getting the last registered id of an issuer
+                app.sdb.create('issuer', {
+                    iid: app.autoID.increment('issuer_max_iid'),
+                    publickey: "-",
+                    email: email,
+                    designation: designation,
+                    timestamp: new Date().getTime()
+                });
+                logger.info("Created an issuer");
+                break;
+            case "authorizer":
+                app.sdb.create('authorizer', {
+                    aid: app.autoID.increment('authorizer_max_aid'),
+                    publickey: "-",
+                    email: email,
+                    designation: designation,
+                    timestamp: new Date().getTime()
+                });
+                logger.info("Created an authorizer");
+                break;
+            default: return {
+                message: "Invalid role",
+                isSuccess: false
+            }
+        }
+        return {
+            isSuccess: true
+        }
+
+});
