@@ -979,6 +979,7 @@ app.route.post('/registerUser/', async function(req, cb){
     var email = req.query.email;
     var designation = req.query.designation;
     var countryCode = req.query.countryCode;
+    var countryId = req.query.countryId;
     var name = req.query.name;
     var type = req.query.type;
     var dappid = req.query.dappid;
