@@ -124,7 +124,17 @@ app.route.post('/employee/id/exists', async function(req, cb){
         if(employee) return {
             employee: employee,
             isSuccess: true,
-            foundWith: fields[i]
+            foundWith: fields[i],
+            status: "employee"
+        }
+        let pendingEmp = await app.model.Pendingemp.findOne({
+            condition: condition
+        });
+        if(pendingEmp) return {
+            employee: pendingEmp,
+            isSuccess: true,
+            foundWith: fields[i],
+            status: "pending employee"
         }
     }
     return {
