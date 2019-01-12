@@ -114,19 +114,20 @@ app.route.post('/getPendingAuthorizationCount', async function(req, cb){
 
 app.route.post('/employee/id/exists', async function(req, cb){
     logger.info("Entered /employee/id/exists API");
-    var exists = false;
-    var condition = {};
-    condition[req.query.by] = req.query.text;
-    try{
-        exists = await app.model.Employee.exists(condition);
-    }catch(err){
-        return {
-            message: "Invalid 'by' input",
-            isSuccess: false
+    var fields = ['empID', 'name', 'email'];
+    for(i in fields){
+        let condition = {};
+        condition[fields[i]] = req.query.text;
+        let employee = await app.model.Employee.findOne({
+            condition: condition
+        });
+        if(employee) return {
+            employee: employee,
+            isSuccess: true
         }
     }
     return {
-        exists: exists,
-        isSuccess: true
-    };
-})
+        isSuccess: false, 
+        message: "Not found in " + JSON.stringify(fields)
+    }
+});
