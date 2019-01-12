@@ -121,8 +121,13 @@ app.route.post('/authorizers/remove', async function(req, cb){
         email: check.email,
     }
     var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUsers', removeObj);
+    if(!removeInSuperDapp) return {
+        message: "No response from superdapp",
+        isSuccess: false
+    }
     if(!removeInSuperDapp.isSuccess) return {
         message: "Failed to delete",
+        err: removeInSuperDapp,
         isSuccess: false
     }
     app.sdb.del('Authorizer', {
@@ -148,8 +153,13 @@ app.route.post('/issuers/remove', async function(req, cb){
         email: check.email
     }
     var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUsers', removeObj);
-    if(!removeInSuperDapp && !removeInSuperDapp.isSuccess) return {
+    if(!removeInSuperDapp) return {
+        message: "No response from superdapp",
+        isSuccess: false
+    }
+    if(!removeInSuperDapp.isSuccess) return {
         message: "Failed to delete",
+        err: removeInSuperDapp,
         isSuccess: false
     }
     app.sdb.del('Issuer', {
