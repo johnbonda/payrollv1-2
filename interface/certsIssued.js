@@ -123,7 +123,8 @@ app.route.post('/employee/id/exists', async function(req, cb){
         });
         if(employee) return {
             employee: employee,
-            isSuccess: true
+            isSuccess: true,
+            foundWith: fields[i]
         }
     }
     return {
