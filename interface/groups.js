@@ -119,7 +119,6 @@ app.route.post('/authorizers/remove', async function(req, cb){
     }
     var removeObj = {
         email: check.email,
-        role: 'authorizer'
     }
     var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUsers', removeObj);
     if(!removeInSuperDapp.isSuccess) return {
@@ -146,8 +145,7 @@ app.route.post('/issuers/remove', async function(req, cb){
         isSuccess: false
     }
     var removeObj = {
-        email: check.email,
-        role: 'issuer'
+        email: check.email
     }
     var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUsers', removeObj);
     if(!removeInSuperDapp && !removeInSuperDapp.isSuccess) return {
