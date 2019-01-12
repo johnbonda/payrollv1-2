@@ -121,7 +121,7 @@ app.route.post('/authorizers/remove', async function(req, cb){
         email: check.email,
         role: 'authorizer'
     }
-    var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUser', removeObj);
+    var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUsers', removeObj);
     if(!removeInSuperDapp.isSuccess) return {
         message: "Failed to delete",
         isSuccess: false
@@ -149,7 +149,7 @@ app.route.post('/issuers/remove', async function(req, cb){
         email: check.email,
         role: 'issuer'
     }
-    var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUser', removeObj);
+    var removeInSuperDapp = await SuperDappCall.call('POST', '/removeUsers', removeObj);
     if(!removeInSuperDapp && !removeInSuperDapp.isSuccess) return {
         message: "Failed to delete",
         isSuccess: false
