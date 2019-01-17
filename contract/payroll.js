@@ -14,10 +14,14 @@ var locker = require("../utils/locker");
 
 module.exports = {
 
-    issuePaySlip: async function(toaddr, type, pid, email, empid, name, employer, month, year, designation, bank, accountNumber, pan, basicPay, hra, lta, ma, providentFund, professionalTax, grossSalary, totalDeductions, netSalary, issuerid, timestamp){
+    issuePaySlip: async function(toaddr, type, payslip){
 
         logger.info("Entered issuePaySlip contract");
-        //app.sdb.lock('payroll.issuePaySlip@'+empid);
+        console.log(toaddr);
+        console.log(type);
+        console.log(payslip);
+        //var pid = JSON.parse(payslip).pid;
+        var pid = payslip.pid
         app.sdb.update('issue', {transactionId: this.trs.id}, {pid: pid});
 
     },

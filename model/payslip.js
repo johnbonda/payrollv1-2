@@ -55,39 +55,19 @@ module.exports = {
             length: 100,
         },
         {
-            name: 'pan',
+            name: 'identity',
             type: 'String',
-            length: 100,
+            length: 1000,
         },
         {
-            name: 'basicPay',
+            name: 'earnings',
             type: 'String',
-            length: 100,
+            length: 2000,
         },
         {
-            name: 'hra',
+            name: 'deductions',
             type: 'String',
-            length: 100,
-        },
-        {
-            name: 'lta',
-            type: 'String',
-            length: 100,
-        },
-        {
-            name: 'ma',
-            type: 'String',
-            length: 100,
-        },
-        {
-            name: 'providentFund',
-            type: 'String',
-            length: 100,
-        },
-        {
-            name: 'professionalTax',
-            type: 'String',
-            length: 100,
+            length: 2000,
         },
         {
             name: 'grossSalary',
@@ -106,6 +86,11 @@ module.exports = {
         },
         {
             name: 'timestamp',
+            type: 'String',
+            length: 255
+        },
+        {
+            name: 'deleted',
             type: 'String',
             length: 255
         }

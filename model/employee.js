@@ -8,7 +8,7 @@ module.exports = {
             length: 255,
         },
         {
-            name: 'empID',
+            name: 'empid',
             type: 'String',
             length: 255
         },
@@ -33,9 +33,9 @@ module.exports = {
             length: 255,
         },
         {
-            name: 'pan',
+            name: 'identity',
             type: 'String',
-            length: 255,
+            length: 1000,
         },
         {
             name: 'salary',
@@ -47,6 +47,16 @@ module.exports = {
             type: 'String',
             length: 255,
         },
+        {
+            name: 'category',
+            type: 'String',
+            length: 255,
+        },
+        {
+            name: 'deleted',
+            type: 'String',
+            length: 255,
+        }
         // {
                 //     name: 'token',
                 //     type: 'String',

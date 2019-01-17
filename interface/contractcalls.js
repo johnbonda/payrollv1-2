@@ -20,9 +20,6 @@ app.route.post("/issueTransactionCall", async function(req, res){
         message: "Invalid Payslip",
         isSuccess: false
     }
-    var authorizers = await app.model.Authorizer.findAll({
-        fields: ['aid']
-    });
 
     var issue = await app.model.Issue.findOne({
         condition: {
@@ -35,6 +32,11 @@ app.route.post("/issueTransactionCall", async function(req, res){
         isSuccess: false
     }
 
+    if(issue.status === 'pending') return {
+        message: "Payslip not Authorized",
+        isSuccess: false
+    }
+
     if(issue.iid !== req.query.iid) return {
         message: "Invalid issuer",
         isSuccess: false
@@ -42,23 +44,23 @@ app.route.post("/issueTransactionCall", async function(req, res){
     
     var employee = await app.model.Employee.findOne({
         condition: {
-            empID: payslip.empid
+            empid: payslip.empid
         }
     });
     if(!employee) return {
         message: "Invalid employee",
         isSuccess: false
     }
+
+    payslip.identity = JSON.parse(Buffer.from(payslip.identity, 'base64').toString());
+    payslip.earnings = JSON.parse(Buffer.from(payslip.earnings, 'base64').toString());
+    payslip.deductions = JSON.parse(Buffer.from(payslip.deductions, 'base64').toString());
     
     // if(issue.status !== "authorized") return "Payslip not authorized yet";
 
-    var args = "[\"" + employee.walletAddress + "\"," + "\"payslip\"";
-    for(i in payslip){
-        args += ",\"" + payslip[i] + "\"";
-    }
-    args += "]";
+    var array = [employee.walletAddress, "payslip", payslip];
 
-    transactionParams.args = args;
+    transactionParams.args = JSON.stringify(array);
     transactionParams.type = 1003;
     transactionParams.fee = req.query.fee;
     transactionParams.secret = req.query.secret;

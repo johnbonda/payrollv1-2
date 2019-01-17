@@ -50,6 +50,11 @@ module.exports = {
             name: 'transactionId',
             type: 'String',
             length: 255
+        },
+        {
+            name: 'category',
+            type: 'String',
+            length: 255
         }
     ]
 }

@@ -15,7 +15,7 @@ app.route.post('/generateEmployees', async function(req, cb){
     for(var i = count.empid+1; i <= count.empid+req.query.count; i++){
         var creat = {
             email: prefix + "PEEmail" + i + "@yopmail.com",
-            empID: prefix + "Employee" + i,
+            empid: prefix + "Employee" + i,
             name: prefix + "PEName" + i,
             designation: prefix + "PEmplDesignation" + i,
             bank: prefix + "PEBank" + i,
@@ -48,7 +48,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
             var payslip = {
                 pid: prefix + "PPId" + (i+1)*j,
                 email: prefix + employees[i].email,
-                empid: prefix + employees[i].empID,
+                empid: prefix + employees[i].empid,
                 name: prefix + employees[i].name,
                 employer: prefix + "PPEmployer",
                 month: prefix + "PPMonth" + j,
@@ -79,7 +79,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 timestampp: new Date().getTime().toString(),
                 status: "issued",
                 count: 10,
-                empid: employees[i].empID,
+                empid: employees[i].empid,
                 transactionId: '-'
             });
 
