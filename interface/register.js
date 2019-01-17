@@ -548,8 +548,7 @@ app.route.post('/authorizer/reject',async function(req,cb){
 
     var issue = await app.model.Issue.findOne({
         condition: {
-            pid: pid, 
-            deleted: '0'
+            pid: req.query.pid
         }
     });
 
@@ -952,7 +951,8 @@ async function monthStatus(month, year, employee){
         if(checkRejected) return {
             name: employee.name,
             designation: employee.designation,
-            status: "Rejected"
+            status: "Rejected",
+            pid: checkRejected.pid
         }
 
         return {
@@ -971,7 +971,8 @@ async function monthStatus(month, year, employee){
         return {
             name: employee.name,
             designation: employee.designation,
-            status: "Issued"
+            status: "Issued",
+            pid: issue.pid
         }
     }
 
@@ -988,7 +989,8 @@ async function monthStatus(month, year, employee){
     return {
         name: employee.name,
         designation: employee.designation,
-        status: "Initiated"
+        status: "Initiated",
+        pid: issue.pid
     }
 }
 
