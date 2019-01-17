@@ -118,11 +118,13 @@ app.route.post('/employee/id/exists', async function(req, cb){
     for(i in fields){
         let condition = {};
         condition[fields[i]] = req.query.text;
-        let employee = await app.model.Employee.findOne({
+        let employee = await app.model.Employee.findAll({
             condition: condition
         });
-        if(employee){
-            employee.identity = JSON.parse(Buffer.from(employee.identity, 'base64').toString()); 
+        if(employee.length){
+            for(i in employee){
+            employee[i].identity = JSON.parse(Buffer.from(employee[i].identity, 'base64').toString()); 
+            }
             return {
                 employee: employee,
                 isSuccess: true,
@@ -130,11 +132,13 @@ app.route.post('/employee/id/exists', async function(req, cb){
                 status: "employee"
             }
         }
-        let pendingEmp = await app.model.Pendingemp.findOne({
+        let pendingEmp = await app.model.Pendingemp.findAll({
             condition: condition
         });
-        if(pendingEmp){
-            pendingEmp.identity = JSON.parse(Buffer.from(pendingEmp.identity, 'base64').toString()); 
+        if(pendingEmp.length){
+            for(i in pendingEmp){
+            pendingEmp[i].identity = JSON.parse(Buffer.from(pendingEmp[i].identity, 'base64').toString()); 
+            }
             return {
                 employee: pendingEmp,
                 isSuccess: true,
