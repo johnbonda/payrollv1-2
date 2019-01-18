@@ -446,7 +446,9 @@ app.route.post('/payslip/statistic', async function(req, cb){
 
     if(issue.status === 'rejected'){
         var rejected = await app.model.Rejected.findOne({
-            pid: req.query.pid
+            condition: {
+                pid: req.query.pid
+            }
         });
         var authorizer = await app.model.Authorizer.findOne({
             aid: rejected.aid
