@@ -451,7 +451,9 @@ app.route.post('/payslip/statistic', async function(req, cb){
             }
         });
         var authorizer = await app.model.Authorizer.findOne({
+            condition: {
             aid: rejected.aid
+            }
         });
         return {
             rejectedBy: authorizer,
