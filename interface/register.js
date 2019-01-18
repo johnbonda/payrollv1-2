@@ -779,7 +779,7 @@ app.route.post("/registerEmployee", async function(req, cb){
                 email: email,
                 //empid: app.autoID.increment('employee_max_empid'),
                 empid: uuid,
-                name: name + lastName,
+                name: name + " " +lastName,
                 designation: designation,
                 bank: bank,
                 accountNumber: accountNumber,
@@ -1100,9 +1100,16 @@ app.route.post('/user/sharePayslips', async function(req, cb){
         condition: {
             pid: {
                 $in: req.query.pids
-            }
+            },
+            status: 'issued'
         }
     });
+
+    for(i in payslips){
+        payslips[i].identity = JSON.parse(Buffer.from(payslips[i].identity, 'base64').toString());
+        payslips[i].earnings = JSON.parse(Buffer.from(payslips[i].earnings, 'base64').toString());
+        payslips[i].deductions = JSON.parse(Buffer.from(payslips[i].deductions, 'base64').toString());
+    }
 
     var mailBody = {
         mailType: "sendPayslips",
