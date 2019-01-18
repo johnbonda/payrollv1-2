@@ -331,7 +331,8 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     }
     
     var numberOfAuths = await app.model.Authorizer.count({
-        category: employee.category
+        category: employee.category,
+        deleted: '0'
     });
     if(!numberOfAuths){
         issue.status = "authorized"
