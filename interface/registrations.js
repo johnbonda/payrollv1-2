@@ -481,6 +481,10 @@ app.route.post('/payslip/statistic', async function(req, cb){
         signatures[i].email = authorizer.email
     }
 
+    payslip.identity = JSON.parse(Buffer.from(payslip.identity, 'base64').toString());
+    payslip.earnings = JSON.parse(Buffer.from(payslip.earnings, 'base64').toString());
+    payslip.deductions = JSON.parse(Buffer.from(payslip.deductions, 'base64').toString());
+
     var result = {
         issue: issue,
         payslip: payslip,
