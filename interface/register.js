@@ -1100,8 +1100,7 @@ app.route.post('/user/sharePayslips', async function(req, cb){
         condition: {
             pid: {
                 $in: req.query.pids
-            },
-            status: 'issued'
+            }
         }
     });
 
