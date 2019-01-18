@@ -122,8 +122,8 @@ app.route.post('/employee/id/exists', async function(req, cb){
             condition: condition
         });
         if(employee.length){
-            for(i in employee){
-            employee[i].identity = JSON.parse(Buffer.from(employee[i].identity, 'base64').toString()); 
+            for(j in employee){
+            employee[j].identity = JSON.parse(Buffer.from(employee[j].identity, 'base64').toString()); 
             }
             return {
                 employee: employee,
@@ -136,8 +136,8 @@ app.route.post('/employee/id/exists', async function(req, cb){
             condition: condition
         });
         if(pendingEmp.length){
-            for(i in pendingEmp){
-            pendingEmp[i].identity = JSON.parse(Buffer.from(pendingEmp[i].identity, 'base64').toString()); 
+            for(j in pendingEmp){
+            pendingEmp[j].identity = JSON.parse(Buffer.from(pendingEmp[j].identity, 'base64').toString()); 
             }
             return {
                 employee: pendingEmp,

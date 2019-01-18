@@ -512,6 +512,23 @@ app.route.post('/authorizer/rejecteds', async function(req, cb){
             aid: req.query.aid
         }
     });
+    for(i in rejecteds){
+        let payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: rejecteds[i].pid
+            }
+        });
+        rejecteds[i].employee = payslip.email;
+        rejecteds[i].month = payslip.month;
+        rejecteds[i].year = payslip.year;
+
+        var issuer = await app.model.Issuer.findOne({
+            condition: {
+                iid: rejecteds[i].iid
+            }
+        });
+        rejecteds[i].issuedBy = issuer.email
+    }
     return {
         rejectedDetails: rejecteds,
         isSuccess: true
