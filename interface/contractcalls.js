@@ -10,6 +10,13 @@ app.route.post("/issueTransactionCall", async function(req, res){
     logger.info("Entered /issueTransactionCall API");
     var transactionParams = {};
     var pid = req.query.pid;
+
+    var issuer = await app.model.Issuer.findOne({
+        condition: {
+            iid: req.query.iid
+        }
+    });
+
     var payslip = await app.model.Payslip.findOne({
         condition: {
             pid: pid
@@ -83,6 +90,14 @@ app.route.post("/issueTransactionCall", async function(req, res){
     }
 
     mailCall.call("POST", "", mailBody, 0);
+
+    var activityMessage = issuer.email + " has issued payslip " + pid;
+    app.sdb.create('activity', {
+        activityMessage: activityMessage,
+        pid: pid,
+        timestampp: new Date().getTime(),
+        atype: 'payslip'
+    });
 
     return response;
 })

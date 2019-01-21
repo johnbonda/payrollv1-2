@@ -119,6 +119,7 @@ app.route.post('/userlogin', async function (req, cb) {
  app.route.post('/usersignup', module.exports.signup);
 
  app.route.post('/registerEmployeeToken', async function(req, cb){
+
         await locker("registerEmployeeToken@" + req.query.token);
      logger.log("Entered /registerEmployeeToken API" + req.query.token);
      var options = {
@@ -149,6 +150,15 @@ app.route.post('/userlogin', async function (req, cb) {
      app.sdb.create("employee", result);
 
      app.sdb.del('pendingemp', {email: result.email});
+
+     var activityMessage = result.email + " is registered as an Employee in " + result.category + " department.";
+    app.sdb.create('activity', {
+        activityMessage: activityMessage,
+        pid: result.email,
+        timestampp: new Date().getTime(),
+        atype: 'employee'
+    });
+
      return {
          isSuccess: true
      };

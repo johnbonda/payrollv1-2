@@ -23,7 +23,7 @@ module.exports = {
             length: 255,
         },
         {
-            name: 'timestamp',
+            name: 'timestampp',
             type: 'String',
             length: 255,
         },

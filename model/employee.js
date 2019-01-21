@@ -38,6 +38,11 @@ module.exports = {
             length: 1000,
         },
         {
+            name: 'iid',
+            type: 'String',
+            length: 1000,
+        },
+        {
             name: 'salary',
             type: 'String',
             length: 255,

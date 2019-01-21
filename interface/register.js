@@ -268,7 +268,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         grossSalary:req.query.grossSalary,
         totalDeductions:req.query.totalDeductions,
         netSalary:req.query.netSalary,
-        timestamp: timestamp.toString(),
+        timestampp: timestamp.toString(),
         deleted: '0'
      };
      issuerid=req.query.issuerid;
@@ -346,6 +346,15 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     app.sdb.create("issue", issue);
     
     app.autoID.increment('payslip_max_pid');
+
+    var activityMessage = "Payslip initiated for " + employee.email + " for the month " + payslip.month + " " + payslip.year + " by  " + issuer.email;
+    app.sdb.create('activity', {
+        activityMessage: activityMessage,
+        pid: payslip.pid,
+        timestampp: new Date().getTime(),
+        atype: 'payslip'
+    });
+
     return {
         message: "Payslip initiated",
         isSuccess: true
@@ -519,6 +528,15 @@ app.route.post('/authorizer/authorize',async function(req,cb){
 
         var count = issue.count + 1;
         app.sdb.update('issue', {count: count}, {pid: issue.pid});
+
+        var activityMessage = checkauth.email + " has authorized payslip " + pid + " which was issued by " + issuer.email;
+        app.sdb.create('activity', {
+            activityMessage: activityMessage,
+            pid: pid,
+            timestampp: new Date().getTime(),
+            atype: 'payslip'
+        });
+
         return {
             message: "Successfully Authorized",
             isSuccess: true
@@ -553,6 +571,12 @@ app.route.post('/authorizer/reject',async function(req,cb){
         }
     });
 
+    var issuer = await app.model.Issuer.findOne({
+        condition: {
+            iid: issue.iid
+        }
+    })
+
     var pid = req.query.pid;
     var message = req.query.message;
     //mail code is written here 
@@ -576,6 +600,15 @@ app.route.post('/authorizer/reject',async function(req,cb){
     }
 
     mailCall.call("POST", "", mailBody, 0);
+
+    var activityMessage = authorizer.email + " has rejected payslip " + pid + " which was issued by " + issuer.email;
+    app.sdb.create('activity', {
+        activityMessage: activityMessage,
+        pid: pid,
+        timestampp: new Date().getTime(),
+        atype: 'payslip'
+    });
+
 });
 
 // app.route.post('/searchEmployee', async function(req, cb){
@@ -785,6 +818,7 @@ app.route.post("/registerEmployee", async function(req, cb){
                 bank: bank,
                 accountNumber: accountNumber,
                 identity: identity,
+                iid: issuer.iid,
                 salary: salary,
                 walletAddress: wallet.walletAddress,
                 category: category,
@@ -812,6 +846,14 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
             mailCall.call("POST", "", mailBody, 0);
 
+            var activityMessage = email + " is registered as an Employee in " + category + " department by " + issuer.email + ".";
+            app.sdb.create('activity', {
+                activityMessage: activityMessage,
+                pid: email,
+                timestampp: new Date().getTime(),
+                atype: 'employee'
+            });
+
             return {
                 message: "Registered",
                 isSuccess: true
@@ -838,6 +880,7 @@ app.route.post("/registerEmployee", async function(req, cb){
                 bank: bank,
                 accountNumber: accountNumber,
                 identity: identity,
+                iid: issuer.iid,
                 salary: salary,
                 token: jwtToken,
                 category: category
@@ -1260,7 +1303,7 @@ app.route.post('/registerUser/', async function(req, cb){
                     publickey: "-",
                     email: email,
                     designation: designation,
-                    timestamp: new Date().getTime(),
+                    timestampp: new Date().getTime(),
                     category: category,
                     deleted: "0"
                 });
@@ -1272,7 +1315,7 @@ app.route.post('/registerUser/', async function(req, cb){
                     publickey: "-",
                     email: email,
                     designation: designation,
-                    timestamp: new Date().getTime(),
+                    timestampp: new Date().getTime(),
                     category: category,
                     deleted: "0"
                 });
@@ -1296,7 +1339,39 @@ app.route.post('/registerUser/', async function(req, cb){
                 app.sdb.update('issue', {status: 'pending'}, {pid: authorizedPayslips[i].pid});
             }
         }
+
+        var activityMessage = email + " is registered as an " + role + " in " + category + " department";
+        app.sdb.create('activity', {
+            activityMessage: activityMessage,
+            pid: email,
+            timestampp: new Date().getTime(),
+            atype: role
+        });
+
         return {
             isSuccess: true
         }
+});
+
+app.route.post('/getActivities', async function(req, cb){
+    var count = await app.model.Activity.count({});
+    if(req.query.count === undefined) return {
+        message: "Provide count",
+        isSuccess: false
+    }
+    if(req.query.count >= count) return {
+        message: "Nil",
+        isSuccess: true
+    }
+    var activities = await app.model.Activity.findAll({
+        limit: req.query.limit,
+        offset: req.query.offset,
+        sort: {
+            timestampp: -1
+        }
+    });
+    return {
+        activities: activities,
+        isSuccess: true
+    }
 });
