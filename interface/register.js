@@ -1372,6 +1372,7 @@ app.route.post('/getActivities', async function(req, cb){
     });
     return {
         activities: activities,
-        isSuccess: true
+        isSuccess: true,
+        count: count
     }
 });
