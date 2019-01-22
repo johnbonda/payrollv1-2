@@ -380,6 +380,11 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
                 category: checkAuth.category
             }
         })
+
+        var authCount = await app.model.Authorizer.count({
+            category: checkAuth.category,
+            deleted: '0'
+        });
         var remaining = [];
         var aid = req.query.aid;
         for(p in pids){
@@ -398,6 +403,7 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
         }
         return {
             result: remaining,
+            authCount: authCount,
             isSuccess: true
         }
 });

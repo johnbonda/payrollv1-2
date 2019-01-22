@@ -350,6 +350,31 @@ app.route.post('/customFields/get', async function(req, cb){
     }
 });
 
+app.route.post('/employee/remove', async function(req, cb){
+    await locker('/employee/remove');
+    var exists = await app.model.Employee.findOne({
+        condition: {
+            empid: req.query.empid,
+            deleted: '0'
+        },
+        fields: ['email']
+    });
+    if(!exists) return {
+        message: "Invalid Employee id",
+        isSuccess: false
+    }
+    app.sdb.update('employee', { deleted: '1'}, {empid: req.query.empid});
+
+    var activityMessage = "Employee" + exists.email + " has been removed.";
+    app.sdb.create('activity', {
+        activityMessage: activityMessage,
+        pid: req.query.empid,
+        timestampp: new Date().getTime(),
+        atype: 'employee'
+    });
+    
+})
+
 app.route.post('/issuer/data', async function(req, cb){
     var issuer = await app.model.Issuer.findOne({
         condition: {
@@ -557,6 +582,27 @@ app.route.post('/payslip/issued', async function(req, cb){
             timestampp: -1
         }
     });
+
+    for(i in issues){
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: issues[i].pid
+            },
+            fields: ['email', 'month', 'year']
+        });
+        issues[i].employeeEmail = payslip.email;
+        issues[i].month = payslip.month;
+        issues[i].year = payslip.year;
+
+        var issuer = await app.model.Issuer.findOne({
+            condition: {
+                iid: issues[i].iid
+            },
+            fields: ['email']
+        });
+
+        issues[i].issuerEmail = issuer.email;
+    }
     return {
         issues: issues,
         total: count,
@@ -578,9 +624,77 @@ app.route.post('/payslip/initiated', async function(req, cb){
             timestampp: -1
         }
     });
+    for(i in issues){
+        var authCount = await app.model.Authorizer.count({
+            category: issues[i].category,
+            deleted: '0'
+        });
+        issues[i].authCount = authCount
+
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: issues[i].pid
+            },
+            fields: ['email', 'month', 'year']
+        });
+
+        issues[i].employeeEmail = payslip.email;
+        issues[i].month = payslip.month;
+        issues[i].year = payslip.year;
+
+        var issuer = await app.model.Issuer.findOne({
+            condition: {
+                iid: issues[i].iid
+            },
+            fields: ['email']
+        });
+
+        issues[i].issuerEmail = issuer.email;
+    }
     return {
         issues: issues,
         total: count,
+        isSuccess: true
+    }
+})
+
+app.route.post('/payslip/getSigns', async function(req, cb){
+    var issue = await app.model.Issue.findOne({
+        condition: {
+            pid: req.query.pid
+        }
+    });
+    if(!issue) return {
+        message: "Invalid Payslip",
+        isSuccess: false
+    }
+
+    var signed = [];
+    var unsigned = [];
+    var authorizers = await app.model.Authorizer.findAll({
+        condition: {
+            deleted: '0',
+            category: issue.category
+        }
+    });
+    for(i in authorizers){
+        var sign = await app.model.Cs.findOne({
+            condition: {
+                aid: authorizers[i].aid,
+                pid: req.query.pid
+            }
+        });
+        if(sign){
+            sign.email = authorizers[i].email
+            signed.push(sign)
+        }else{
+            unsigned.push(authorizers[i])
+        }
+    }
+    return {
+        signed: signed,
+        unsigned: unsigned,
+        authCount: authorizers.length,
         isSuccess: true
     }
 })
