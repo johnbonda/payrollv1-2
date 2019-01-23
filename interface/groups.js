@@ -698,3 +698,18 @@ app.route.post('/payslip/getSigns', async function(req, cb){
         isSuccess: true
     }
 })
+
+app.route.post('/getBanks', async function(req, cb){
+    var banks = await app.model.Employee.findAll({
+        fields: ['bank']
+    });
+    var bankSet = new Set();
+    for(i in banks){
+        bankSet.add(banks[i].bank)
+    }
+    
+    return {
+        banks: Array.from(bankSet),
+        isSuccess: true
+    }
+})
