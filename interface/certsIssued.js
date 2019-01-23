@@ -47,7 +47,7 @@ app.route.post('/recentIssued', async function(req, cb)
         condition:{
             status:"issued"
         },
-        fields:['pid', 'timestampp'], 
+        fields:['pid', 'timestampp', 'iid'], 
         sort: {
             timestampp: -1
         },
@@ -59,8 +59,19 @@ app.route.post('/recentIssued', async function(req, cb)
                 pid:res[i].pid
             }
         });
+
+        var issuer = await app.model.Issuer.findOne({
+            condition: {
+                iid: res[i].iid
+            },
+            fields: ['email']
+        })
+
         res[i].name=payslip.name;
         res[i].empid=payslip.empid;
+        res[i].month = payslip.month;
+        res[i].year = payslip.year;
+        res[i].issuedBy = issuer.email;
     } 
   return res;
 });

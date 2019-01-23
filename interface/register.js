@@ -1382,3 +1382,39 @@ app.route.post('/getActivities', async function(req, cb){
         count: count
     }
 });
+
+app.route.post('/payslip/payment', async function(req, cb){
+    var issue = await app.model.Issue.findOne({
+        condition: {
+            pid: req.query.pid
+        }
+    });
+
+    if(!issue) return {
+        message: "Invalid Payslip",
+        isSuccess: false
+    }
+
+    if(issue.status !== 'issued') return {
+        message: "Payslip not issued",
+        isSuccess: false
+    }
+
+    var paymentExists = await app.model.Payment.exists({
+        pid: req.query.pid
+    });
+
+    if(paymentExists) return {
+        message: "Payment already done",
+        isSuccess: false
+    }
+
+    app.sdb.create('payment', {
+        pid: req.query.pid,
+        orderid: req.query.orderid
+    });
+
+    return {
+        isSuccess: true
+    }
+})

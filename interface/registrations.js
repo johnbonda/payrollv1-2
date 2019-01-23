@@ -553,3 +553,96 @@ app.route.post('/authorizer/rejecteds', async function(req, cb){
     }
 });
 
+app.route.post('/getPayedPayslip', async function(req, cb){
+    var pid = req.query.pid;
+    var issue = await app.model.Issue.findOne({
+        condition: {
+            pid: pid
+        }
+    });
+
+    if(!issue) return {
+        message: "Invalid payslip id",
+        isSuccess: false
+    }
+
+    if(issue.status !== "issued") return {
+        message: "Payslip not issued yet",
+        isSuccess: false
+    }
+    
+    var payed = await app.model.Payment.findOne({
+        condition: {
+            pid: pid
+        }
+    });
+
+    if(!payed) return {
+        message: "Payslip is not payed for viewing",
+        isSuccess: false
+    }
+
+    var payslip = await app.model.Payslip.findOne({
+        condition: {
+            pid: pid
+        }
+    });
+
+    var signs = await app.model.Cs.findAll({
+        condition: {
+            pid: pid
+        }
+    });
+
+    for(i in signs){
+        var authorizer = await app.model.Authorizer.findOne({
+            condition: {
+                aid: signs[i].aid
+            }
+        });
+        signs[i].authorizer = authorizer.email
+    }
+
+    var result = {
+        payslip: payslip,
+        signs: signs
+    }
+
+    result = Buffer.from(JSON.stringify(result)).toString('base64');
+
+    return {
+        result: result,
+        isSuccess: true
+    }
+    
+    // var payslip = await app.model.Payslip.findOne({
+    //     condition: {
+    //         pid: pid
+    //     }
+    // });
+    
+    // var payed = await app.model.Payment.findOne({
+    //     condition: {
+    //         pid: pid
+    //     }
+    // });
+
+    // if(payed) return {
+    //     payslip: payslip,
+    //     payment: true,
+    //     isSuccess: true
+    // }
+
+    // delete payslip.earnings;
+    // delete payslip.deductions;
+    // delete payslip.grossSalary;
+    // delete payslip.totalDeductions;
+    // delete payslip.netSalary;
+
+    // return {
+    //     payslip: payslip,
+    //     payment: false,
+    //     isSuccess: true
+    // }
+})
+
