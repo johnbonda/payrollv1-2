@@ -67,7 +67,8 @@ app.route.post('/authorizers/data', async function(req, cb){
 app.route.post('/authorizers/getId', async function(req, cb){
     var result = await app.model.Authorizer.findOne({
         condition:{
-            email: req.query.email
+            email: req.query.email,
+            deleted: '0'
         }
     });
     if(result){
@@ -103,7 +104,8 @@ app.route.post('/employees/getId', async function(req, cb){
 app.route.post('/issuers/getId', async function(req, cb){
     var result = await app.model.Issuer.findOne({
         condition:{
-            email: req.query.email
+            email: req.query.email,
+            deleted: '0'
         }
     });
     if(result){
