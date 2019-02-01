@@ -1376,7 +1376,7 @@ app.route.post('/getActivities', async function(req, cb){
             timestampp: -1
         }
     });
-    return {
+    return {    
         activities: activities,
         isSuccess: true,
         count: count
@@ -1384,37 +1384,81 @@ app.route.post('/getActivities', async function(req, cb){
 });
 
 app.route.post('/payslip/payment', async function(req, cb){
+
+    var paysliplink = await app.model.Paysliplink.findOne({
+        condition: {
+            link: req.query.link
+        }
+    })
+    if(!paysliplink) return {
+        message: "Invalid link",
+        isSuccess: false
+    }
+
+    if(paysliplink.payed === '1') return {
+        isSuccess: false,
+        message: "Already paid"
+    }
+
+    app.sdb.update('paysliplink', {payed: '1'}, {link: req.query.link});
+    app.sdb.update('paysliplink', {orderid: req.query.orderid}, {link: req.query.link});
+
+    return {
+        isSuccess: true
+    }
+})
+
+app.route.post('/generatePayslipLink', async function(req, cb){
     var issue = await app.model.Issue.findOne({
         condition: {
-            pid: req.query.pid
+            pid: req.query.pid,
         }
     });
-
     if(!issue) return {
         message: "Invalid Payslip",
         isSuccess: false
     }
-
     if(issue.status !== 'issued') return {
-        message: "Payslip not issued",
+        message: "Payslip not issued yet",
         isSuccess: false
     }
 
-    var paymentExists = await app.model.Payment.exists({
-        pid: req.query.pid
+    var hash = Buffer.from(issue.hash).toString('base64');
+    var link = req.query.link + "/" + hash;
+
+    var days = req.query.days || 1;
+
+    var validity = new Date().getTime() + days * 86400000;
+
+    app.sdb.create('paysliplink', {
+        link: link,
+        payed: '0',
+        validity: validity,
+        orderid: '-'
     });
 
-    if(paymentExists) return {
-        message: "Payment already done",
-        isSuccess: false
+    var payslip = await app.model.Payslip.findOne({
+        condition: {
+            pid: req.query.pid
+        },
+        fields: ['name', 'month', 'year', 'employer']
+    });
+
+    var mailBody = {
+        mailType: "sendPayslipLink",
+        mailOptions: {
+            to: [req.query.email],
+            name: payslip.name,
+            link: link,
+            month: payslip.month,
+            year: payslip.year,
+            employer: payslip.employer
+        }
     }
-
-    app.sdb.create('payment', {
-        pid: req.query.pid,
-        orderid: req.query.orderid
-    });
+    mailCall.call("POST", "", mailBody, 0);
 
     return {
+        link: link,
         isSuccess: true
     }
 })

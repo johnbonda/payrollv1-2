@@ -17,6 +17,17 @@ app.route.post('/issuers', async function(req, cb){
         limit: req.query.limit,
         offset: req.query.offset
     });
+    for(i in result){
+        var employeeCount = await app.model.Employee.count({
+            iid: result[i].iid
+        })
+        var issuedCount = await app.model.Issue.count({
+            iid: result[i].iid,
+            status: 'issued'
+        });
+        result[i].employeesRegistered = employeeCount;
+        result[i].issuesCount = issuedCount;
+    }
     return {
         total: total,
         issuers: result
@@ -47,6 +58,17 @@ app.route.post('/authorizers', async function(req, cb){
         limit: req.query.limit,
         offset: req.query.offset
     });
+    for(i in result){
+        var signedCount = await app.model.Cs.count({
+            aid: result[i].aid
+        });
+        var rejectedCount = await app.model.Rejected.count({
+            aid: result[i].aid
+        });
+        
+        result[i].signedCount = signedCount;
+        result[i].rejectedCount = rejectedCount;
+    }
     return {
         total: total,
         authorizer: result
