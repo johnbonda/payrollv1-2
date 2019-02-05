@@ -20,18 +20,17 @@ module.exports = {
         {
             name: 'designation',
             type: 'String',
-            length: 255,
+            length: 255
         },
         {
             name: 'timestampp',
             type: 'String',
             length: 255,
         },
-        ,
         {
-            name: 'category',
+            name: 'department',
             type: 'String',
-            length: 255,
+            length: 255
         },
         {
             name: 'deleted',

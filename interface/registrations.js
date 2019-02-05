@@ -151,7 +151,7 @@ app.route.post('/userlogin', async function (req, cb) {
 
      app.sdb.del('pendingemp', {email: result.email});
 
-     var activityMessage = result.email + " is registered as an Employee in " + result.category + " department.";
+     var activityMessage = result.email + " is registered as an Employee in " + result.department + " department.";
     app.sdb.create('activity', {
         activityMessage: activityMessage,
         pid: result.email,
@@ -473,7 +473,7 @@ app.route.post('/payslip/statistic', async function(req, cb){
     }
     
     var authorizerCount = await app.model.Authorizer.count({
-        category: issue.category,
+        department: issue.department,
         deleted: '0'
     });
     var signatures = await app.model.Cs.findAll({
@@ -500,10 +500,37 @@ app.route.post('/payslip/statistic', async function(req, cb){
         payslip: payslip,
         issuer: issuer,
         totalAuthorizers: authorizerCount,
-        signedAuthorizersCount: issue.count,
+        signedAuthorizersCount: signatures.length,
         signatures: signatures,
         isSuccess: true
     };
+
+    var authLevelName = await app.model.Deplevel.findOne({
+        condition: {
+            department: issue.department,
+            priority: Number(issue.authLevel)
+        }
+    })
+
+    var totalAuthsInLevel = await app.model.Authorizer.count({
+        department: issue.department,
+        designation: authLevelName.designation,
+        deleted: '0'
+    });
+
+    var totalLevels = await app.model.Deplevel.count({
+        department: issue.department
+    });
+
+    if(issue.status === 'pending'){
+        result.currentAuthLevel = {
+            levelNumber: authLevelName.priority + 1,
+            name: authLevelName.designation,
+            totalAuths: totalAuthsInLevel,
+            signedAuths: issue.count
+        };
+        result.totalLevels = totalLevels
+    }
 
     if(issue.status === 'issued'){
         var transaction = await app.model.Transaction.findOne({

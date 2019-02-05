@@ -284,8 +284,8 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
          message: "Invalid Issuer",
          isSuccess: false
      }
-     if(employee.category != issuer.category) return {
-         message: "Issuer and Employee category doesn't match",
+     if(employee.department != issuer.department) return {
+         message: "Issuer and Employee department doesn't match",
          isSuccess: false
      }
 
@@ -327,16 +327,36 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         count : 0,
         empid: employee.empid,
         transactionId: '-',
-        category: employee.category
+        department: employee.department
     }
     
-    var numberOfAuths = await app.model.Authorizer.count({
-        category: employee.category,
-        deleted: '0'
-    });
-    if(!numberOfAuths){
-        issue.status = "authorized"
+    var level = 0;
+
+    while(1){
+        var designation = await app.model.Deplevel.findOne({
+            condition: {
+                department: issuer.department,
+                priority: level
+            }
+        });
+        if(!designation){
+            issue.status = 'authorized',
+            level--;
+            break;
+        }
+        var authLevelCount = await app.model.Authorizer.count({
+            department: issuer.department,
+            designation: designation.designation,
+            deleted: '0'
+        });
+
+        if(authLevelCount) {
+            break;
+        }
+
+        level++;
     }
+    issue.authLevel = level;
     
     payslip.earnings = Buffer.from(JSON.stringify(req.query.earnings)).toString('base64');
     payslip.deductions = Buffer.from(JSON.stringify(req.query.deductions)).toString('base64');
@@ -374,15 +394,24 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
             isSuccess: false
         }
 
+        var priority = await app.model.Deplevel.findOne({
+            condition: {
+                department: checkAuth.department,
+                designation: checkAuth.designation
+            }
+        });
+
         var pids = await app.model.Issue.findAll({
             condition:{
                 status:"pending",
-                category: checkAuth.category
+                department: checkAuth.department,
+                authLevel: priority.priority
             }
-        })
+        });
 
         var authCount = await app.model.Authorizer.count({
-            category: checkAuth.category,
+            department: checkAuth.department,
+            designation: checkAuth.designation,
             deleted: '0'
         });
         var remaining = [];
@@ -464,8 +493,19 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             isSuccess: false
         }
 
-        if(issue.category !== checkauth.category) return {
-            message: "Paylsip and Authorizer category doesn't match",
+        var designation = await app.model.Deplevel.findOne({
+            condition: {
+                department: issue.department,
+                priority: issue.authLevel
+            }
+        });
+        if(designation.designation !== checkauth.designation) return {
+            message: "Authlevel and designation mismatch",
+            isSuccess: false
+        }
+
+        if(issue.department !== checkauth.department) return {
+            message: "Paylsip and Authorizer department doesn't match",
             isSuccess: false
         }
 
@@ -515,7 +555,8 @@ app.route.post('/authorizer/authorize',async function(req,cb){
         var base64sign = (util.getSignatureByHash(hash, secret)).toString('base64');
         
         var authCount = await app.model.Authorizer.count({
-            category: checkauth.category,
+            department: checkauth.department,
+            designation: checkauth.designation,
             deleted: '0'
         });
 
@@ -527,13 +568,47 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             timestampp: new Date().getTime().toString(),
             deleted: '0'
         });
-
-        if(issue.count === authCount - 1){
-            app.sdb.update('issue', {status: 'authorized'}, {pid: issue.pid})
-        }
-
         var count = issue.count + 1;
         app.sdb.update('issue', {count: count}, {pid: issue.pid});
+
+        if(issue.count === authCount - 1){
+            var level = await app.model.Deplevel.findOne({
+                condition: {
+                    department: checkauth.department,
+                    designation: checkauth.designation
+                }
+            });
+
+            level = level.priority + 1;
+
+            while(1){
+                var designation = await app.model.Deplevel.findOne({
+                    condition: {
+                        department: issuer.department,
+                        priority: level
+                    }
+                });
+                if(!designation){
+                    app.sdb.update('issue', {status: 'authorized'}, {pid: issue.pid});
+                    level--;
+                    break;
+                }
+                var authLevelCount = await app.model.Authorizer.count({
+                    department: issuer.department,
+                    designation: designation.designation,
+                    deleted: '0'
+                });
+        
+                if(authLevelCount) {
+                    break;
+                }
+        
+                level++;
+            }
+            app.sdb.update('issue', {authLevel: level}, {pid: issue.pid});
+            app.sdb.update('issue', {count: 0}, {pid: issue.pid})
+            
+        }
 
         var activityMessage = checkauth.email + " has authorized payslip " + pid + " which was issued by " + issuer.email;
         app.sdb.create('activity', {
@@ -725,7 +800,7 @@ app.route.post("/registerEmployee", async function(req, cb){
         isSuccess: false
     }
 
-    var category = issuer.category;
+    var department = issuer.department;
 
         var result = await app.model.Employee.exists({
             email: email,
@@ -746,11 +821,11 @@ app.route.post("/registerEmployee", async function(req, cb){
             isSuccess: false
         }
 
-        result = await app.model.Category.exists({
-            name: category
+        result = await app.model.Deplevel.exists({
+            department: department
         });
         if(!result) return {
-            message: "Invalid Category",
+            message: "Invalid Department",
             isSuccess: false
         }
 
@@ -827,7 +902,7 @@ app.route.post("/registerEmployee", async function(req, cb){
                 iid: issuer.iid,
                 salary: salary,
                 walletAddress: wallet.walletAddress,
-                category: category,
+                department: department,
                 deleted: "0"
             }
 
@@ -852,7 +927,7 @@ app.route.post("/registerEmployee", async function(req, cb){
             }
             mailCall.call("POST", "", mailBody, 0);
 
-            var activityMessage = email + " is registered as an Employee in " + category + " department by " + issuer.email + ".";
+            var activityMessage = email + " is registered as an Employee in " + department + " department by " + issuer.email + ".";
             app.sdb.create('activity', {
                 activityMessage: activityMessage,
                 pid: email,
@@ -889,7 +964,7 @@ app.route.post("/registerEmployee", async function(req, cb){
                 iid: issuer.iid,
                 salary: salary,
                 token: jwtToken,
-                category: category
+                department: department
             }
             app.sdb.create("pendingemp", crea);
             console.log("Asking address");
@@ -1178,6 +1253,213 @@ app.route.post('/user/sharePayslips', async function(req, cb){
     }
 })
 
+// async function userRegistration(email, name, countryCode, countryId, type){
+//     var request = {
+//         query: {
+//             email: email
+//         }
+//     }
+//     var response = await registrations.exists(request, 0);
+
+//     function makePassword() {
+//         var text = "";
+//         var caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+//         var smalls = "abcdefghijklmnopqrstuvwxyz";
+//         var symbols = "!@$";
+//         var numbers = "1234567890";
+    
+//         for (var i = 0; i < 3; i++){
+//         text += caps.charAt(Math.floor(Math.random() * caps.length));
+//         text += smalls.charAt(Math.floor(Math.random() * smalls.length));
+//         text += symbols.charAt(Math.floor(Math.random() * symbols.length));
+//         text += numbers.charAt(Math.floor(Math.random() * numbers.length));
+//         }
+//         return text;
+//     }
+
+//     var password = makePassword();        
+
+//     if(!response.isSuccess){
+//         var req = {
+//             query: {
+//                 countryId:countryId,
+//                 countryCode:countryCode,
+//                 email:email,
+//                 name:name,
+//                 password:password,
+//                 type:type
+//             }
+//         }
+//         var resultt = await registrations.signup(req, 0);
+//         if(resultt !== "success") return {
+//             message: JSON.stringify(resultt),
+//             isSuccess: false
+//         }
+
+//         var wallet = {
+//             password: password
+//         }
+
+//         var mailBody = {
+//             mailType: "sendRegistered",
+//             mailOptions: {
+//                 to: [email],
+//                 empname: name,
+//                 wallet: wallet
+//             }
+//         }
+//         mailCall.call("POST", "", mailBody, 0);
+
+//         logger.info("Registered a new user");
+//     }
+
+//     return {
+//         isSuccess: true
+//     }
+// }
+
+// app.route.post('/registerIssuer', async function(req, cb){
+//     await locker("registerIssuer");
+
+//     var email = req.query.email;
+//     var designation = req.query.designation;
+//     var countryCode = req.query.countryCode;
+//     var countryId = req.query.countryId;
+//     var name = req.query.name;
+//     var type = req.query.type;
+//     var dappid = req.query.dappid;
+//     var department = req.query.department;
+
+//     result = await app.model.Issuer.exists({
+//         email: email,
+//         deleted: '0'
+//     });
+
+//     if(result){
+//         logger.error("User already registered");
+//         return {
+//             message: "User already registered",
+//             isSuccess: false
+//         }
+//     }
+
+//     let departmentCheck = await app.model.Deplevel.exists({
+//         department: department
+//     });
+//     if(!departmentCheck) return {
+//         message: "Invalid department",
+//         isSuccess: false
+//     }
+
+//     var bkvsRegistration = await userRegistration(email, name, countryCode, countryId, type);
+
+//     if(!bkvsRegistration.isSuccess) return bkvsRegistration;
+
+//     var mapObj = {
+//         email: email,
+//         dappid: dappid,
+//         role: role
+//     }
+//     var mapcall = await SuperDappCall.call('POST', "/mapUser", mapObj);
+//     // Need some exception handling flow for the case when a email with a particular role is already registered on the dapp.
+//     if(!mapcall.isSuccess) return mapcall;
+
+//     app.sdb.create('issuer', {
+//         iid: app.autoID.increment('issuer_max_iid'),
+//         publickey: "-",
+//         email: email,
+//         designation: designation,
+//         timestampp: new Date().getTime(),
+//         category: category,
+//         deleted: "0"
+//     });
+//     logger.info("Created an issuer");
+
+//     var activityMessage = email + " is registered as an issuer in " + department + " department";
+//     app.sdb.create('activity', {
+//         activityMessage: activityMessage,
+//         pid: email,
+//         timestampp: new Date().getTime(),
+//         atype: "issuer"
+//     });
+
+//     return {
+//         isSuccess: true
+//     }
+
+// })
+
+// app.route.post('/registerAuthorizer', async function(req, cb){
+//     await locker("registerAuthorizer");
+
+//     var email = req.query.email;
+//     var designation = req.query.designation;
+//     var countryCode = req.query.countryCode;
+//     var countryId = req.query.countryId;
+//     var name = req.query.name;
+//     var type = req.query.type;
+//     var dappid = req.query.dappid;
+//     var department = req.query.department;
+
+//     result = await app.model.Authorizer.exists({
+//         email: email,
+//         deleted: '0'
+//     });
+
+//     if(result){
+//         logger.error("User already registered");
+//         return {
+//             message: "User already registered",
+//             isSuccess: false
+//         }
+//     }
+
+//     let departmentCheck = await app.model.Deplevel.exists({
+//         department: department
+//     });
+//     if(!departmentCheck) return {
+//         message: "Invalid department",
+//         isSuccess: false
+//     }
+
+//     var bkvsRegistration = await userRegistration(email, name, countryCode, countryId, type);
+
+//     if(!bkvsRegistration.isSuccess) return bkvsRegistration;
+
+//     var mapObj = {
+//         email: email,
+//         dappid: dappid,
+//         role: role
+//     }
+//     var mapcall = await SuperDappCall.call('POST', "/mapUser", mapObj);
+//     // Need some exception handling flow for the case when a email with a particular role is already registered on the dapp.
+//     if(!mapcall.isSuccess) return mapcall;
+
+//     app.sdb.create('issuer', {
+//         iid: app.autoID.increment('issuer_max_iid'),
+//         publickey: "-",
+//         email: email,
+//         designation: designation,
+//         timestampp: new Date().getTime(),
+//         category: category,
+//         deleted: "0"
+//     });
+//     logger.info("Created an issuer");
+
+//     var activityMessage = email + " is registered as an authorizer.";
+//     app.sdb.create('activity', {
+//         activityMessage: activityMessage,
+//         pid: email,
+//         timestampp: new Date().getTime(),
+//         atype: "authorizer"
+//     });
+
+//     return {
+//         isSuccess: true
+//     }
+
+// })
+
 app.route.post('/registerUser/', async function(req, cb){
     var email = req.query.email;
     var designation = req.query.designation;
@@ -1187,7 +1469,7 @@ app.route.post('/registerUser/', async function(req, cb){
     var type = req.query.type;
     var dappid = req.query.dappid;
     var role = req.query.role;
-    var category = req.query.category;
+    var department = req.query.department;
 
         logger.info("Entered registerUser with email: " + email + " and role: " + role + "and dappid: " + dappid);
         console.log("Entered Register User");
@@ -1207,6 +1489,18 @@ app.route.post('/registerUser/', async function(req, cb){
                     email: email,
                     deleted: '0'
                 });
+                var deplevel = await app.model.Deplevel.findOne({
+                    condition: {
+                        department: department,
+                        designation: req.query.designation
+                    }
+                });
+
+                if(!deplevel) return {
+                    message: "Invalid department or position",
+                    isSuccess: false
+                }
+
                 break;
 
             default: 
@@ -1225,12 +1519,11 @@ app.route.post('/registerUser/', async function(req, cb){
             }
         }
 
-        let categoryCheck = await app.model.Category.exists({
-            name: category,
-            deleted: '0'
+        let departmentCheck = await app.model.Deplevel.exists({
+            department: department
         });
-        if(!categoryCheck) return {
-            message: "Invalid category",
+        if(!departmentCheck) return {
+            message: "Invalid department",
             isSuccess: false
         }
 
@@ -1310,7 +1603,7 @@ app.route.post('/registerUser/', async function(req, cb){
                     email: email,
                     designation: designation,
                     timestampp: new Date().getTime(),
-                    category: category,
+                    department: department,
                     deleted: "0"
                 });
                 logger.info("Created an issuer");
@@ -1322,7 +1615,7 @@ app.route.post('/registerUser/', async function(req, cb){
                     email: email,
                     designation: designation,
                     timestampp: new Date().getTime(),
-                    category: category,
+                    department: department,
                     deleted: "0"
                 });
                 logger.info("Created an authorizer");
@@ -1334,19 +1627,25 @@ app.route.post('/registerUser/', async function(req, cb){
         }
 
         if(role === 'authorizer'){
-            var authorizedPayslips = await app.model.Issue.findAll({
-                condition: {
-                    status: 'authorized',
-                    category: category
-                },
-                fields: ['pid']
-            });
-            for(i in authorizedPayslips){
-                app.sdb.update('issue', {status: 'pending'}, {pid: authorizedPayslips[i].pid});
-            }
+            // var authorizedPayslips = await app.model.Issue.findAll({
+            //     condition: {
+            //         status: 'authorized',
+            //         category: category
+            //     },
+            //     fields: ['pid']
+            // });
+            // for(i in authorizedPayslips){
+            //     app.sdb.update('issue', {status: 'pending'}, {pid: authorizedPayslips[i].pid});
+            // }
+
+            app.sdb.create('authdept', {
+                aid: app.autoID.get('authorizer_max_aid'),
+                deplevelid: deplevel.id
+            })
+
         }
 
-        var activityMessage = email + " is registered as an " + role + " in " + category + " department";
+        var activityMessage = email + " is registered as an " + role + " in " + department + " department";
         app.sdb.create('activity', {
             activityMessage: activityMessage,
             pid: email,
@@ -1376,7 +1675,7 @@ app.route.post('/getActivities', async function(req, cb){
             timestampp: -1
         }
     });
-    return {    
+    return {
         activities: activities,
         isSuccess: true,
         count: count

@@ -53,7 +53,7 @@ module.exports = {
             length: 255,
         },
         {
-            name: 'category',
+            name: 'department',
             type: 'String',
             length: 255,
         },

@@ -17,17 +17,6 @@ app.route.post('/issuers', async function(req, cb){
         limit: req.query.limit,
         offset: req.query.offset
     });
-    for(i in result){
-        var employeeCount = await app.model.Employee.count({
-            iid: result[i].iid
-        })
-        var issuedCount = await app.model.Issue.count({
-            iid: result[i].iid,
-            status: 'issued'
-        });
-        result[i].employeesRegistered = employeeCount;
-        result[i].issuesCount = issuedCount;
-    }
     return {
         total: total,
         issuers: result
@@ -58,17 +47,6 @@ app.route.post('/authorizers', async function(req, cb){
         limit: req.query.limit,
         offset: req.query.offset
     });
-    for(i in result){
-        var signedCount = await app.model.Cs.count({
-            aid: result[i].aid
-        });
-        var rejectedCount = await app.model.Rejected.count({
-            aid: result[i].aid
-        });
-        
-        result[i].signedCount = signedCount;
-        result[i].rejectedCount = rejectedCount;
-    }
     return {
         total: total,
         authorizer: result
@@ -168,28 +146,57 @@ app.route.post('/authorizers/remove', async function(req, cb){
         err: removeInSuperDapp,
         isSuccess: false
     }
-    var pendingIssues = await app.model.Issue.findAll({
+    
+    var priority = await app.model.Deplevel.findOne({
         condition: {
-            status: {
-                $in: ['pending', 'authorized']
-            },
-            category: check.category
-        },
-        fields: ['pid', 'count']
+            department: check.department,
+            designation: check.designation
+        }
     });
 
-    var countOfAuths = await app.model.Authorizer.count({
-        category: check.category,
+    var pendingPayslips = await app.model.Issue.findAll({
+        condition: {
+            status: 'pending',
+            authLevel: priority.priority
+        }
+    });
+
+    var authCount = await app.model.Authorizer.count({
+        department: check.department,
+        designation: check.designation,
         deleted: '0'
     });
 
-    for(i in pendingIssues){
-        var signed = await app.model.Cs.exists({
-            aid: req.query.aid,
-            pid: pendingIssues[i].pid
-        })
-        if(signed) app.sdb.update('issue', {count: pendingIssues[i].count - 1}, {pid: pendingIssues[i].pid});
-        else if(pendingIssues[i].count === countOfAuths - 1) app.sdb.update('issue', {status: 'authorized'}, {pid: pendingIssues[i].pid})
+    for(i in pendingPayslips){
+        if(pendingPayslips[i].count === authCount - 1){
+            var level = priority.priority + 1;
+            while(1){
+                var designation = await app.model.Deplevel.findOne({
+                    condition: {
+                        department: check.department,
+                        priority: level
+                    }
+                });
+                if(!designation){
+                    app.sdb.update('issue', {status: 'authorized'}, {pid: pendingPayslips[i].pid});
+                    level--;
+                    break;
+                }
+                var authLevelCount = await app.model.Authorizer.count({
+                    department: check.department,
+                    designation: designation.designation,
+                    deleted: '0'
+                });
+        
+                if(authLevelCount) {
+                    break;
+                }
+
+                level++;
+            }
+            app.sdb.update('issue', {authLevel: level}, {pid: pendingPayslips[i].pid});
+            app.sdb.update('issue', {count: 0}, {pid: pendingPayslips[i].pid})
+        }
     }
 
     app.sdb.update('authorizer', {deleted: '1'}, {aid: check.aid});
@@ -248,6 +255,83 @@ app.route.post('/issuers/remove', async function(req, cb){
         isSuccess: true
     };
 });
+
+app.route.post('/department/define', async function(req, cb){
+    await locker('/department/define');
+    var departments = req.query.departments;
+    for(let i in departments){
+        for(let j in departments[i].levels){
+            app.sdb.create('deplevel', {
+                id: app.autoID.increment('deplevel_max_id'),
+                department: departments[i].name,
+                designation: departments[i].levels[j],
+                priority: j
+            });
+        }
+    }
+    return {
+        isSuccess: true
+    }
+});
+
+app.route.post('/department/add', async function(req, cb){
+    await locker('/department/add');
+    var department = req.query.department
+    var departmentExists = await app.model.Deplevel.exists({
+        department: department.name
+    })
+    if(departmentExists) return {
+        message: "Department already exists",
+        isSuccess: false
+    }
+    for(let i in department.levels){
+        app.sdb.create('deplevel', {
+            id: app.autoID.increment('deplevel_max_id'),
+            department: department.name,
+            designation: department.levels[i],
+            priority: i
+        });
+    }
+    return {
+        isSuccess: true
+    }
+});
+
+app.route.post('/department/get', async function(req, cb){
+    var departments = await app.model.Deplevel.findAll({
+        fields: ['department']
+    });
+    var departmentsSet = new Set();
+    for(let i in departments) {
+        departmentsSet.add(departments[i].department)
+    };
+
+    var departmentArray = Array.from(departmentsSet);
+    console.log(departmentArray)
+    for(i in departmentArray){
+        var obj = {
+            name: departmentArray[i],
+            levels: []
+        }
+        var levels = await app.model.Deplevel.findAll({
+            condition: {
+                department: departmentArray[i]
+            },
+            fields: ['designation']
+        });
+
+        for(j in levels){
+            obj.levels.push(levels[j].designation)
+        }
+
+        departmentArray[i] = obj
+    }
+
+    return {
+        departments: departmentArray,
+        isSuccess: true
+    }
+})
 
 app.route.post('/category/define', async function(req, cb){
     await locker('/category/define');
@@ -650,7 +734,7 @@ app.route.post('/payslip/initiated', async function(req, cb){
     });
     for(i in issues){
         var authCount = await app.model.Authorizer.count({
-            category: issues[i].category,
+            department: issues[i].department,
             deleted: '0'
         });
         issues[i].authCount = authCount
@@ -698,7 +782,7 @@ app.route.post('/payslip/getSigns', async function(req, cb){
     var authorizers = await app.model.Authorizer.findAll({
         condition: {
             deleted: '0',
-            category: issue.category
+            department: issue.department
         }
     });
     for(i in authorizers){
