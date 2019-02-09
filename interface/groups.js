@@ -26,8 +26,24 @@ app.route.post('/issuers', async function(req, cb){
             iid: result[i].iid,
             status: 'issued'
         });
+
+        var departmentArray = [];
+        var departments = await app.model.Issudept.findAll({
+            condition: {
+                iid: result[i].iid
+            }
+        });
+        for(j in departments){
+            var department = await app.model.Department.findOne({
+                condition: {
+                    did: departments[j].did
+                }
+            })
+            departmentArray.push(department.name);
+        }
         result[i].employeesRegistered = employeeCount;
         result[i].issuesCount = issuedCount;
+        result[i].departments = departmentArray;
     }
     return {
         total: total,
@@ -43,6 +59,23 @@ app.route.post('/issuers/data', async function(req, cb){
         }
     });
     if(!result) return "Invalid Issuer";
+
+    var departmentArray = [];
+    var departments = await app.model.Issudept.findAll({
+        condition: {
+            iid: result.iid
+        }
+    });
+    for(j in departments){
+        var department = await app.model.Department.findOne({
+            condition: {
+                did: departments[j].did
+            }
+        })
+        departmentArray.push(department.name);
+    }
+    result.departments = departmentArray;
+
     return result;
 });
 
@@ -66,6 +99,25 @@ app.route.post('/authorizers', async function(req, cb){
         var rejectedCount = await app.model.Rejected.count({
             aid: result[i].aid
         });
+
+        var departmentArray = [];
+        var departments = await app.model.Authdept.findAll({
+            condition: {
+                aid: result[i].aid
+            }
+        });
+        for(j in departments){
+            var department = await app.model.Department.findOne({
+                condition: {
+                    did: departments[j].did
+                }
+            })
+            departmentArray.push({
+                name: department.name,
+                level: departments[j].level
+            });
+        }
+        result[i].departments = departmentArray;
         
         result[i].signedCount = signedCount;
         result[i].rejectedCount = rejectedCount;
@@ -84,6 +136,27 @@ app.route.post('/authorizers/data', async function(req, cb){
         }
     });
     if(!result) return "Invalid Authorizer";
+
+    var departmentArray = [];
+    var departments = await app.model.Authdept.findAll({
+        condition: {
+            aid: result.aid
+        }
+    });
+    for(j in departments){
+        var department = await app.model.Department.findOne({
+            condition: {
+                did: departments[j].did
+            }
+        })
+        departmentArray.push({
+            name: department.name,
+            level: departments[j].level
+        });
+    }
+    
+    result.department = departmentArray;
+
     return result;
 });
 
@@ -636,6 +709,22 @@ app.route.post('/issuer/data', async function(req, cb){
         message: "Invalid issuer",
         isSuccess: false
     }
+    var departmentArray = [];
+    var departments = await app.model.Issudept.findAll({
+        condition: {
+            iid: req.query.iid
+        }
+    });
+    for(j in departments){
+        var department = await app.model.Department.findOne({
+            condition: {
+                did: departments[j].did
+            }
+        })
+        departmentArray.push(department.name);
+    }
+    issuer.departments = departmentArray;
+
     var employeeCount = await app.model.Employee.count({
         iid: req.query.iid
     })
@@ -731,12 +820,33 @@ app.route.post('/authorizer/data', async function(req, cb){
         message: "Invalid Authorizer",
         isSuccess: false
     }
+
+    var departmentArray = [];
+    var departments = await app.model.Authdept.findAll({
+        condition: {
+            aid: req.query.aid
+        }
+    });
+    for(j in departments){
+        var department = await app.model.Department.findOne({
+            condition: {
+                did: departments[j].did
+            }
+        })
+        departmentArray.push({
+            name: department.name,
+            level: departments[j].level
+        });
+    }
+
     var signedCount = await app.model.Cs.count({
         aid: req.query.aid
     });
     var rejectedCount = await app.model.Rejected.count({
         aid: req.query.aid
     });
+
+    authorizer.departments = departmentArray;
     return {
         authorizer: authorizer,
         signedCount: signedCount,
