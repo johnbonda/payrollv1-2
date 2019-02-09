@@ -535,7 +535,7 @@ app.route.post('/department/define', async function(req, cb){
 // });
 
 app.route.post('/department/get', async function(req, cb){
-    var departments = await app.model.Departments.findAll({})
+    var departments = await app.model.Department.findAll({})
 
     return {
         departments: departments,
