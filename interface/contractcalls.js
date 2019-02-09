@@ -2,6 +2,7 @@ var DappCall = require("../utils/DappCall");
 var mailCall = require("../utils/mailCall");
 var logger = require("../utils/logger");
 var locker = require("../utils/locker");
+var blockWait = require("../utils/blockwait");
 
 
 
@@ -99,5 +100,7 @@ app.route.post("/issueTransactionCall", async function(req, res){
         atype: 'payslip'
     });
 
+    await blockWait();
+    
     return response;
 })

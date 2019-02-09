@@ -2,7 +2,12 @@ module.exports = {
     name: 'testings',
     fields: [
         {
-            name: 'transactionid',
+            name: 'test',
+            type: 'String',
+            length: 255,
+        },
+        {
+            name: 'value',
             type: 'String',
             length: 255
         }

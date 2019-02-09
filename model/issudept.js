@@ -1,10 +1,10 @@
 module.exports = {
-    name: "authdepts",
+    name: "issudepts",
     fields: [
         {
-            name: 'aid',
+            name: 'iid',
             type: 'String',
-            length: 255
+            length: 255,
         },
         {
             name: 'did',
@@ -12,14 +12,9 @@ module.exports = {
             length: 255,
         },
         {
-            name: 'level',
-            type: 'Number',
-            length: 255,
-        },
-        {
             name: 'deleted',
-            type: 'String', 
-            length: 255
+            type: 'String',
+            length: 255,
         }
     ]
 }

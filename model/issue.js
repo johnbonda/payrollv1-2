@@ -38,11 +38,6 @@ module.exports = {
         },
         {
             name: 'authLevel',
-            type: 'String',
-            length: 255
-        },
-        {
-            name:'count',
             type: 'Number',
             length: 255
         },
@@ -57,7 +52,7 @@ module.exports = {
             length: 255
         },
         {
-            name: 'department',
+            name: 'did',
             type: 'String',
             length: 255
         }

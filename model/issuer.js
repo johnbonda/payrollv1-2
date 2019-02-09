@@ -18,17 +18,7 @@ module.exports = {
             length: 255,
         },
         {
-            name: 'designation',
-            type: 'String',
-            length: 255
-        },
-        {
             name: 'timestampp',
-            type: 'String',
-            length: 255
-        },
-        {
-            name: 'department',
             type: 'String',
             length: 255
         },
