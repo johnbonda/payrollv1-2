@@ -279,8 +279,8 @@ app.route.post('/issuer/pendingIssues', async function(req, cb){
             fields:['pid', 'month', 'year']
         });
         if(!response){
-             result[obj].month = response.month;
-             result[obj].year = response.year;
+             result[obj].month = req.query.month;
+             result[obj].year = req.query.year;
              array.push(result[obj]);
         }
     }
@@ -299,6 +299,18 @@ app.route.post('/issuer/authorizedIssues', async function(req, cb){
         limit: req.query.limit,
         offset: req.query.offset
     })
+
+    for(i in authorizedIssues) {
+        var payslip = await app.model.Payslip.findOne({
+            condition: {
+                pid: authorizedIssues[i].pid
+            },
+            fields: ['name', 'month', 'year']
+        });
+        authorizedIssues[i].empname = payslip.name;
+        authorizedIssues[i].month = payslip.month,
+        authorizedIssues[i].year = payslip.year
+    }
 
     return {
         isSuccess: true,
