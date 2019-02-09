@@ -235,8 +235,13 @@ app.route.post('/issuers/statistics', async function(req, cb){
         issuers[i].issueCount = issueCount;
     }
 
+    var totalPayslipsIssued = await app.model.Issue.count({
+        status: 'issued'
+    });
+
     return {
         totalIssuers: issuers.length,
+        totalPayslipsIssued: totalPayslipsIssued,
         issuers: issuers,
         isSuccess: true
     }
@@ -253,9 +258,12 @@ app.route.post('/authorizers/statistics', async function(req, cb){
         authorizers[i].authorizedCount = authorizedCount;
     }
 
+    var totalSigns = await app.model.Cs.count({});
+
     return {
         totalAuthorizers: authorizers.length,
         authorizers: authorizers,
+        totalSigns: totalSigns,
         isSuccess: true
     }
 });
