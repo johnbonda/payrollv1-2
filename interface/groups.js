@@ -474,7 +474,7 @@ app.route.post('/issuers/remove', async function(req, cb){
         isSuccess: false
     }
 
-    app.sdb.update('issudepts', {deleted: '1'}, {iid: check.iid});
+    app.sdb.update('issudept', {deleted: '1'}, {iid: check.iid});
     
     app.sdb.update('issuer', {deleted: '1'}, {iid: check.iid});
 
