@@ -1133,3 +1133,15 @@ app.route.post('/superuser/statistics', async function(req, cb){
         isSuccess: true
     }
 })
+
+app.route.post('/issuer/employeesRegistered', async function(req, cb){
+    var employees = await app.model.Employee.findAll({
+        condition: {
+            iid: req.query.iid
+        }
+    });
+    return {
+        employeesRegistered: employees,
+        isSuccess: true
+    }
+});
