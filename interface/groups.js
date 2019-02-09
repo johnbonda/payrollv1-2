@@ -154,7 +154,7 @@ app.route.post('/authorizers/data', async function(req, cb){
             level: departments[j].level
         });
     }
-    
+
     result.department = departmentArray;
 
     return result;
@@ -1088,6 +1088,28 @@ app.route.post('/employees/getDesignations', async function(req, cb){
 
     return {
         designation: Array.from(designationSet),
+        isSuccess: true
+    }
+})
+
+app.route.post('/superuser/statistics', async function(req, cb){
+    var employeesCount = await app.model.Employee.count({
+        deleted: '0'
+    });
+    var issuersCount = await app.model.Issuer.count({
+        deleted: '0'
+    });
+    var authorizersCount = await app.model.Authorizer.count({
+        deleted: '0'
+    });
+    var payslipsCount = await app.model.Issue.count({
+        status: 'issued'
+    });
+    return {
+        employeesCount: employeesCount,
+        issuersCount: issuersCount,
+        authorizersCount: authorizersCount,
+        payslipsCount: payslipsCount,
         isSuccess: true
     }
 })
