@@ -1516,7 +1516,7 @@ app.route.post('/payslip/payment', async function(req, cb){
 })
 
 app.route.post('/generatePayslipLink', async function(req, cb){
-    await locker("/generatePayslipLink@" + pid)
+    await locker("/generatePayslipLink@" + req.query.pid)
     var issue = await app.model.Issue.findOne({
         condition: {
             pid: req.query.pid,
