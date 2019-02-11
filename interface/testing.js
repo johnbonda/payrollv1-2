@@ -61,11 +61,10 @@ app.route.post('/enterTestdata', async function(req, cb){
     }
 });
 
-app.route.postd('/datatablestesting', function (req, res) {
-    var Model = require('../blockchain.db'),
+app.route.post('/datatablestesting', function (req, res) {
         datatablesQuery = require('datatables-query'),
         params = req.body,
-        query = datatablesQuery(Model);
+        query = datatablesQuery(app.model.Testing);
 
     query.run(params).then(function (data) {
         return data;
