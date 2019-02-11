@@ -475,10 +475,6 @@ app.route.post('/payslip/statistic', async function(req, cb){
         }
     }
     
-    var authorizerCount = await app.model.Authorizer.count({
-        department: issue.department,
-        deleted: '0'
-    });
     var signatures = await app.model.Cs.findAll({
         condition: {
             pid: req.query.pid
@@ -502,7 +498,6 @@ app.route.post('/payslip/statistic', async function(req, cb){
         issue: issue,
         payslip: payslip,
         issuer: issuer,
-        totalAuthorizers: authorizerCount,
         signedAuthorizersCount: signatures.length,
         signatures: signatures,
         isSuccess: true
