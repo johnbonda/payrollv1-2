@@ -508,31 +508,15 @@ app.route.post('/payslip/statistic', async function(req, cb){
         isSuccess: true
     };
 
-    var authLevelName = await app.model.Deplevel.findOne({
+    var department = await app.model.Department.findOne({
         condition: {
-            department: issue.department,
-            priority: Number(issue.authLevel)
+            did: issue.did
         }
-    })
-
-    var totalAuthsInLevel = await app.model.Authorizer.count({
-        department: issue.department,
-        designation: authLevelName.designation,
-        deleted: '0'
-    });
-
-    var totalLevels = await app.model.Deplevel.count({
-        department: issue.department
     });
 
     if(issue.status === 'pending'){
-        result.currentAuthLevel = {
-            levelNumber: authLevelName.priority + 1,
-            name: authLevelName.designation,
-            totalAuths: totalAuthsInLevel,
-            signedAuths: issue.count
-        };
-        result.totalLevels = totalLevels
+        result.currentAuthLevel = issue.authLevel;
+        result.totalLevels = department.levels;
     }
 
     if(issue.status === 'issued'){
