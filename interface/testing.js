@@ -51,12 +51,25 @@ app.route.post('/testingUpdateCondition', async function(req, cb){
 })
 
 app.route.post('/enterTestdata', async function(req, cb){
-    var str = 'a';
-    for(i = 0; i < 10; i++){
-        str+='a';
+    var str = 0;
+    for(i = 0; i < 100; i++){
+        str++;
         app.sdb.create('testing', {
             test: "not updated yet",
             value: str
         });
     }
+});
+
+app.route.postd('/datatablestesting', function (req, res) {
+    var Model = require('../blockchain.db'),
+        datatablesQuery = require('datatables-query'),
+        params = req.body,
+        query = datatablesQuery(Model);
+
+    query.run(params).then(function (data) {
+        return data;
+    }, function (err) {
+        return err;
+    });
 })
