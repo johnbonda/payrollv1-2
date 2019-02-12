@@ -412,6 +412,10 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
         });
 
         var pendingSignatureIssues = [];
+        var total = 0;
+        var iterator = 0;
+        if(!req.query.limit) req.query.limit = Number.POSITIVE_INFINITY;
+        if(!req.query.offset) req.query.offset = 0
 
         for(let i in authdepts){
             var issues = await app.model.Issue.findAll({
@@ -428,6 +432,9 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
                     pid: issues[j].pid
                 });
                 if(!signed){
+                    total++;
+                    if(iterator++ < req.query.offset) continue;
+                    if(pendingSignatureIssues.length >= req.query.limit) continue;
                     var payslip = await app.model.Payslip.findOne({
                         condition: {
                             pid: issues[j].pid
@@ -446,6 +453,7 @@ app.route.post('/authorizers/pendingSigns',async function(req,cb){
         }
 
         return {
+            total: total,
             result: pendingSignatureIssues,
             isSuccess: true
         }
@@ -1303,7 +1311,7 @@ app.route.post('/registerUser/', async function(req, cb){
             }
         }
 
-        if(!departments) return {
+        if(role === 'issuer' && !departments) return {
             isSuccess: false,
             message: "Please define atleast one department for the user"
         }
@@ -1397,6 +1405,11 @@ app.route.post('/registerUser/', async function(req, cb){
         var mapcall = await SuperDappCall.call('POST', "/mapUser", mapObj);
         // Need some exception handling flow for the case when a email with a particular role is already registered on the dapp.
         if(!mapcall.isSuccess) return mapcall;
+
+        var returnObj = {
+            isSuccess: true
+        }
+
         switch(role){
 
             case "issuer": 
@@ -1418,6 +1431,7 @@ app.route.post('/registerUser/', async function(req, cb){
                         deleted: '0'
                     });
                 }
+                returnObj.iid = iid;
                 break;
 
             case "authorizer":
@@ -1431,14 +1445,7 @@ app.route.post('/registerUser/', async function(req, cb){
                 logger.info("Created an authorizer");
                 //Registering the authorizer in the given departments
                 aid = app.autoID.get('authorizer_max_aid')
-                for(let i in departments){
-                    app.sdb.create('authdept', {
-                        aid: aid,
-                        did: departments[i].did,
-                        level: departments[i].level,
-                        deleted: '0'
-                    });
-                }
+                returnObj.aid = aid;
                 break;
             default: return {
                 message: "Invalid role",
@@ -1456,10 +1463,59 @@ app.route.post('/registerUser/', async function(req, cb){
 
         await blockWait();
 
-        return {
-            isSuccess: true
-        }
+        return returnObj
 });
+
+app.route.post('/authorizer/assignDepartmentsAndLevels', async function(req, cb){
+    await locker('/authorizer/assignDepartmentsAndLevels@'+req.query.aid)
+    var departments = req.query.departments;
+    var authorizer = await app.model.Authorizer.findOne({
+        condition: {
+            aid: req.query.aid,
+            deleted: '0'
+        }
+    });
+    if(!authorizer) return {
+        isSuccess: false,
+        message: "Invalid Authorizer"
+    }
+
+    for(let i in departments){
+        let department = await app.model.Department.findOne({
+            condition: {
+                name: departments[i].name
+            }
+        });
+        if(!department) return {
+            isSuccess: false,
+            message: "Invalid department"
+        }
+        departments[i].did = department.did;
+        if(!departments[i].level) return {
+            isSuccess: false,
+            message: "Need to provide a level for authorizer"
+        }
+        if(departments[i].level <= 0 || departments[i].level > department.levels) return {
+            isSuccess: false,
+            message: "Provide valid levels for that department"
+        }
+    }
+
+    for(let i in departments){
+        app.sdb.create('authdept', {
+            aid: req.query.aid,
+            did: departments[i].did,
+            level: departments[i].level,
+            deleted: '0'
+        });
+    }
+
+    await blockWait();
+
+    return {
+        isSuccess: true
+    }
+})
 
 app.route.post('/getActivities', async function(req, cb){
     var count = await app.model.Activity.count({});

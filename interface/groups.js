@@ -4,33 +4,69 @@ var locker = require("../utils/locker");
 var blockWait = require("../utils/blockwait");
 
 
-
-// inputs: limit, offset
 app.route.post('/issuers', async function(req, cb){
-    logger.info("Entered /issuers API");
-    var total = await app.model.Issuer.count({
-        deleted: '0'
-    });
-    var result = await app.model.Issuer.findAll({
-        condition: {
+    if(!req.query.department){
+        var total = await app.model.Issuer.count({
             deleted: '0'
-        },
-        limit: req.query.limit,
-        offset: req.query.offset
-    });
-    for(i in result){
+        })
+        var issuers = await app.model.Issuer.findAll({
+            condition: {
+                deleted: '0'
+            },
+            limit: req.query.limit,
+            offset: req.query.offset
+        });
+    }
+    else{
+        var department = await app.model.Department.findOne({
+            condition: {
+                name: req.query.department
+            }
+        });
+        if(!department) return {
+            isSuccess: false,
+            message: "Invalid Department"
+        }
+
+        var total = await app.model.Issudept.count({
+            did: department.did,
+            deleted: '0'
+        })
+
+        var issuersDept = await app.model.Issudept.findAll({
+            condition: {
+                did: department.did,
+                deleted: '0'
+            },
+            limit: req.query.limit,
+            offset: req.query.offset
+        });
+
+        var issuers = [];
+
+        for(i in issuersDept){
+            var issuer = await app.model.Issuer.findOne({
+                condition: {
+                    iid: issuersDept[i].iid
+                }
+            })
+            issuers.push(issuer)
+        }
+    }
+
+    for(i in issuers){
         var employeeCount = await app.model.Employee.count({
-            iid: result[i].iid
+            iid: issuers[i].iid
         })
         var issuedCount = await app.model.Issue.count({
-            iid: result[i].iid,
+            iid: issuers[i].iid,
             status: 'issued'
         });
 
         var departmentArray = [];
         var departments = await app.model.Issudept.findAll({
             condition: {
-                iid: result[i].iid
+                iid: issuers[i].iid
             }
         });
         for(j in departments){
@@ -41,14 +77,14 @@ app.route.post('/issuers', async function(req, cb){
             })
             departmentArray.push(department.name);
         }
-        result[i].employeesRegistered = employeeCount;
-        result[i].issuesCount = issuedCount;
-        result[i].departments = departmentArray;
+        issuers[i].employeesRegistered = employeeCount;
+        issuers[i].issuesCount = issuedCount;
+        issuers[i].departments = departmentArray;
     }
     return {
         total: total,
-        issuers: result
-    }; 
+        issuers: issuers
+    }
 });
 
 app.route.post('/issuers/data', async function(req, cb){
@@ -79,31 +115,68 @@ app.route.post('/issuers/data', async function(req, cb){
     return result;
 });
 
-// inputs: limit, offset
 app.route.post('/authorizers', async function(req, cb){
-    logger.info("Entered /authorizers API");
-    var total = await app.model.Authorizer.count({
-        deleted: '0'
-    });
-    var result = await app.model.Authorizer.findAll({
-        condition: {
+    if(!req.query.department){
+        var total = await app.model.Authorizer.count({
             deleted: '0'
-        },
-        limit: req.query.limit,
-        offset: req.query.offset
-    });
-    for(i in result){
+        })
+        var authorizers = await app.model.Authorizer.findAll({
+            condition: {
+                deleted: '0'
+            },
+            limit: req.query.limit,
+            offset: req.query.offset
+        });
+    }
+    else{
+        var department = await app.model.Department.findOne({
+            condition: {
+                name: req.query.department
+            }
+        });
+        if(!department) return {
+            isSuccess: false,
+            message: "Invalid Department"
+        }
+
+        var total = await app.model.Authdept.count({
+            did: department.did,
+            deleted: '0'
+        })
+
+        var authorizersDept = await app.model.Authdept.findAll({
+            condition: {
+                did: department.did,
+                deleted: '0'
+            },
+            limit: req.query.limit,
+            offset: req.query.offset
+        });
+
+        var authorizers = [];
+
+        for(i in authorizersDept){
+            var authorizer = await app.model.Authorizer.findOne({
+                condition: {
+                    aid: authorizersDept[i].aid
+                }
+            });
+            authorizers.push(authorizer)
+        }
+    }
+
+    for(i in authorizers){
         var signedCount = await app.model.Cs.count({
-            aid: result[i].aid
+            aid: authorizers[i].aid
         });
         var rejectedCount = await app.model.Rejected.count({
-            aid: result[i].aid
+            aid: authorizers[i].aid
         });
 
         var departmentArray = [];
         var departments = await app.model.Authdept.findAll({
             condition: {
-                aid: result[i].aid
+                aid: authorizers[i].aid
             }
         });
         for(j in departments){
@@ -117,16 +190,16 @@ app.route.post('/authorizers', async function(req, cb){
                 level: departments[j].level
             });
         }
-        result[i].departments = departmentArray;
+        authorizers[i].departments = departmentArray;
         
-        result[i].signedCount = signedCount;
-        result[i].rejectedCount = rejectedCount;
+        authorizers[i].signedCount = signedCount;
+        authorizers[i].rejectedCount = rejectedCount;
     }
     return {
         total: total,
-        authorizer: result
-    }; 
-}); 
+        authorizers: authorizers
+    }
+})
 
 app.route.post('/authorizers/data', async function(req, cb){
     logger.info("Entered /authoirzers/data");
@@ -276,6 +349,11 @@ app.route.post('/issuer/pendingIssues', async function(req, cb){
         }
     });
     var array = []; 
+    var total = 0;
+    var iterator = 0;
+    if(!req.query.limit) req.query.limit = Number.POSITIVE_INFINITY;
+    if(!req.query.offset) req.query.offset = 0;
+
     for(obj in result){
         var options = {
             empid: result[obj].empid,
@@ -287,12 +365,17 @@ app.route.post('/issuer/pendingIssues', async function(req, cb){
             fields:['pid', 'month', 'year']
         });
         if(!response){
+            total++;
+            if(iterator++ < req.query.offset) continue;
+            if(array.length >= req.query.limit) continue;
+
              result[obj].month = req.query.month;
              result[obj].year = req.query.year;
              array.push(result[obj]);
         }
     }
     return {
+        total: total,
         pendingIssues: array,
         isSuccess: true
     }
@@ -1135,12 +1218,29 @@ app.route.post('/superuser/statistics', async function(req, cb){
 })
 
 app.route.post('/issuer/employeesRegistered', async function(req, cb){
-    var employees = await app.model.Employee.findAll({
-        condition: {
-            iid: req.query.iid
-        }
+    var issuer = await app.model.Issuer.exists({
+        iid: req.query.iid
     });
+    if(!issuer) return {
+        isSuccess: false,
+        message: "Invalid Issuer"
+    }
+    var condition = {
+        iid: req.query.iid
+    }
+
+    if(req.query.designation) condition.designation = req.query.designation;
+    if(req.query.department) condition.department = req.query.department;
+
+    var total = await app.model.Employee.count(condition)
+    var employees = await app.model.Employee.findAll({
+        condition: condition,
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+
     return {
+        total: total,
         employeesRegistered: employees,
         isSuccess: true
     }

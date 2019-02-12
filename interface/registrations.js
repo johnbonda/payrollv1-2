@@ -534,10 +534,15 @@ app.route.post('/authorizer/rejecteds', async function(req, cb){
         message: "Invalid Authorizer",
         isSuccess: false
     }
+    var total = await app.model.Rejected.count({
+        aid: req.query.aid
+    });
     var rejecteds = await app.model.Rejected.findAll({
         condition: {
             aid: req.query.aid
-        }
+        },
+        limit: req.query.limit,
+        offset: req.query.offset
     });
     for(i in rejecteds){
         let payslip = await app.model.Payslip.findOne({
@@ -557,6 +562,7 @@ app.route.post('/authorizer/rejecteds', async function(req, cb){
         rejecteds[i].issuedBy = issuer.email
     }
     return {
+        total: total,
         rejectedDetails: rejecteds,
         isSuccess: true
     }

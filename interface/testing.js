@@ -51,17 +51,15 @@ app.route.post('/testingUpdateCondition', async function(req, cb){
 })
 
 app.route.post('/enterTestdata', async function(req, cb){
-    var str = 0;
     for(i = 0; i < 100; i++){
-        str++;
         app.sdb.create('testing', {
-            test: "not updated yet",
-            value: str
+            test: "hello " + i,
+            value: i
         });
     }
 });
 
-app.route.post('/datatablestesting', function (req, res) {
+app.route.post('/datatablestesting', async function (req, res) {
         datatablesQuery = require('datatables-query'),
         params = req.body,
         query = datatablesQuery(app.model.Testing);
@@ -71,4 +69,17 @@ app.route.post('/datatablestesting', function (req, res) {
     }, function (err) {
         return err;
     });
+})
+
+app.route.post('/pagenationTesting', async function(req, cb){
+    var total = await app.model.Testing.count({});
+    var result = await app.model.Testing.findAll({
+        limit: req.query.limit,
+        offset: req.query.offset
+    })
+    return {
+        result: result,
+        total: total,
+        isSuccess: true
+    }
 })
