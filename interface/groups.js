@@ -298,7 +298,7 @@ app.route.post('/authorizer/statistic', async function(req, cb){
 
 app.route.post('/issuers/statistics', async function(req, cb){
     var issuers = await app.model.Issuer.findAll({
-        fields: ['iid']
+        fields: ['iid', 'email']
     });
     for(i in issuers){
         var issueCount = await app.model.Issue.count({
@@ -322,7 +322,7 @@ app.route.post('/issuers/statistics', async function(req, cb){
 
 app.route.post('/authorizers/statistics', async function(req, cb){
     var authorizers = await app.model.Authorizer.findAll({
-        fields: ['aid']
+        fields: ['aid', 'email']
     });
     for(i in authorizers){
         var authorizedCount = await app.model.Cs.count({
@@ -342,12 +342,18 @@ app.route.post('/authorizers/statistics', async function(req, cb){
 });
 
 app.route.post('/issuer/pendingIssues', async function(req, cb){
+
+    var condition = {
+        iid: req.query.iid,
+        deleted: '0'
+    }
+    if(req.query.department) condition[department] = req.query.department;
+    if(req.query.designation) condition[designation] = req.query.designation;
+
     var result = await app.model.Employee.findAll({
-        condition: {
-            iid: req.query.iid,
-            deleted: '0'
-        }
+        condition: condition
     });
+    
     var array = []; 
     var total = 0;
     var iterator = 0;
@@ -1245,3 +1251,33 @@ app.route.post('/issuer/employeesRegistered', async function(req, cb){
         isSuccess: true
     }
 });
+
+app.route.post('/getDepartments/authorizers', async function(req, cb){
+    var total = await app.model.Department.count({});
+    var departments = await app.model.Department.findAll({
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+    var departmentsArray = [];
+    for(i in departments){
+        var auths = await app.model.Authdept.findAll({
+            condition: {
+                did: departments[i].did,
+                deleted: '0'
+            }
+        });
+        var authArray = [];
+        for(j in auths){
+            authArray.push(auths[j].aid)
+        }
+        departmentsArray.push({
+            name: departments[i].name,
+            levels: authArray
+        });
+    }
+    return {
+        total: total,
+        departments: departmentsArray,
+        isSuccess: true
+    }
+})

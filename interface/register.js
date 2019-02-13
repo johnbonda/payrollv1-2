@@ -1466,56 +1466,101 @@ app.route.post('/registerUser/', async function(req, cb){
         return returnObj
 });
 
-app.route.post('/authorizer/assignDepartmentsAndLevels', async function(req, cb){
-    await locker('/authorizer/assignDepartmentsAndLevels@'+req.query.aid)
-    var departments = req.query.departments;
-    var authorizer = await app.model.Authorizer.findOne({
-        condition: {
-            aid: req.query.aid,
+app.route.post('/department/assignAuthorizers', async function(req, cb){
+    await locker('/department/assignAuthorizers');
+
+    var levels = req.query.levels;
+
+    for(i in levels){
+        if(levels[i] === 'null') continue;
+        var check = await app.model.Authorizer.exists({
+            aid: levels[i],
             deleted: '0'
+        });
+        if(!check) return {
+            isSuccess: false,
+            message: "Invalid authorizer"
+        }
+    }
+
+    var department = await app.model.Department.findOne({
+        condition: {
+            name: req.query.department
         }
     });
-    if(!authorizer) return {
-        isSuccess: false,
-        message: "Invalid Authorizer"
-    }
+    
 
-    for(let i in departments){
-        let department = await app.model.Department.findOne({
-            condition: {
-                name: departments[i].name
-            }
-        });
-        if(!department) return {
-            isSuccess: false,
-            message: "Invalid department"
-        }
-        departments[i].did = department.did;
-        if(!departments[i].level) return {
-            isSuccess: false,
-            message: "Need to provide a level for authorizer"
-        }
-        if(departments[i].level <= 0 || departments[i].level > department.levels) return {
-            isSuccess: false,
-            message: "Provide valid levels for that department"
-        }
-    }
-
-    for(let i in departments){
-        app.sdb.create('authdept', {
-            aid: req.query.aid,
-            did: departments[i].did,
-            level: departments[i].level,
+    if(department) {
+        app.sdb.update('authdept', {deleted: '1'}, {
+            did: department.did,
             deleted: '0'
+        });
+        app.sdb.update('department', {levels: levels.length}, {did: department.did});
+        var did = department.did
+    }
+    else{
+        app.sdb.create('department', {
+            did: app.autoID.increment('department_max_did'),
+            name: req.query.department,
+            levels: levels.length
+        });
+        var did = app.autoID.get('department_max_did');
+    }   
+    for(i in levels){
+        if(levels[i] === "null") continue;
+        app.sdb.create('authdept', {
+            aid: levels[i],
+            did: did,
+            level: Number(i) + 1,
+            deleted: '0'
+        });
+    }
+    
+    await blockWait();
+    
+    if(!department) return {
+        isSuccess: true,
+        message: "Created department and assigned"
+    
+    }
+    var pendingIssues = await app.model.Issue.findAll({
+        condition: {
+            status: 'pending',
+            did: department.did
+        }
+    });
+
+    for(i in pendingIssues){
+        var level = pendingIssues[i].authLevel;
+        while(1){
+            if(level > levels.length){
+                app.sdb.update('issue', {status: 'authorized'}, {
+                    pid: pendingIssues[i].pid
+                });
+                level--;
+                break;
+            }
+            var authLevelCount = await app.model.Authdept.count({
+                did: department.did,
+                level: level,
+                deleted: '0'
+            });
+            if(authLevelCount) break;
+
+            level++;
+        }
+        app.sdb.update('issue', {authLevel: level}, {
+            pid: pendingIssues[i].pid
         });
     }
 
     await blockWait();
 
     return {
-        isSuccess: true
+        isSuccess: true,
+        message: "Department and respective payslips updated"
     }
-})
+});
 
 app.route.post('/getActivities', async function(req, cb){
     var count = await app.model.Activity.count({});
@@ -1628,4 +1673,4 @@ app.route.post('/generatePayslipLink', async function(req, cb){
         link: link,
         isSuccess: true
     }
-});
+}); 
