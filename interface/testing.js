@@ -1,4 +1,5 @@
 var locker = require("../utils/locker");
+var blockWait = require('../utils/blockwait')
 
 app.route.post('/testingLocker', async function(req, cb){
     await locker('testingLocker');
@@ -82,4 +83,25 @@ app.route.post('/pagenationTesting', async function(req, cb){
         total: total,
         isSuccess: true
     }
+})
+
+app.route.post('/populateEmployees', async function(req, cb){
+    for(let i = 0; i < 100; i++){
+        app.sdb.create('employee', {
+            email: "dummyEmp" + i + "@yopmail.com",
+            //empid: app.autoID.increment('employee_max_empid'),
+            empid: "dummyEmpid" + i,
+            name: "dummyname" + i,
+            designation: "dummydesignation" + i,
+            bank: "dummybank" + i,
+            accountNumber: "dummyaccountNumber" + i,
+            identity: "dummyidentity" + i,
+            iid: req.query.iid,
+            salary: "dummysalary",
+            walletAddress: "dummywalletaddrss" + i,
+            department: req.query.department,
+            deleted: "0"
+        });
+    }
+    await blockWait();
 })

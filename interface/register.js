@@ -1026,20 +1026,54 @@ app.route.post("/payslip/month/status", async function(req, cb){
     logger.info("Entered /payslip/month/status API");
     var month = req.query.month;
     var year = req.query.year;
+
     var resultArray = {};
-    var total = await app.model.Employee.count({});
-    var employees = await app.model.Employee.findAll({
-        fields: ['empid', 'name', 'designation'],
-        limit: req.query.limit,
-        offset: req.query.offset
-    });
-    for(i in employees){
-        resultArray[employees[i].empid] = await monthStatus(month, year, employees[i]);
+    var total = 0;
+
+    var condition = {
+        deleted: '0'
     }
+
+    if(req.query.department){
+        condition.department = req.query.department;
+    }
+
+    var options = {
+        condition: condition
+    }
+
+    if(req.query.status){
+        var employees = await app.model.Employee.findAll(options);
+        var iterator = 0;
+        if(!req.query.limit) req.query.limit = Number.POSITIVE_INFINITY;
+        if(!req.query.offset) req.query.offset = 0;
+
+        for(i in employees){
+            var monthstatus = await monthStatus(month, year, employees[i]);
+            if(monthstatus.status === req.query.status){
+                total++;
+                if(iterator++ < req.query.offset) continue;
+                if(Object.keys(resultArray).length >= req.query.limit) continue;
+
+                resultArray[employees[i].empid] = monthstatus;
+            }
+        }
+    }
+    else {
+        options.limit = req.query.limit;
+        options.offset = req.query.offset;
+
+        var total = await app.model.Employee.count(condition);
+        var employees = await app.model.Employee.findAll(options);
+        for(i in employees){
+            resultArray[employees[i].empid] = await monthStatus(month, year, employees[i]);
+        }
+    }
+
     return {
         total: total,
         result: resultArray
-    };
+    }
 });
 
 app.route.post('/employee/payslip/month/status', async function(req, cb){

@@ -66,7 +66,8 @@ app.route.post('/issuers', async function(req, cb){
         var departmentArray = [];
         var departments = await app.model.Issudept.findAll({
             condition: {
-                iid: issuers[i].iid
+                iid: issuers[i].iid,
+                deleted: '0'
             }
         });
         for(j in departments){
@@ -176,7 +177,8 @@ app.route.post('/authorizers', async function(req, cb){
         var departmentArray = [];
         var departments = await app.model.Authdept.findAll({
             condition: {
-                aid: authorizers[i].aid
+                aid: authorizers[i].aid,
+                deleted: '0'
             }
         });
         for(j in departments){
@@ -353,7 +355,7 @@ app.route.post('/issuer/pendingIssues', async function(req, cb){
     var result = await app.model.Employee.findAll({
         condition: condition
     });
-    
+
     var array = []; 
     var total = 0;
     var iterator = 0;
@@ -1268,7 +1270,13 @@ app.route.post('/getDepartments/authorizers', async function(req, cb){
         });
         var authArray = [];
         for(j in auths){
-            authArray.push(auths[j].aid)
+            var authorizer = await app.model.Authorizer.findOne({
+                condition: {
+                    aid: auths[j].aid
+                },
+                fields: ['aid', 'email']
+            });
+            authArray.push(authorizer);
         }
         departmentsArray.push({
             name: departments[i].name,

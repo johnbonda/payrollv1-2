@@ -385,7 +385,7 @@ app.route.post('/payslip/returnHash', async function(req, cb){
     return {
         hash: issue.hash,
         isSuccess: true
-    }
+    }   
 });
 
 app.route.post('/employee/payslips/statistic', async function(req, cb){
