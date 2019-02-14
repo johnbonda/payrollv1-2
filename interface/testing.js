@@ -86,6 +86,8 @@ app.route.post('/pagenationTesting', async function(req, cb){
 })
 
 app.route.post('/populateEmployees', async function(req, cb){
+    var identity = Buffer.from(JSON.stringify(req.query.identity)).toString('base64');
+
     for(let i = 0; i < 100; i++){
         app.sdb.create('employee', {
             email: "dummyEmp" + i + "@yopmail.com",
@@ -95,7 +97,7 @@ app.route.post('/populateEmployees', async function(req, cb){
             designation: "dummydesignation" + i,
             bank: "dummybank" + i,
             accountNumber: "dummyaccountNumber" + i,
-            identity: "dummyidentity" + i,
+            identity: identity,
             iid: req.query.iid,
             salary: "dummysalary",
             walletAddress: "dummywalletaddrss" + i,
@@ -148,4 +150,6 @@ app.route.post('/populateBkvs', async function(req, cb){
             did: "1"
         })
     }
+
+    await blockWait();
 })
