@@ -105,3 +105,47 @@ app.route.post('/populateEmployees', async function(req, cb){
     }
     await blockWait();
 })
+
+
+app.route.post('/populateBkvs', async function(req, cb){
+    var identity = Buffer.from(JSON.stringify(req.query.identity)).toString('base64');
+    var earnings = Buffer.from(JSON.stringify(req.query.earnings)).toString('base64');
+    var deductions = Buffer.from(JSON.stringify(req.query.deductions)).toString('base64');
+    var status = ['pending', 'authorized', 'issued']
+    for(let i = 0; i < 100; i++){
+        var timestamp = new Date().getTime();
+        app.sdb.create('payslip', {
+            pid: "" + i,
+            email:"dummyemail" + i + "@yopmail.com",
+            empid: "JohnBonda",
+            name:"dummyname" + i,
+            employer:"dummyemployer" + i,
+            month: i%12,
+            year:"dummyyear" + i,
+            designation:"dummydesignation" + i,
+            bank:"dummybank" + i,
+            accountNumber:"dummyaccount" + i,
+            identity: identity,
+            earnings: earnings,
+            deductions: deductions,
+            grossSalary:"dummygross" + i,
+            totalDeductions:"dummydeduction" + i,
+            netSalary:"dummynetsalary" + i,
+            timestampp: timestamp.toString(),
+            deleted: '0'
+        });
+
+        app.sdb.create('issue', {
+            pid:"" + i,
+            iid: "1",
+            hash: "dummyhash" + i,
+            sign: "dummysign" + i,
+            publickey:"dummypublickey" + i,
+            timestampp:timestamp.toString(),
+            status: status[i%3],
+            empid: "JohnBonda",
+            transactionId: '-',
+            did: "1"
+        })
+    }
+})
