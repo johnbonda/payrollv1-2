@@ -1276,7 +1276,7 @@ app.route.post('/getDepartments/authorizers', async function(req, cb){
                 },
                 fields: ['aid', 'email']
             });
-            authArray.push(authorizer);
+            authArray[Number(auths[j].level) - 1] = authorizer
         }
         departmentsArray.push({
             name: departments[i].name,
