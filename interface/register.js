@@ -1034,8 +1034,8 @@ app.route.post("/payslip/month/status", async function(req, cb){
         deleted: '0'
     }
 
-    if(req.query.department){
-        condition.department = req.query.department;
+    if(req.query.designation){
+        condition.designation = req.query.designation;
     }
 
     var options = {
