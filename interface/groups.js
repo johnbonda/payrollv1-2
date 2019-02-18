@@ -470,17 +470,32 @@ app.route.post('/authorizers/getId', async function(req, cb){
             deleted: '0'
         }
     });
-    if(!result){
-        return {
-            isSuccess: false,
-            message: "Authorizer not found"
-        }
+    if(!result) return {
+        isSuccess: false,
+        message: "Authorizer not found"
+    }
+    var authdepts = await app.model.Authdept.findAll({
+        condition: {
+            aid: result.aid,
+            deleted: '0'
+        },
+        fields: ['did']
+    });
+    result.departments = [];
+    for(i in authdepts){
+        var department = await app.model.Department.findOne({
+            condition: {
+                did: authdepts[i].did
+            },
+            fields: ['name']
+        });
+        result.departments.push(department.name);
     }
     return {
         isSuccess: true,
         result: result
     }
-})
+});
 
 app.route.post('/employees/getId', async function(req, cb){
     var result = await app.model.Employee.findOne({
@@ -507,17 +522,32 @@ app.route.post('/issuers/getId', async function(req, cb){
             deleted: '0'
         }
     });
-    if(result){
-        return {
-            isSuccess: true,
-            result: result
-        }
-    }
-    return {
+    if(!result) return {
         isSuccess: false,
         message: "Issuer not found"
     }
-})
+    var issudepts = await app.model.Issudept.findAll({
+        condition: {
+            iid: result.iid,
+            deleted: '0'
+        },
+        fields: ['did']
+    });
+    result.departments = [];
+    for(i in issudepts){
+        var department = await app.model.Department.findOne({
+            condition: {
+                did: issudepts[i].did
+            },
+            fields: ['name']
+        });
+        result.departments.push(department.name);
+    }
+    return {
+        isSuccess: true,
+        result: result
+    }
+});
 
 app.route.post('/authorizers/remove', async function(req, cb){
     logger.info("Entered /authorizers/remove API");

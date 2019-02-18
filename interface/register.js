@@ -924,7 +924,7 @@ app.route.post("/registerEmployee", async function(req, cb){
             console.log(JSON.stringify(mapcall));
 
             var mailBody = {
-                mailType: "sendRegistered",
+                mailType: "sendEmployeeRegistered",
                 mailOptions: {
                     to: [creat.email],
                     empname: creat.name,
@@ -1487,6 +1487,18 @@ app.route.post('/registerUser/', async function(req, cb){
             }
         }
 
+        if(response.isSuccess){
+            var mailBody = {
+                mailType: "sendWelcome",
+                mailOptions: {
+                    to: [creat.email],
+                    name: name,
+                    role: role
+                }
+            }
+            mailCall.call("POST", "", mailBody, 0);
+        }
+
         var activityMessage = email + " is registered as an " + role;
         app.sdb.create('activity', {
             activityMessage: activityMessage,
@@ -1497,7 +1509,7 @@ app.route.post('/registerUser/', async function(req, cb){
 
         await blockWait();
 
-        return returnObj
+        return returnObj;
 });
 
 app.route.post('/department/assignAuthorizers', async function(req, cb){
