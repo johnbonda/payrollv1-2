@@ -1654,7 +1654,7 @@ app.route.post('/payslip/payment', async function(req, cb){
     app.sdb.update('paysliplink', {payed: '1'}, {link: req.query.link});
     app.sdb.update('paysliplink', {orderid: req.query.orderid}, {link: req.query.link});
 
-    await blockWait();
+    //await blockWait();
 
     
     return {
