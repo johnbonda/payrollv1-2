@@ -1491,7 +1491,7 @@ app.route.post('/registerUser/', async function(req, cb){
             var mailBody = {
                 mailType: "sendWelcome",
                 mailOptions: {
-                    to: [creat.email],
+                    to: [email],
                     name: name,
                     role: role
                 }
