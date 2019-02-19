@@ -1199,6 +1199,12 @@ app.route.post('/authorizer/authorizedAssets', async function(req, cb){
             }
         });
 
+        var department = await app.model.Department.findOne({
+            condition: {
+                did: issue.did
+            }
+        });
+        issue.totalLevels = department.levels;
         issue.email = payslip.email;
         result.push(issue);
     }
