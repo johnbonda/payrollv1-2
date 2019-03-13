@@ -16,9 +16,10 @@ module.exports = {
         }
     },
 
-    saveTransactionId: async function(){
+    saveTransactionId: async function(hey, lol){
         app.sdb.create('testing', {
-            transactionid: this.trs.id
+            test: hey,
+            value: lol
         });
     }
 }
