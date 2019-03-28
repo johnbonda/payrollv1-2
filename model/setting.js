@@ -20,6 +20,16 @@ module.exports = {
             name: 'identity',
             type: 'String',
             length: 255
+        },
+        {
+            name: 'otherEarnings',
+            type: 'String',
+            length: 2000,
+        },
+        {
+            name: 'otherDeductions',
+            type: 'String',
+            length: 2000,
         }
     ]
 }

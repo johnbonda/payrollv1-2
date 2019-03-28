@@ -765,9 +765,11 @@ app.route.post('/customFields/define', async function(req, cb){
         }
     })
     try{
-    var earnings = Buffer.from(JSON.stringify(req.query.earnings)).toString('base64');
-    var deductions = Buffer.from(JSON.stringify(req.query.deductions)).toString('base64');
-    var identity = Buffer.from(JSON.stringify(req.query.identity)).toString('base64');
+    var earnings = JSON.stringify(req.query.earnings);
+    var deductions = JSON.stringify(req.query.deductions);
+    var otherEarnings = JSON.stringify(req.query.otherEarnings);
+    var otherDeductions = JSON.stringify(req.query.otherDeductions);
+    var identity = JSON.stringify(req.query.identity);
     }catch(err){
         return {
             message: "Enter valid inputs",
@@ -779,13 +781,17 @@ app.route.post('/customFields/define', async function(req, cb){
        app.sdb.update('setting', {earnings: earnings}, {id: '0'});
        app.sdb.update('setting', {deductions: deductions}, {id: '0'});
        app.sdb.update('setting', {identity: identity}, {id: '0'}); 
+       app.sdb.update('setting', {otherEarnings: otherEarnings}, {id: '0'});
+       app.sdb.update('setting', {otherDeductions: otherDeductions}, {id: '0'});
     }
     else{
         app.sdb.create('setting', {
             id: '0',
             earnings: earnings,
             deductions: deductions,
-            identity: identity
+            identity: identity,
+            otherEarnings: otherEarnings,
+            otherDeductions: otherDeductions
         })
     }
     await blockWait();
@@ -807,9 +813,11 @@ app.route.post('/customFields/get', async function(req, cb){
         isSuccess: false
     }
     return {
-        earnings: JSON.parse(Buffer.from(setting.earnings, 'base64').toString()),
-        deductions: JSON.parse(Buffer.from(setting.deductions, 'base64').toString()),
-        identity: JSON.parse(Buffer.from(setting.identity, 'base64').toString()),
+        earnings: JSON.parse(setting.earnings),
+        deductions: JSON.parse(setting.deductions),
+        identity: JSON.parse(setting.identity),
+        otherEarnings: JSON.parse(setting.otherEarnings),
+        otherDeductions: JSON.parse(setting.otherDeductions),
         isSuccess: true
     }
 });

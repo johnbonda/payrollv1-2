@@ -60,9 +60,11 @@ app.route.post("/issueTransactionCall", async function(req, res){
         isSuccess: false
     }
 
-    payslip.identity = JSON.parse(Buffer.from(payslip.identity, 'base64').toString());
-    payslip.earnings = JSON.parse(Buffer.from(payslip.earnings, 'base64').toString());
-    payslip.deductions = JSON.parse(Buffer.from(payslip.deductions, 'base64').toString());
+    payslip.identity = JSON.parse(payslip.identity);
+    payslip.earnings = JSON.parse(payslip.earnings,);
+    payslip.deductions = JSON.parse(payslip.deductions);
+    payslip.otherEarnings = JSON.parse(payslip.otherEarnings);
+    payslip.otherDeductions = JSON.parse(payslip.otherDeductions);
     
     // if(issue.status !== "authorized") return "Payslip not authorized yet";
 

@@ -70,6 +70,16 @@ module.exports = {
             length: 2000,
         },
         {
+            name: 'otherEarnings',
+            type: 'String',
+            length: 2000,
+        },
+        {
+            name: 'otherDeductions',
+            type: 'String',
+            length: 2000,
+        },
+        {
             name: 'grossSalary',
             type: 'String',
             length: 100,

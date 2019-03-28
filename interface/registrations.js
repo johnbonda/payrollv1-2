@@ -490,9 +490,11 @@ app.route.post('/payslip/statistic', async function(req, cb){
         signatures[i].email = authorizer.email
     }
 
-    payslip.identity = JSON.parse(Buffer.from(payslip.identity, 'base64').toString());
-    payslip.earnings = JSON.parse(Buffer.from(payslip.earnings, 'base64').toString());
-    payslip.deductions = JSON.parse(Buffer.from(payslip.deductions, 'base64').toString());
+    payslip.identity = JSON.parse(payslip.identity);
+    payslip.earnings = JSON.parse(payslip.earnings);
+    payslip.deductions = JSON.parse(payslip.deductions);
+    payslip.otherEarnings = JSON.parse(payslip.otherEarnings);
+    payslip.otherDeductions = JSON.parse(payslip.otherDeductions);
 
     var result = {
         issue: issue,
@@ -655,9 +657,11 @@ app.route.post('/getPayedPayslip', async function(req, cb){
         }
     });
 
-    payslip.identity = JSON.parse(Buffer.from(payslip.identity, 'base64').toString());
-    payslip.earnings = JSON.parse(Buffer.from(payslip.earnings, 'base64').toString());
-    payslip.deductions = JSON.parse(Buffer.from(payslip.deductions, 'base64').toString());
+    payslip.identity = JSON.parse(payslip.identity);
+    payslip.earnings = JSON.parse(payslip.earnings);
+    payslip.deductions = JSON.parse(payslip.deductions);
+    payslip.otherEarnings = JSON.parse(payslip.otherEarnings);
+    payslip.otherDeductions = JSON.parse(payslip.otherDeductions);
 
     var issuer = await app.model.Issuer.findOne({
         condition: {
