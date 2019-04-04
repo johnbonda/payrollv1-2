@@ -62,7 +62,7 @@ app.route.post('/employeeData', async function(req,cb){
         isSuccess: false
     }
 
-    result.identity = JSON.parse(Buffer.from(result.identity, 'base64').toString());
+    result.identity = JSON.parse(result.identity);
 
     return {
         employee: result,
@@ -249,7 +249,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
        message: "Invalid Employee",
        isSuccess: false
     }
-    var identity = JSON.parse(Buffer.from(employee.identity, 'base64').toString());
+    var identity = JSON.parse(employee.identity);
    
     var timestamp = new Date().getTime();
      var payslip={
@@ -266,6 +266,8 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         identity: identity,
         earnings: req.query.earnings,
         deductions: req.query.deductions,
+        otherEarnings: req.query.otherEarnings,
+        otherDeductions: req.query.otherDeductions,
         grossSalary:req.query.grossSalary,
         totalDeductions:req.query.totalDeductions,
         netSalary:req.query.netSalary,
@@ -365,8 +367,10 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     }
     issue.authLevel = level;
     
-    payslip.earnings = Buffer.from(JSON.stringify(req.query.earnings)).toString('base64');
-    payslip.deductions = Buffer.from(JSON.stringify(req.query.deductions)).toString('base64');
+    payslip.earnings = JSON.stringify(req.query.earnings);
+    payslip.deductions = JSON.stringify(req.query.deductions);
+    payslip.otherEarnings = JSON.stringify(req.query.otherEarnings);
+    payslip.otherDeductions = JSON.stringify(req.query.otherDeductions);
     payslip.identity = employee.identity;
     
     app.sdb.create("payslip", payslip);
@@ -470,9 +474,11 @@ app.route.post('/payslip/getPayslip', async function(req, cb){
         isSuccess: false,
         message: "Invalid Payslip ID"
     }
-    payslip.identity = JSON.parse(Buffer.from(payslip.identity, 'base64').toString());
-    payslip.earnings = JSON.parse(Buffer.from(payslip.earnings, 'base64').toString());
-    payslip.deductions = JSON.parse(Buffer.from(payslip.deductions, 'base64').toString());
+    payslip.identity = JSON.parse(payslip.identity);
+    payslip.earnings = JSON.parse(payslip.earnings);
+    payslip.deductions = JSON.parse(payslip.deductions);
+    payslip.otherEarnings = JSON.parse(payslip.otherEarnings);
+    payslip.otherDeductions = JSON.parse(payslip.otherDeductions);
 
     return {
         isSuccess: true,
@@ -555,9 +561,11 @@ app.route.post('/authorizer/authorize',async function(req,cb){
 
         console.log("Queried Payslip: " + JSON.stringify(payslip));
 
-        payslip.identity = JSON.parse(Buffer.from(payslip.identity, 'base64').toString());
-        payslip.earnings = JSON.parse(Buffer.from(payslip.earnings, 'base64').toString());
-        payslip.deductions = JSON.parse(Buffer.from(payslip.deductions, 'base64').toString());
+        payslip.identity = JSON.parse(payslip.identity);
+        payslip.earnings = JSON.parse(payslip.earnings);
+        payslip.deductions = JSON.parse(payslip.deductions);
+        payslip.otherEarnings = JSON.parse(payslip.otherEarnings);
+        payslip.otherDeductions = JSON.parse(payslip.otherDeductions);
 
         var hash = util.getHash(JSON.stringify(payslip));
         var base64hash = hash.toString('base64');
@@ -760,7 +768,7 @@ app.route.post("/registerEmployee", async function(req, cb){
     var bank = req.query.bank;
     var accountNumber = req.query.accountNumber;
     try{
-        var identity = Buffer.from(JSON.stringify(req.query.identity)).toString('base64');
+        var identity = JSON.stringify(req.query.identity);
     }catch(err){
         return {
             message: "Provide proper identity",
@@ -1281,9 +1289,11 @@ app.route.post('/user/sharePayslips', async function(req, cb){
     });
 
     for(i in payslips){
-        payslips[i].identity = JSON.parse(Buffer.from(payslips[i].identity, 'base64').toString());
-        payslips[i].earnings = JSON.parse(Buffer.from(payslips[i].earnings, 'base64').toString());
-        payslips[i].deductions = JSON.parse(Buffer.from(payslips[i].deductions, 'base64').toString());
+        payslips[i].identity = JSON.parse(payslips[i].identity);
+        payslips[i].earnings = JSON.parse(payslips[i].earnings);
+        payslips[i].deductions = JSON.parse(payslips[i].deductions);
+        payslips[i].otherEarnings = JSON.parse(payslips[i].otherEarnings);
+        payslips[i].otherDeductions = JSON.parse(payslips[i].otherDeductions);
     }
 
     var mailBody = {

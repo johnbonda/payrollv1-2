@@ -109,7 +109,7 @@ app.route.post('/getEmployeeById', async function(req, cb)
         message: "Employee not found",
         isSuccess: false
     }
-    employee.identity = JSON.parse(Buffer.from(employee.identity, 'base64').toString());
+    employee.identity = JSON.parse(employee.identity);
 })
 
 app.route.post('/getPendingAuthorizationCount', async function(req, cb){
@@ -134,7 +134,7 @@ app.route.post('/employee/id/exists', async function(req, cb){
         });
         if(employee.length){
             for(j in employee){
-            employee[j].identity = JSON.parse(Buffer.from(employee[j].identity, 'base64').toString()); 
+            employee[j].identity = JSON.parse(employee[j].identity); 
             }
             return {
                 employee: employee,
@@ -148,7 +148,7 @@ app.route.post('/employee/id/exists', async function(req, cb){
         });
         if(pendingEmp.length){
             for(j in pendingEmp){
-            pendingEmp[j].identity = JSON.parse(Buffer.from(pendingEmp[j].identity, 'base64').toString()); 
+            pendingEmp[j].identity = JSON.parse(pendingEmp[j].identity); 
             }
             return {
                 employee: pendingEmp,

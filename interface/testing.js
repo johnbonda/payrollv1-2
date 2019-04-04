@@ -86,7 +86,7 @@ app.route.post('/pagenationTesting', async function(req, cb){
 })
 
 app.route.post('/populateEmployees', async function(req, cb){
-    var identity = Buffer.from(JSON.stringify(req.query.identity)).toString('base64');
+    var identity = JSON.stringify(req.query.identity);
 
     for(let i = 0; i < 100; i++){
         app.sdb.create('employee', {
