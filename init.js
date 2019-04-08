@@ -1,34 +1,76 @@
+var mysqlite3 = require('sqlite3');
+var path = require('path');
+var util = require('./utils/util');
+var SuperDappCall = require("./utils/SuperDappCall");
+var sleep = require('./utils/sleep');
+var config = require('./config.json');
+
 module.exports = async function () {
-  console.log('enter dapp init')
+  console.log('enter dapp init');
+  var contractObjects = {
+    finalIssue: {
+      type: 1003,
+      name: "Final issue",
+      location: 'payroll.issuePaySlip'
+    }
+  }
+  for(i in contractObjects){
+    app.registerContract(contractObjects[i].type, contractObjects[i].location);
+  }
+  app.setDefaultFee(config.defaultFee, 'BEL');
 
-  app.registerContract(1000, 'domain.register')
-  app.registerContract(1001, 'domain.set_ip')
-  app.registerContract(1003, 'payroll.issuePaySlip')
-  app.registerContract(1004, 'payroll.verify')
-  app.registerContract(1006, 'temp.insertIntoEmployees')
-  app.registerContract(1007, 'payroll.registerEmployee')
-  app.registerContract(1008, 'payroll.authorize')
-  app.registerContract(1009, 'payroll.registerUser')
-  app.registerContract(1010, 'temp.saveTransactionId')
-  //app.registerContract(1005, 'payroll.pay')
-  //app.registerFee(1005, '0', 'BEL')
-  app.registerFee(1003, '0', 'BEL')
-  app.registerFee(1004, '0', 'BEL')
-  app.registerFee(1006, '0', 'BEL')
-  app.registerFee(1007, '0', 'BEL')
-  app.registerFee(1008, '0', 'BEL')
-  app.registerFee(1009, '0', 'BEL')
-  app.registerFee(1010, '0', 'BEL')
-app.sdb.create("count",{
-  id:0,
-  pid:0,
-  aid:0,
-  iid:0,
-  empid:0
-});
+  var timeout = 0;
+  do{
+    try{
+    var getFees = await SuperDappCall.call("POST", "/dapps/getTransactionFees", {
+      dappid: util.getDappID()
+    });
+    } catch(err){
+      console.log("Could not connect to superdapp: " + timeout++);
+      if(timeout > 10) {
+        console.log("Timed out connection to super dapp, registering contracts with default fee");
+        break;
+      }
+      await sleep(5000);
+    }
+  }while(!getFees);
 
+  if(getFees && getFees.isSuccess){
+    for(i in getFees.fee){
+      app.registerFee(contractObjects[getFees.fee[i].contract].type, getFees.fee[i].transactionFee, 'BEL');
+    }
+  }
 
+  app.custom.contractObjects = contractObjects;
+  
   app.events.on('newBlock', (block) => {
     console.log('new block received', block.height)
+  })
+
+  app.sideChainDatabase = new mysqlite3.Database(path.join(__dirname, "blockchain.db"), (err) => {
+    if (err) {
+      throw err;
+    }
+    console.log('Connected to the blockchain database');
+  });
+
+  var settingExists =  app.model.Setting.exists({
+    id: '0'
+  });
+  settingExists.then(function(data){
+    if(!data) 
+    app.sdb.create('setting', {
+      id: '0',
+      fields: JSON.stringify({
+        name: "Name",
+        id: "ID",
+        year: "Year",
+        degree: "Degree",
+        department: "Department"
+      }),
+      identity: JSON.stringify({
+        "Aadhar Card": "AdharNumber"
+      })
+    })
   })
 }
