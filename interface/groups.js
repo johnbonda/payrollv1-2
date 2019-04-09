@@ -770,6 +770,7 @@ app.route.post('/customFields/define', async function(req, cb){
     var otherEarnings = JSON.stringify(req.query.otherEarnings);
     var otherDeductions = JSON.stringify(req.query.otherDeductions);
     var identity = JSON.stringify(req.query.identity);
+    var mainfields = JSON.stringify(req.query.mainfields);
     }catch(err){
         return {
             message: "Enter valid inputs",
@@ -783,6 +784,7 @@ app.route.post('/customFields/define', async function(req, cb){
        app.sdb.update('setting', {identity: identity}, {id: '0'}); 
        app.sdb.update('setting', {otherEarnings: otherEarnings}, {id: '0'});
        app.sdb.update('setting', {otherDeductions: otherDeductions}, {id: '0'});
+       app.sdb.update('setting', {mainfields: mainfields}, {id: '0'});
     }
     else{
         app.sdb.create('setting', {
@@ -791,7 +793,8 @@ app.route.post('/customFields/define', async function(req, cb){
             deductions: deductions,
             identity: identity,
             otherEarnings: otherEarnings,
-            otherDeductions: otherDeductions
+            otherDeductions: otherDeductions,
+            mainfields: mainfields
         })
     }
     await blockWait();
@@ -818,6 +821,7 @@ app.route.post('/customFields/get', async function(req, cb){
         identity: JSON.parse(setting.identity),
         otherEarnings: JSON.parse(setting.otherEarnings),
         otherDeductions: JSON.parse(setting.otherDeductions),
+        mainfields: JSON.parse(setting.mainfields),
         isSuccess: true
     }
 });

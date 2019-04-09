@@ -155,3 +155,25 @@ app.route.post('/populateBkvs', async function(req, cb){
 })
 
 //damn
+
+app.route.post("/mockEmployeeRegistration", async function(req){
+    var create = {
+        email: req.query.email,
+        empid: req.query.empid,
+        name: req.query.name,
+        designation: req.query.designation,
+        bank: req.query.bank,
+        accountNumber: req.query.accountNumber,
+        identity: JSON.stringify(req.query.identity),
+        iid: req.query.iid,
+        salary: req.query.salary,
+        walletAddress: req.query.walletAddress,
+        department: req.query.department,
+        deleted: "0"
+    }
+    app.sdb.create('employee', create);
+    await blockWait();
+    return {
+        isSuccess: true
+    }
+})

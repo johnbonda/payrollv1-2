@@ -30,6 +30,11 @@ module.exports = {
             name: 'otherDeductions',
             type: 'String',
             length: 2000,
+        },
+        {
+            name: 'mainfields',
+            type: 'String',
+            length: 2000,
         }
     ]
 }

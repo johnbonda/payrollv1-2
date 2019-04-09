@@ -60,5 +60,24 @@ module.exports = {
         s = s.substring(0,s.length - 1)
         s += "]";
         return s;
-      }
+      },
+
+      getMilliSecondLimits: function(month, year){
+        month = Number(month);
+        year = Number(year);
+        var first = new Date();
+        var last = new Date();
+        var days = (month%2!==0)?31:(month!==2)?30:(year%4===0)?29:28;
+        first.setFullYear(year, month-1, 1);
+        last.setFullYear(year, month-1, days);
+        return {
+            first: first.getTime(),
+            last: last.getTime()
+        }
+    },
+
+    getDappID: function(){
+        var arr = __dirname.split('/');
+        return arr[arr.length - 2];
+    }
 }
