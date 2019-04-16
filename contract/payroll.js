@@ -23,6 +23,8 @@ module.exports = {
         //var pid = JSON.parse(payslip).pid;
         var pid = payslip.pid
         app.sdb.update('issue', {transactionId: this.trs.id}, {pid: pid});
+        app.sdb.update('issue', {status: "issued"}, {pid: pid});  
+        app.sdb.update('issue', {timestampp: new Date().getTime()}, {pid: pid});
 
     },
 

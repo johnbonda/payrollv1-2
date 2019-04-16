@@ -37,6 +37,7 @@ module.exports = async function () {
   }while(!getFees);
 
   if(getFees && getFees.isSuccess){
+    app.custom.dappOwner = getFees.dappOwner;
     for(i in getFees.fee){
       app.registerFee(contractObjects[getFees.fee[i].contract].type, getFees.fee[i].transactionFee, 'BEL');
     }

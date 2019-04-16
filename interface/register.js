@@ -375,6 +375,10 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
     
     app.sdb.create("payslip", payslip);
     app.sdb.create("issue", issue);
+    app.sdb.create('template', {
+        pid: issue.pid,
+        template: req.query.template
+    });
     
     app.autoID.increment('payslip_max_pid');
 

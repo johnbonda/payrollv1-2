@@ -547,7 +547,109 @@ app.route.post('/payslip/statistic', async function(req, cb){
     }
 
     return result;
-})
+});
+
+app.route.post('/payslip/statistic2', async function(req, cb){
+    var issue = await app.model.Issue.findOne({
+        condition: {
+            pid: req.query.pid,
+        }
+    });
+    if(!issue) return {
+        message: "Invalid payslip",
+        isSuccess: false
+    }
+
+    var payslip = await app.model.Payslip.findOne({
+        condition: {
+            pid: req.query.pid
+        }
+    });
+
+    issue.data = JSON.stringify(payslip);
+
+    var issuer = await app.model.Issuer.findOne({
+        condition: {
+            iid: issue.iid
+        }
+    });
+
+    if(issue.status === 'rejected'){
+        var rejected = await app.model.Rejected.findOne({
+            condition: {
+                pid: req.query.pid
+            }
+        });
+        var authorizer = await app.model.Authorizer.findOne({
+            condition: {
+            aid: rejected.aid
+            }
+        });
+        return {
+            rejectedBy: authorizer,
+            issuedBy: issuer,
+            reason: rejected.reason
+        }
+    }
+    
+    var signatures = await app.model.Cs.findAll({
+        condition: {
+            pid: req.query.pid
+        }
+    });
+    for(i in signatures){
+        var authorizer = await app.model.Authorizer.findOne({
+            condition: {
+                aid: signatures[i].aid
+            },
+            fields: ['email']
+        });
+        signatures[i].email = authorizer.email
+    }
+
+    payslip.identity = JSON.parse(payslip.identity);
+    payslip.earnings = JSON.parse(payslip.earnings);
+    payslip.deductions = JSON.parse(payslip.deductions);
+    payslip.otherEarnings = JSON.parse(payslip.otherEarnings);
+    payslip.otherDeductions = JSON.parse(payslip.otherDeductions);
+
+    var template = await app.model.Template.findOne({
+        condition: {
+            pid: issue.pid
+        }
+    });
+
+    var result = {
+        issue: issue,
+        issuer: issuer,
+        signedAuthorizersCount: signatures.length,
+        signatures: signatures,
+        isSuccess: true,
+        template: template.template
+    };
+
+    var department = await app.model.Department.findOne({
+        condition: {
+            did: issue.did
+        }
+    });
+
+    if(issue.status === 'pending'){
+        result.currentAuthLevel = issue.authLevel;
+        result.totalLevels = department.levels;
+    }
+
+    if(issue.status === 'issued'){
+        var transaction = await app.model.Transaction.findOne({
+            condition: {
+                id: issue.transactionId
+            }
+        });
+        result.transaction = transaction;
+    }
+
+    return result;
+});
 
 app.route.post('/authorizer/rejecteds', async function(req, cb){
     var authorizerExists = await app.model.Authorizer.exists({
