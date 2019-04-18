@@ -405,50 +405,14 @@ app.route.post('/employee/payslips/statistic', async function(req, cb){
         condition: {
             empid: employee.empid
         },
-        fields: ['pid', 'iid', 'status', 'timestampp'],
+        fields: ['pid', 'iid', 'status', 'timestampp', 'empid'],
         sort: {
             timestampp: -1
         },
         limit: req.query.limit,
         offset: req.query.offset
     });
-
-    // Getting the mainfields to show
-    var setting = await app.model.Setting.findOne({
-        condition: {
-            id: '0'
-        }
-    });
-    console.log("The setting object is: " + JSON.stringify(setting));
-    var fields = [];
-    if(!setting){
-        fields.push('month', 'year');
-    } else {
-        for(i in JSON.parse(setting.mainfields)){
-            fields.push(i);
-        }
-    }
-    console.log("The fields object is: " + JSON.stringify(fields));
     
-    for(i in issues){
-        var payslip = await app.model.Payslip.findOne({
-            condition: {
-                pid: issues[i].pid
-            },
-            fields: fields
-        });
-        var issuer = await app.model.Issuer.findOne({
-            condition: {
-                iid: issues[i].iid
-            },
-            fields: ['email']
-        })
-        // issues[i].month = payslip.month;
-        // issues[i].year = payslip.year;
-        // issues[i].issuedBy = issuer.email;
-        issues[i].mainfields = payslip;
-        issues[i].issuedBy = issuer.email;
-    }
     return {
         issuedPayslips: issues,
         total: count,
