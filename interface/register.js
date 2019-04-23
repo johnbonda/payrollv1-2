@@ -1653,8 +1653,15 @@ app.route.post('/getActivities', async function(req, cb){
 });
 
 app.route.post('/payslip/payment', async function(req, cb){
-    await locker("/payslip/payment@" + req.query.link)
-
+    if(!req.query.centralServerKey) return {
+        isSuccess: false,
+        message: "Need central server key to access this API"
+    }
+    if(!util.centralServerCheck(req.query.centralServerKey)) return {
+        isSuccess: false,
+        message: "Central Server Authentication failed"
+    }
+    await locker("/payslip/payment@" + req.query.link);
 
     var paysliplink = await app.model.Paysliplink.findOne({
         condition: {
@@ -1672,7 +1679,12 @@ app.route.post('/payslip/payment', async function(req, cb){
     }
 
     app.sdb.update('paysliplink', {payed: '1'}, {link: req.query.link});
-    app.sdb.update('paysliplink', {orderid: req.query.orderid}, {link: req.query.link});
+    app.sdb.create('earning', {
+        paysliplink: req.query.link,
+        ownerEarning: req.query.ownerEarning,
+        adminEarning: req.query.adminEarning,
+        orderId: req.query.orderId
+    });
 
     //await blockWait();
 
@@ -1708,8 +1720,7 @@ app.route.post('/generatePayslipLink', async function(req, cb){
     app.sdb.create('paysliplink', {
         link: link,
         payed: '0',
-        validity: validity,
-        orderid: '-'
+        validity: validity
     });
 
     var payslip = await app.model.Payslip.findOne({

@@ -1,19 +1,23 @@
 module.exports = {
-    name: "paysliplinks",
+    name: "earnings",
     fields: [
-
         {
-            name: 'link',
+            name: 'paysliplink',
             type: 'String',
             length: 255
         },
         {
-            name: 'payed',
+            name: 'ownerEarning',
             type: 'String',
             length: 255
         },
         {
-            name: 'validity',
+            name: 'adminEarning',
+            type: 'String',
+            length: 255
+        },
+        {
+            name: 'orderId',
             type: 'String',
             length: 255
         }

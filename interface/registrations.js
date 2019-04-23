@@ -785,6 +785,8 @@ app.route.post('/getPayedPayslip', async function(req, cb){
     delete payslip.grossSalary;
     delete payslip.totalDeductions;
     delete payslip.netSalary;
+    delete payslip.otherDeductions;
+    delete payslip.otherEarnings;
 
     return {
         payslip: payslip,

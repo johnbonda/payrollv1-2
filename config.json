@@ -28,5 +28,6 @@
     "registerEmp": "http://52.201.227.220/payroll_structured/Token_generator/token.html"
   },
   "tokenKey": "Implementing JWT tokens",
-  "defaultFee": "0"
+  "defaultFee": "0",
+  "centralServerHash": "CVPNb8BEEznSuxfof43q8M/bs3m9BXUliLMg92niz1M="
 }

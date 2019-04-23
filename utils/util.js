@@ -1,5 +1,6 @@
 var crypto = require("crypto");
 var sodium = require('sodium').api;
+var centralServerHash = require('../config.json').centralServerHash;
 
 module.exports = {
     
@@ -16,21 +17,11 @@ module.exports = {
     },
     
     Verify: function (hash, signature, publicKey) {
-        //var signatureBuffer = new Buffer(signature);
-        //var publicKeyBuffer = new Buffer(publicKey);
-        //return sodium.crypto_sign_verify_detached(signatureBuffer, hash, publicKeyBuffer);
         return sodium.crypto_sign_verify_detached(signature, hash, publicKey);
     },
 
     getHash: function(data){
-        // let buffer = new ByteBuffer(1000, true);
-        //     // for(x in data){
-        //     //     buffer.writeString(data[x]);
-        //     // }
-
-        // buffer.writeCString(data); 
-    
-            return  crypto.createHash('sha256').update(data).digest(); //buffer.toBuffer()
+            return  crypto.createHash('sha256').update(data).digest(); 
     },
     
     getSignature: function(data, secret){
@@ -42,7 +33,6 @@ module.exports = {
         var secrethash = crypto.createHash('sha256').update(secret, 'utf8').digest();
         var Keypair = this.MakeKeypair(secrethash);
         comsign = this.Sign(datahash,Keypair);
-        //console.log("companysign :"+comsign);
         return comsign;
     },
 
@@ -79,5 +69,9 @@ module.exports = {
     getDappID: function(){
         var arr = __dirname.split('/');
         return arr[arr.length - 2];
+    },
+
+    centralServerCheck: function(secret){
+        return centralServerHash === this.getHash(secret).toString('base64');
     }
 }
