@@ -66,7 +66,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 grossSalary: Math.floor(Math.random() * 50000 + 10000),
                 totalDeductions: Math.floor(Math.random() * 10000 + 1000),
                 netSalary: Math.floor(Math.random() * 50000 + 10000),
-                timestamp: prefix + new Date().getTime().toString()
+                timestamp: prefix + new Date().getTime()
             };
             app.sdb.create('payslip', payslip);
 
@@ -76,7 +76,7 @@ app.route.post('/generateAndIssuePayslips', async function(req, cb){
                 hash: prefix + "PPHash" + i*j,
                 sign: prefix + "PPSign" + i*j,
                 publickey: prefix + "-",
-                timestampp: new Date().getTime().toString(),
+                timestampp: new Date().getTime(),
                 status: "issued",
                 count: 10,
                 empid: employees[i].empid,

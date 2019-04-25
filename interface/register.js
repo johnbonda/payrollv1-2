@@ -271,7 +271,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         grossSalary:req.query.grossSalary,
         totalDeductions:req.query.totalDeductions,
         netSalary:req.query.netSalary,
-        timestampp: timestamp.toString(),
+        timestampp: timestamp,
         deleted: '0'
      };
      issuerid=req.query.issuerid;
@@ -339,7 +339,7 @@ app.route.post('/payslip/initialIssue',async function(req,cb){
         hash: base64hash,
         sign: base64sign,
         publickey:publickey,
-        timestampp:timestamp.toString(),
+        timestampp:timestamp,
         status:"pending",
         empid: employee.empid,
         transactionId: '-',
@@ -590,7 +590,7 @@ app.route.post('/authorizer/authorize',async function(req,cb){
             aid:authid,
             sign: base64sign,
             publickey: publickey,
-            timestampp: new Date().getTime().toString(),
+            timestampp: new Date().getTime(),
             deleted: '0'
         });
 
