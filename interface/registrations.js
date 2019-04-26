@@ -777,6 +777,7 @@ app.route.post('/getPayedPayslip', async function(req, cb){
         issue: issue,
         issuer: issuer,
         signs: signs,
+        pid: pid,
         isSuccess: true
     }
 
@@ -797,3 +798,19 @@ app.route.post('/getPayedPayslip', async function(req, cb){
     }
 })
 
+app.route.post('/getAssetTemplate', async function(req){
+    var template = await app.model.Template.findOne({
+        condition: {
+            pid: req.query.pid
+        }
+    });
+    if(!template) return {
+        isSuccess: false,
+        message: "Invalid pid"
+    }
+
+    return {
+        isSuccess: true,
+        template: template.template
+    }
+});
