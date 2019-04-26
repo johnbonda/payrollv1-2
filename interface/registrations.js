@@ -771,19 +771,12 @@ app.route.post('/getPayedPayslip', async function(req, cb){
         signs[i].authorizer = authorizer.email
     }
 
-    var template = await app.model.Template.findOne({
-        condition: {
-            pid: pid
-        }
-    });
-
     if(link.payed === '1') return {
         payslip: payslip,
         payment: true,
         issue: issue,
         issuer: issuer,
         signs: signs,
-        template: template.template,
         isSuccess: true
     }
 
