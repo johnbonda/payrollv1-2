@@ -1686,7 +1686,7 @@ app.route.post('/payslip/payment', async function(req, cb){
         orderId: req.query.orderId
     });
 
-    //await blockWait();
+    await blockWait();
 
     
     return {
