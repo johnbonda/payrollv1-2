@@ -798,6 +798,12 @@ app.route.post('/getPayedPayslip', async function(req, cb){
     }
 })
 
+app.route.get('/isLaunched', async function(req){
+    return {
+        isSuccess: true
+    }
+});
+
 app.route.post('/getAssetTemplate', async function(req){
     var template = await app.model.Template.findOne({
         condition: {
