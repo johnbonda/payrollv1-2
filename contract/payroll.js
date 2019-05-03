@@ -14,7 +14,7 @@ var locker = require("../utils/locker");
 
 module.exports = {
 
-    issuePaySlip: async function(toaddr, type, payslip){
+    issuePaySlip: async function(toaddr, type, payslip, pid, balance){
 
         logger.info("Entered issuePaySlip contract");
         console.log(toaddr);
@@ -25,7 +25,10 @@ module.exports = {
         app.sdb.update('issue', {transactionId: this.trs.id}, {pid: pid});
         app.sdb.update('issue', {status: "issued"}, {pid: pid});  
         app.sdb.update('issue', {timestampp: new Date().getTime()}, {pid: pid});
-
+        app.sdb.create('transactiondetail', {
+            transactionId: this.trs.id,
+            balance: balance
+        });
     },
 
     authorize: async function(iid, secret, authid, dappid){

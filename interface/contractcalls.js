@@ -72,16 +72,17 @@ app.route.post("/issueTransactionCall", async function(req, res){
     
     // if(issue.status !== "authorized") return "Payslip not authorized yet";
 
-    var array = [employee.walletAddress, "payslip", payslip];
-
-    transactionParams.args = JSON.stringify(array);
-    transactionParams.type = 1003;
-    transactionParams.fee = req.query.fee;
-    transactionParams.secret = req.query.secret;
-    transactionParams.senderPublicKey = req.query.senderPublicKey;
 
     var balanceCredit = await creditBalance(req.query.secret, "finalIssue");
     if(!balanceCredit.isSuccess) return balanceCredit;
+
+    var array = [employee.walletAddress, "payslip", payslip, issue.pid, balanceCredit.ownerBalance];
+
+    transactionParams.args = JSON.stringify(array);
+    transactionParams.type = 1003;
+    transactionParams.fee = balanceCredit.fee;
+    transactionParams.secret = req.query.secret;
+    transactionParams.senderPublicKey = req.query.senderPublicKey;
 
     console.log(JSON.stringify(transactionParams));
 
@@ -146,7 +147,9 @@ async function creditBalance(secret, contract){
     await blockWait();
 
     return {
-        isSuccess: true
+        isSuccess: true,
+        ownerBalance: ownerBalance.balance,
+        fee: currentFee.min
     }
 }
 

@@ -73,3 +73,130 @@ app.route.post('/admin/setContractFee', async function(req){
         isSuccess: true
     }
 })
+
+app.route.get('/rechargeDetails', async function(req){
+    var superUserBalance = await app.model.Balance.findOne({
+        condition: {
+            address: app.custom.dappOwner
+        }
+    });
+    var certsIssued = await app.model.Issue.count({
+        status: 'issued'
+    });
+    return {
+        isSuccess: true,
+        superUserBalance: superUserBalance.balance,
+        issuedCount: certsIssued,
+        success: true
+    }
+});
+
+app.route.post('/admin/getTransactionDetails', async function(req){
+    var query = `select transactions.*, transactiondetails.balance, 'issuer' as role from transactions join transactiondetails on transactions.id = transactiondetails.transactionId`
+    var total = await new Promise((resolve)=>{
+        let sql = `select count(*) as count from (${query});`;
+        app.sideChainDatabase.get(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!total.isSuccess) return total;
+
+    var transactions = await new Promise((resolve)=>{
+        let sql = `${query} limit ? offset ?;`;
+        app.sideChainDatabase.all(sql, [req.query.limit || 10, req.query.offset || 0], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!transactions.isSuccess) return transactions;
+
+    return {
+        total: total.result.count,
+        transactions: transactions.result
+    }
+});
+
+app.route.post('/admin/getOwnerEarnings', async function(req){
+    var total = await app.model.Earning.count();
+    var earnings = await app.model.Earning.findAll({
+        limit: req.query.limit,
+        offset: req.query.offset
+    });
+
+    return {
+        isSuccess: true,
+        earnings: earnings
+    }
+});
+
+app.route.post('/admin/incomes', async function(req){
+    var adminEarnings = await new Promise((resolve)=>{
+        let sql = `select sum(adminEarning) as totalAdminEarnings from earnings;`;
+        app.sideChainDatabase.get(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!adminEarnings.isSuccess)  adminEarnings.totalAdminEarnings = 0;
+
+    var ownerEarnings = await new Promise((resolve)=>{
+        let sql = `select sum(ownerEarning) as totalOwnerEarnings from earnings;`;
+        app.sideChainDatabase.get(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!ownerEarnings.isSuccess) ownerEarnings.totalOwnerEarnings = 0;
+
+    var transactionFeesEarned = await new Promise((resolve)=>{
+        let sql = `select sum(transactions.fee) as transactionFeesEarned from transactions;`;
+        app.sideChainDatabase.get(sql, [], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!transactionFeesEarned.isSuccess) return transactionFeesEarned.transactionFeesEarned = 0;
+
+    return {
+        isSuccess: true,
+        adminEarnings:  Number(adminEarnings.result.totalAdminEarnings),
+        ownerEarnings:  Number(ownerEarnings.result.totalOwnerEarnings),
+        transactionFeesEarned:  Number(transactionFeesEarned.result.transactionFeesEarned)
+    }
+});

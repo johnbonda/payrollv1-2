@@ -7,6 +7,11 @@ module.exports = {
             length: 255
         },
         {
+            name: 'email',
+            type: 'String',
+            length: 255
+        },
+        {
             name: 'ownerEarning',
             type: 'String',
             length: 255
@@ -19,6 +24,11 @@ module.exports = {
         {
             name: 'orderId',
             type: 'String',
+            length: 255
+        },
+        {
+            name: 'timestampp',
+            type: 'Number',
             length: 255
         }
     ]

@@ -778,6 +778,7 @@ app.route.post('/getPayedPayslip', async function(req, cb){
         issuer: issuer,
         signs: signs,
         pid: pid,
+        dappid: req.query.dappid,
         isSuccess: true
     }
 
