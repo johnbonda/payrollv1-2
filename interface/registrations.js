@@ -792,6 +792,7 @@ app.route.post('/getPayedPayslip', async function(req, cb){
 
     return {
         payslip: payslip,
+        pid: pid,
         payment: false,
         isSuccess: true,
         link: req.query.link,
