@@ -1033,6 +1033,32 @@ app.route.post("/payslips/verifyMultiple", async function(req, cb){
     return result;
 });
 
+async function getIssuerDepartmentsArrays(iid){
+    var issuerDepartments = await new Promise((resolve)=>{
+        let sql = `select departments.name from issudepts join departments on issudepts.did = departments.did where issudepts.iid = ? and issudepts.deleted = '0';`;
+        app.sideChainDatabase.all(sql, [iid], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!issuerDepartments.isSuccess) return issuerDepartments;
+    var departments = [];
+    for(i in issuerDepartments.result){
+        departments.push(issuerDepartments.result[i].name);
+    }
+    return {
+        isSuccess: true,
+        departments: departments
+    }
+}
+
 // inputs: limit, offset
 app.route.post("/payslip/month/status", async function(req, cb){
     logger.info("Entered /payslip/month/status API");
@@ -1044,6 +1070,14 @@ app.route.post("/payslip/month/status", async function(req, cb){
 
     var condition = {
         deleted: '0'
+    }
+
+    if(req.query.iid){
+        var departments = await getIssuerDepartmentsArrays(req.query.iid);
+        if(!departments.isSuccess) return departments;
+        condition.department = {
+            $in: departments.departments
+        }
     }
 
     if(req.query.designation){
@@ -1091,11 +1125,22 @@ app.route.post("/payslip/month/status", async function(req, cb){
 app.route.post('/employee/payslip/month/status', async function(req, cb){
     var month = req.query.month;
     var year = req.query.year;
+
+    var condition = {
+        empid: req.query.empid,
+        deleted: '0'
+    }
+
+    if(req.query.iid){
+        var departments = await getIssuerDepartmentsArrays(req.query.iid);
+        if(!departments.isSuccess) return departments;
+        condition.department = {
+            $in: departments.departments
+        }
+    }
     
     var employee = await app.model.Employee.findOne({
-        condition: {
-            empid: req.query.empid
-        },
+        condition: condition,
         fields: ['empid', 'name', 'designation']
     })
     if(!employee) return {
