@@ -567,18 +567,55 @@ app.route.post('/superuser/statistic/rejectedIssues', async function(req){
     }
 });
 
+async function getIssuerDepartmentsArrays(iid){
+    var issuerDepartments = await new Promise((resolve)=>{
+        let sql = `select departments.name from issudepts join departments on issudepts.did = departments.did where issudepts.iid = ? and issudepts.deleted = '0';`;
+        app.sideChainDatabase.all(sql, [iid], (err, row)=>{
+            if(err) resolve({
+                isSuccess: false,
+                message: JSON.stringify(err),
+                result: {}
+            });
+            resolve({
+                isSuccess: true,
+                result: row
+            });
+        });
+    });
+    if(!issuerDepartments.isSuccess) return issuerDepartments;
+    var departments = [];
+    for(i in issuerDepartments.result){
+        departments.push(issuerDepartments.result[i].name);
+    }
+    return {
+        isSuccess: true,
+        departments: departments
+    }
+}
+
 app.route.post('/receipient/email/exists', async function(req){
-    var receipient = await app.model.Employee.findOne({
-        condition: {
-            email: req.query.email
+    var condition = {
+        email:req.query.email
+    }
+
+    if(req.query.iid){
+        var departments = await getIssuerDepartmentsArrays(req.query.iid);
+        if(!departments.isSuccess) return departments;
+        condition.department = {
+            $in: departments.departments
         }
+    }
+    var receipient = await app.model.Employee.findOne({
+        condition: condition
     });
     if(!receipient) return {
-        exists: false
+        exists: false,  
+        isSuccess: true
     }
     return {
         exists: true,
-        data: receipient
+        data: receipient,
+        isSuccess: true
     }
 })
 
