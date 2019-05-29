@@ -1,6 +1,6 @@
 var crypto = require("crypto");
 var sodium = require('sodium').api;
-var centralServerHash = require('../config.json').centralServerHash;
+var centralServerHash = require('../../../dappsConfig.json').centralServerHash;
 
 module.exports = {
     

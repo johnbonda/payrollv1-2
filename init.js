@@ -3,7 +3,7 @@ var path = require('path');
 var util = require('./utils/util');
 var SuperDappCall = require("./utils/SuperDappCall");
 var sleep = require('./utils/sleep');
-var config = require('./config.json');
+var config = require('../../dappsConfig.json');
 
 module.exports = async function () {
   console.log('enter dapp init');

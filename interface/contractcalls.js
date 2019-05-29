@@ -4,7 +4,7 @@ var logger = require("../utils/logger");
 var locker = require("../utils/locker");
 var blockWait = require("../utils/blockwait");
 var util = require("../utils/util");
-var defaultFee = require('../config.json').defaultFee;
+var defaultFee = require('../../../dappsConfig.json').defaultFee;
 var addressUtils = require('../utils/address');
 
 

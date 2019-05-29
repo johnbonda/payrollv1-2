@@ -1,4 +1,5 @@
-var config = require("../config.json");
+var config = require("../../../dappsConfig.json");
+var nodeServer = config.centralServer + ":8080";
 
 module.exports = {
   fixedPoint : Math.pow(10, 10),
@@ -9,10 +10,15 @@ module.exports = {
   URX: config.bkvs,
   CRX: "http://localhost:9305/api/dapps/" + config.superdapp ,
   LSR: "http://localhost:9305/api/dapps/",
-  MRI: config.centralServer + "/sendMail/",
+  MRI: nodeServer + "/sendMail/",
   fees: {
     send: 0.001,
     inTransfer: 0.001,
     outTransfer: 0.001
-  }
+  },
+    centralServerHash: config.centralServerHash,
+  links: {
+    verifyLink: config.centralServer + "/payroll_structured/Views/Verify/verify.html",
+    registerEmp: config.centralServer + "/payroll_structured/Token_generator/token.html"
+  },
 }

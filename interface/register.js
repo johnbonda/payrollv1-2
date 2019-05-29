@@ -1,5 +1,5 @@
 var util = require("../utils/util.js");
-var config = require("../config.json");
+var config = require("../../../dappsConfig.json");
 var SwaggerCall = require("../utils/SwaggerCall");
 var SuperDappCall = require("../utils/SuperDappCall")
 var TokenCall = require("../utils/TokenCall");

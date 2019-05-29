@@ -1,4 +1,4 @@
-var defaultFee = require('../config.json').defaultFee;
+var defaultFee = require('../../../dappsConfig.json').defaultFee;
 
 app.route.post('/admin/workDetails', async function(req){
     var issuersCount = await app.model.Issuer.count({
