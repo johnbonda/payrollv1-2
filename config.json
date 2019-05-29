@@ -29,5 +29,8 @@
   },
   "tokenKey": "Implementing JWT tokens",
   "defaultFee": "0",
-  "centralServerHash": "CVPNb8BEEznSuxfof43q8M/bs3m9BXUliLMg92niz1M="
+  "centralServerHash": "CVPNb8BEEznSuxfof43q8M/bs3m9BXUliLMg92niz1M=",
+  "bkvs": "http://54.254.174.74:8080",
+  "centralServer": "http://52.201.227.220:8080",
+  "superdapp": "048c1869547f60db8a6cd93b06a786abe5f50c4567198f4df0376462f9a20c5e"
 }
