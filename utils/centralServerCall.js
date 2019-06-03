@@ -2,7 +2,7 @@
 
 var request = require('request');
 var constants = require('./constants.js');
-const URL = constants.links.centralServer;
+const URL = constants.links.centralserver;
 module.exports = {
 	call: async function(method, url_path, payload, cb){
 		return new Promise((resolve, reject) => {
