@@ -62,7 +62,7 @@ module.exports = async function () {
         name: "issuelimit"
     });
     if(!limitExists){
-        var response = await centralServerCall("POST", "/getUser", {
+        var response = await centralServerCall.call("POST", "/getUser", {
             email: getFees.email
         });
         app.sdb.create("issuelimit", {
