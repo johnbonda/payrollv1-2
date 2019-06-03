@@ -674,6 +674,16 @@ app.route.post('/issuers/remove', async function(req, cb){
         message: "Not found",
         isSuccess: false
     }
+    var pending = await app.model.Issue.exists({
+        iid: req.query.iid,
+        status: {
+            $in: ["authorized", "pending"]
+        }
+    });
+    if(pending) return {
+        isSuccess: false,
+        message: "Asset's pending with the user"
+    }
     var removeObj = {
         email: check.email
     }
