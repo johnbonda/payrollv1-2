@@ -13,6 +13,18 @@ var addressUtils = require('../utils/address');
 app.route.post("/issueTransactionCall", async function(req, res){
     await locker("issueTransactionCall");
     logger.info("Entered /issueTransactionCall API");
+    
+    //Check the package
+    var limit = await app.model.Issuelimit.findOne({
+        condition: {
+            name: "issuelimit"
+        }
+    });
+    if(!limit || limit.value <= 0 || limit.expirydate < new Date().getTime()) return {
+        isSuccess: false,
+        message: "No active package"
+    }
+
     var transactionParams = {};
     var pid = req.query.pid;
 

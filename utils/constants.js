@@ -19,6 +19,7 @@ module.exports = {
     centralServerHash: config.centralServerHash,
   links: {
     verifyLink: config.centralServer + "/payroll_structured/Views/Verify/verify.html",
-    registerEmp: config.centralServer + "/payroll_structured/Token_generator/token.html"
+    registerEmp: config.centralServer + "/payroll_structured/Token_generator/token.html",
+    centralserver: nodeServer
   },
 }
