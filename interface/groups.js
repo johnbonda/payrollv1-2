@@ -682,7 +682,7 @@ app.route.post('/issuers/remove', async function(req, cb){
     });
     if(pending) return {
         isSuccess: false,
-        message: "Asset's pending with the user"
+        message: "Payslip's pending with the user"
     }
     var removeObj = {
         email: check.email
